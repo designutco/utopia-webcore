@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useWebsite } from '@/contexts/WebsiteContext'
+import SelectFilter from '@/components/SelectFilter'
 
 interface Post {
   id: string
@@ -113,31 +114,22 @@ export default function BlogListPage() {
             />
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Website</label>
-          <select
-            value={filterWebsite}
-            onChange={e => setFilterWebsite(e.target.value)}
-            className="px-3 py-2 text-sm rounded-lg border focus:outline-none"
-            style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--foreground)' }}
-          >
-            <option value="">All websites</option>
-            {websites.map(w => <option key={w} value={w}>{w}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Status</label>
-          <select
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
-            className="px-3 py-2 text-sm rounded-lg border focus:outline-none"
-            style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--foreground)' }}
-          >
-            <option value="">All statuses</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </div>
+        <SelectFilter
+          label="Website"
+          value={filterWebsite}
+          onChange={setFilterWebsite}
+          options={[{ value: '', label: 'All websites' }, ...websites.map(w => ({ value: w, label: w }))]}
+        />
+        <SelectFilter
+          label="Status"
+          value={filterStatus}
+          onChange={setFilterStatus}
+          options={[
+            { value: '', label: 'All statuses' },
+            { value: 'published', label: 'Published' },
+            { value: 'draft', label: 'Draft' },
+          ]}
+        />
         {(filterWebsite || filterStatus || search) && (
           <button
             onClick={() => { setFilterWebsite(''); setFilterStatus(''); setSearch('') }}

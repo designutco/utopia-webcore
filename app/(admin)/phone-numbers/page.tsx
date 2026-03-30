@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useWebsite } from '@/contexts/WebsiteContext'
+import SelectFilter from '@/components/SelectFilter'
 
 interface PhoneNumber {
   id: string
@@ -133,30 +134,18 @@ export default function PhoneNumbersPage() {
             />
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Website</label>
-          <select
-            value={filterWebsite}
-            onChange={e => setFilterWebsite(e.target.value)}
-            className="px-3 py-2 text-sm rounded-lg border focus:outline-none"
-            style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--foreground)' }}
-          >
-            <option value="">All websites</option>
-            {websites.map(w => <option key={w} value={w}>{w}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Product</label>
-          <select
-            value={filterProduct}
-            onChange={e => setFilterProduct(e.target.value)}
-            className="px-3 py-2 text-sm rounded-lg border focus:outline-none"
-            style={{ borderColor: 'var(--border)', background: 'white', color: 'var(--foreground)' }}
-          >
-            <option value="">All products</option>
-            {products.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
+        <SelectFilter
+          label="Website"
+          value={filterWebsite}
+          onChange={setFilterWebsite}
+          options={[{ value: '', label: 'All websites' }, ...websites.map(w => ({ value: w, label: w }))]}
+        />
+        <SelectFilter
+          label="Product"
+          value={filterProduct}
+          onChange={setFilterProduct}
+          options={[{ value: '', label: 'All products' }, ...products.map(p => ({ value: p, label: p }))]}
+        />
         {(filterWebsite || filterProduct || search) && (
           <button
             onClick={() => { setFilterWebsite(''); setFilterProduct(''); setSearch('') }}
