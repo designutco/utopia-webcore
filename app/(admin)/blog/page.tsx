@@ -167,7 +167,7 @@ export default function BlogListPage() {
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f0f8fb'}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                 >
-                  <td className="px-5 py-3.5 max-w-xs">
+                  <td className="px-5 py-3.5 align-middle max-w-xs">
                     <Link
                       href={`/blog/${post.id}/edit`}
                       className="font-medium hover:underline"
@@ -181,9 +181,9 @@ export default function BlogListPage() {
                       <p className="text-xs mt-0.5 truncate" style={{ color: '#7dbdd0' }}>{post.excerpt}</p>
                     )}
                   </td>
-                  <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: '#4a7a8a' }}>{post.website}</td>
-                  <td className="px-5 py-3.5 font-mono text-xs" style={{ color: '#7dbdd0' }}>{post.slug}</td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#4a7a8a' }}>{post.website}</td>
+                  <td className="px-5 py-3.5 align-middle font-mono text-xs" style={{ color: '#7dbdd0' }}>{post.slug}</td>
+                  <td className="px-5 py-3.5 align-middle">
                     <span
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
                       style={post.status === 'published'
@@ -203,9 +203,9 @@ export default function BlogListPage() {
                       {post.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: '#4a7a8a' }}>{formatDate(post.published_at)}</td>
-                  <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: '#4a7a8a' }}>{formatDate(post.updated_at)}</td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#4a7a8a' }}>{formatDate(post.published_at)}</td>
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#4a7a8a' }}>{formatDate(post.updated_at)}</td>
+                  <td className="px-5 py-3.5 align-middle">
                     <div className="flex items-center gap-1 justify-end">
                       <button
                         onClick={() => router.push(`/blog/${post.id}/edit`)}

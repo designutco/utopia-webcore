@@ -212,8 +212,8 @@ export default function PhoneNumbersPage() {
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f9fb'}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                     >
-                      <td className="px-5 py-3 font-mono text-xs" style={{ color: '#4a7a8a' }}>{row.location_slug}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 align-middle font-mono text-xs" style={{ color: '#4a7a8a' }}>{row.location_slug}</td>
+                      <td className="px-5 py-3 align-middle">
                         {editingId === row.id ? (
                           <input
                             className="px-2 py-1 border rounded text-sm w-40 focus:outline-none"
@@ -225,7 +225,7 @@ export default function PhoneNumbersPage() {
                           <span className="font-mono font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
                         )}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 align-middle">
                         {editingId === row.id ? (
                           <input
                             className="px-2 py-1 border rounded text-sm w-28 focus:outline-none"
@@ -238,7 +238,7 @@ export default function PhoneNumbersPage() {
                           <span style={{ color: '#7dbdd0' }}>{row.label ?? '—'}</span>
                         )}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 align-middle">
                         <button
                           onClick={() => toggleActive(row.id, row.is_active)}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
@@ -254,7 +254,7 @@ export default function PhoneNumbersPage() {
                           )}
                         </button>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 align-middle">
                         <div className="flex items-center gap-1 justify-end">
                           {editingId === row.id ? (
                             <>
