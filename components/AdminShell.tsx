@@ -2,6 +2,7 @@
 
 import { WebsiteProvider } from '@/contexts/WebsiteContext'
 import Sidebar from './Sidebar'
+import Breadcrumb from './Breadcrumb'
 
 interface AdminShellProps {
   userEmail: string
@@ -14,6 +15,7 @@ export default function AdminShell({ userEmail, children }: AdminShellProps) {
       <div className="flex h-screen" style={{ background: 'var(--background)' }}>
         <Sidebar userEmail={userEmail} />
         <main className="flex-1 overflow-y-auto p-8">
+          <Breadcrumb />
           {children}
         </main>
       </div>
