@@ -25,20 +25,6 @@ export default function Breadcrumb() {
 
   return (
     <nav className="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
-      {/* Back button */}
-      <button
-        onClick={() => router.back()}
-        className="flex items-center justify-center w-8 h-8 rounded-lg border transition-colors flex-shrink-0"
-        style={{ borderColor: 'var(--border)', background: 'var(--card)', color: '#64648a' }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = '#64648a' }}
-        aria-label="Go back"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
       {/* Home */}
       <Link
         href="/"

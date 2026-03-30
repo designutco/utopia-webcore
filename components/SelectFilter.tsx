@@ -22,7 +22,7 @@ export default function SelectFilter({ label, value, onChange, options }: Select
             MozAppearance: 'none',
             borderColor: 'var(--border)',
             background: 'white',
-            color: 'var(--foreground)',
+            color: '#4a7a8a',
             paddingTop: '0.5rem',
             paddingBottom: '0.5rem',
             paddingLeft: '0.75rem',

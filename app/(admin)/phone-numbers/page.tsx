@@ -141,7 +141,7 @@ export default function PhoneNumbersPage() {
               className="cursor-pointer text-sm rounded-lg border focus:outline-none"
               style={{
                 appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-                borderColor: 'var(--border)', background: 'white', color: 'var(--foreground)',
+                borderColor: 'var(--border)', background: 'white', color: '#4a7a8a',
                 paddingTop: '0.5rem', paddingBottom: '0.5rem', paddingLeft: '0.75rem', paddingRight: '2.25rem',
                 minWidth: '160px',
               }}
