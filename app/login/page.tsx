@@ -49,41 +49,46 @@ export default function LoginPage() {
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>Web & Content Operations</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1a2e' }}>Sign in</h2>
-          <p className="text-sm text-slate-500 mb-6">Enter your credentials to continue</p>
+        <div className="rounded-2xl shadow-2xl p-8" style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(20px)' }}>
+          <div className="mb-7">
+            <h2 className="text-xl font-bold tracking-tight mb-1" style={{ color: '#0f1720' }}>Welcome back</h2>
+            <p className="text-sm" style={{ color: '#6b7f8d' }}>Sign in to your workspace to continue.</p>
+          </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="mb-5 p-3 rounded-lg border text-sm flex items-center gap-2" style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}>
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#1a1a2e' }}>Email</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#4a6070' }}>Email address</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-shadow"
-                style={{ borderColor: '#e4e3f2' }}
-                onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,67,113,0.15)'}
-                onBlur={e => e.currentTarget.style.boxShadow = 'none'}
-                placeholder="you@example.com"
+                className="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none transition-shadow"
+                style={{ borderColor: '#dde3e8', color: '#0f1720' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(28,110,140,0.12)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = '#dde3e8'; e.currentTarget.style.boxShadow = 'none' }}
+                placeholder="you@company.com"
                 autoComplete="email"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#1a1a2e' }}>Password</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#4a6070' }}>Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-shadow"
-                style={{ borderColor: '#e4e3f2' }}
-                onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 3px rgba(67,67,113,0.15)'}
-                onBlur={e => e.currentTarget.style.boxShadow = 'none'}
+                className="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none transition-shadow"
+                style={{ borderColor: '#dde3e8', color: '#0f1720' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(28,110,140,0.12)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = '#dde3e8'; e.currentTarget.style.boxShadow = 'none' }}
                 placeholder="••••••••"
                 autoComplete="current-password"
               />
@@ -91,12 +96,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-opacity disabled:opacity-50"
+              className="w-full text-white font-semibold py-3 px-4 rounded-xl text-sm transition-opacity disabled:opacity-50 mt-1"
               style={{ background: 'var(--primary)' }}
-              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)' }}
+              onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = '0.88' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? 'Signing in…' : 'Access Workspace →'}
             </button>
           </form>
         </div>
