@@ -205,9 +205,10 @@ export default function PhoneNumbersPage() {
               <table className="w-full text-sm" style={{ background: 'white' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)', background: '#fafcfd' }}>
-                    {['Location', 'Phone Number', 'Label', 'Status', ''].map((h, i) => (
-                      <th key={i} className="px-5 py-3 text-left text-xs font-semibold" style={{ color: '#4a7a8a' }}>{h}</th>
-                    ))}
+                    <th className="px-5 py-3 text-left text-xs font-semibold w-32" style={{ color: '#4a7a8a' }}>Location</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold" style={{ color: '#4a7a8a' }}>Phone Number</th>
+                    <th className="px-5 py-3 text-left text-xs font-semibold" style={{ color: '#4a7a8a' }}>Label</th>
+                    <th className="px-5 py-3 text-center text-xs font-semibold w-24" style={{ color: '#4a7a8a' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -218,19 +219,48 @@ export default function PhoneNumbersPage() {
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f4f9fb'}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                     >
+                      {/* Location */}
                       <td className="px-5 py-3 align-middle font-mono text-xs" style={{ color: '#4a7a8a' }}>{row.location_slug}</td>
-                      <td className="px-5 py-3 align-middle">
-                        {editingId === row.id ? (
-                          <input
-                            className="px-2 py-1 border rounded text-sm w-40 focus:outline-none"
-                            style={{ borderColor: 'var(--primary)' }}
-                            value={editValues.phone_number ?? ''}
-                            onChange={e => setEditValues(v => ({ ...v, phone_number: e.target.value }))}
-                          />
-                        ) : (
-                          <span className="font-mono font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
-                        )}
+
+                      {/* Phone number + active checkbox */}
+                      <td className="px-5 py-3 align-middle text-center">
+                        <div className="flex items-center justify-center gap-3">
+                          {editingId === row.id ? (
+                            <input
+                              className="px-2 py-1 border rounded text-sm w-40 focus:outline-none"
+                              style={{ borderColor: 'var(--primary)' }}
+                              value={editValues.phone_number ?? ''}
+                              onChange={e => setEditValues(v => ({ ...v, phone_number: e.target.value }))}
+                            />
+                          ) : (
+                            <span className="font-mono font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                          )}
+                          {/* Checkbox toggle */}
+                          <button
+                            onClick={() => toggleActive(row.id, row.is_active)}
+                            title={row.is_active ? 'Active — click to deactivate' : 'Inactive — click to activate'}
+                            className="flex items-center gap-1.5 text-xs font-medium shrink-0"
+                            style={{ color: row.is_active ? '#16a34a' : '#94a3b8' }}
+                          >
+                            <span
+                              className="w-4 h-4 rounded flex items-center justify-center border"
+                              style={row.is_active
+                                ? { background: '#16a34a', borderColor: '#16a34a' }
+                                : { background: 'white', borderColor: '#cbd5e1' }
+                              }
+                            >
+                              {row.is_active && (
+                                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                            {row.is_active ? 'Active' : 'Inactive'}
+                          </button>
+                        </div>
                       </td>
+
+                      {/* Label */}
                       <td className="px-5 py-3 align-middle">
                         {editingId === row.id ? (
                           <input
@@ -244,24 +274,10 @@ export default function PhoneNumbersPage() {
                           <span style={{ color: '#7dbdd0' }}>{row.label ?? '—'}</span>
                         )}
                       </td>
+
+                      {/* Actions */}
                       <td className="px-5 py-3 align-middle">
-                        <button
-                          onClick={() => toggleActive(row.id, row.is_active)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-                          style={row.is_active
-                            ? { background: '#dcfce7', color: '#16a34a' }
-                            : { background: '#f1f5f9', color: '#64748b' }
-                          }
-                        >
-                          {row.is_active ? (
-                            <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>Active</>
-                          ) : (
-                            <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>Inactive</>
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-5 py-3 align-middle">
-                        <div className="flex items-center gap-1 justify-end">
+                        <div className="flex items-center gap-1 justify-center">
                           {editingId === row.id ? (
                             <>
                               <button
