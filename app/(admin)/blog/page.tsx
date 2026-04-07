@@ -74,6 +74,14 @@ export default function BlogListPage() {
     )
   })
 
+  // Group by website
+  const grouped = filtered.reduce<Record<string, Post[]>>((acc, p) => {
+    if (!acc[p.website]) acc[p.website] = []
+    acc[p.website].push(p)
+    return acc
+  }, {})
+  const groupedEntries = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b))
+
   return (
     <div>
       {/* Header */}
@@ -93,11 +101,6 @@ export default function BlogListPage() {
         </Link>
       </div>
       <p className="text-sm mb-6" style={{ color: '#475569' }}>Create and manage blog content across all websites.</p>
-
-      {/* Info strip */}
-      <div className="rounded-lg border px-4 py-3 mb-6 text-sm" style={{ borderColor: '#cbd5e1', background: '#fafafa', color: '#475569' }}>
-        Click <strong style={{ color: 'var(--foreground)' }}>Edit</strong> to open the full post editor. Published posts are visible on the website immediately.
-      </div>
 
       {/* Search + filters */}
       <div className="flex flex-wrap gap-4 mb-5 items-end">
@@ -146,112 +149,153 @@ export default function BlogListPage() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl overflow-hidden border" style={{ borderColor: '#cbd5e1', background: 'white' }}>
-        {loading ? (
-          <div className="p-12 text-center text-sm" style={{ color: '#475569' }}>Loading…</div>
-        ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm" style={{ color: '#475569' }}>
-            No posts found.{' '}
-            <Link href="/blog/new" className="hover:underline" style={{ color: 'var(--primary)' }}>Create one</Link>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[700px]">
-            <thead>
-              <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f1f5f9' }}>
-                {['Title', 'Website', 'Slug', 'Status', 'Published', 'Updated', ''].map((h, i) => (
-                  <th key={i} className="px-5 py-3.5 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((post, i) => (
-                <tr
-                  key={post.id}
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid #cbd5e1' : 'none' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f1f5f9'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
-                >
-                  <td className="px-5 py-3.5 align-middle max-w-xs">
-                    <Link
-                      href={`/blog/${post.id}/edit`}
-                      className="font-medium hover:underline"
-                      style={{ color: 'var(--foreground)' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--primary)'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--foreground)'}
-                    >
-                      {post.title}
-                    </Link>
-                    {post.excerpt && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{post.excerpt}</p>
+      {/* Grouped by website */}
+      {loading ? (
+        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
+      ) : groupedEntries.length === 0 ? (
+        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>
+          No posts found.{' '}
+          <Link href="/blog/new" className="hover:underline" style={{ color: 'var(--primary)' }}>Create one</Link>
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {groupedEntries.map(([website, rows]) => {
+            const publishedCount = rows.filter(p => p.status === 'published').length
+            const draftCount = rows.length - publishedCount
+            return (
+              <section key={website} className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: '#cbd5e1' }}>
+                {/* Website header */}
+                <div className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3" style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
+                    </svg>
+                    <span className="text-sm font-semibold truncate" style={{ color: 'var(--foreground)' }}>{website}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {publishedCount > 0 && (
+                      <span className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap" style={{ background: '#dcfce7', color: '#16a34a' }}>
+                        {publishedCount} published
+                      </span>
                     )}
-                  </td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{post.website}</td>
-                  <td className="px-5 py-3.5 align-middle text-xs" style={{ color: '#475569' }}>{post.slug}</td>
-                  <td className="px-5 py-3.5 align-middle">
-                    <span
-                      className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap"
-                      style={post.status === 'published'
-                        ? { background: '#dcfce7', color: '#16a34a' }
-                        : { background: '#f1f5f9', color: '#64748b' }
-                      }
-                    >
-                      {post.status === 'published' ? (
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      {post.status === 'published' ? 'Published' : 'Draft'}
+                    {draftCount > 0 && (
+                      <span className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                        {draftCount} draft
+                      </span>
+                    )}
+                    <span className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap" style={{ background: 'var(--primary)', color: 'white' }}>
+                      {rows.length} {rows.length === 1 ? 'post' : 'posts'}
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{formatDate(post.published_at)}</td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{formatDate(post.updated_at)}</td>
-                  <td className="px-5 py-3.5 align-middle">
-                    <div className="flex items-center gap-1 justify-end">
-                      <button
-                        onClick={() => router.push(`/blog/${post.id}/edit`)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors"
-                        style={{ borderColor: '#cbd5e1', color: '#475569' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#cbd5e1'; (e.currentTarget as HTMLElement).style.color = '#475569' }}
-                        title="Edit"
+                    <Link
+                      href={`/blog/new?website=${encodeURIComponent(website)}`}
+                      className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full text-white transition-opacity hover:opacity-90 whitespace-nowrap"
+                      style={{ background: '#475569' }}
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Posts table */}
+                <table className="w-full text-sm" style={{ background: 'white', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col />
+                    <col className="w-20 sm:w-24" />
+                    <col className="w-24 sm:w-28" />
+                    <col className="w-20 sm:w-24" />
+                  </colgroup>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                      <th className="px-3 sm:px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Post</th>
+                      <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
+                      <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Updated</th>
+                      <th className="px-2 sm:px-4 py-3 text-right text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((post, i) => (
+                      <tr
+                        key={post.id}
+                        className="hover:bg-[#f1f5f9] transition-colors"
+                        style={{ borderBottom: i < rows.length - 1 ? '1px solid #cbd5e1' : 'none' }}
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => deletePost(post.id, post.title)}
-                        disabled={deleting === post.id}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors disabled:opacity-50"
-                        style={{ borderColor: '#cbd5e1', color: '#475569' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#fca5a5'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = '#fef2f2' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#cbd5e1'; (e.currentTarget as HTMLElement).style.color = '#475569'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-                        title="Delete"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        )}
-      </div>
+                        {/* Post details — stacked */}
+                        <td className="px-3 sm:px-4 py-3 align-middle overflow-hidden">
+                          <div className="min-w-0">
+                            <Link
+                              href={`/blog/${post.id}/edit`}
+                              className="text-xs sm:text-sm font-medium hover:underline truncate block"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              {post.title}
+                            </Link>
+                            {post.excerpt && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{post.excerpt}</p>}
+                            <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>/{post.slug}</p>
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-2 py-3 align-middle text-center">
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
+                            style={post.status === 'published'
+                              ? { background: '#dcfce7', color: '#16a34a' }
+                              : { background: '#f1f5f9', color: '#94a3b8' }
+                            }
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: post.status === 'published' ? '#16a34a' : '#94a3b8' }} />
+                            {post.status === 'published' ? 'Live' : 'Draft'}
+                          </span>
+                        </td>
+
+                        {/* Updated */}
+                        <td className="px-2 py-3 align-middle text-center text-[10px] sm:text-xs" style={{ color: '#475569' }}>
+                          {formatDate(post.updated_at)}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-2 sm:px-4 py-3 align-middle">
+                          <div className="flex items-center gap-1 justify-end">
+                            <button
+                              onClick={() => router.push(`/blog/${post.id}/edit`)}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors hover:text-[var(--primary)] hover:border-[var(--primary)]"
+                              style={{ borderColor: '#cbd5e1', color: '#475569' }}
+                              title="Edit"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deletePost(post.id, post.title)}
+                              disabled={deleting === post.id}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors disabled:opacity-50 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                              style={{ borderColor: '#cbd5e1', color: '#475569' }}
+                              title="Delete"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+            )
+          })}
+        </div>
+      )}
 
       {/* Row count */}
       {!loading && filtered.length > 0 && (
         <p className="mt-3 text-xs" style={{ color: '#475569' }}>
-          Showing {filtered.length} of {posts.length} entries
+          Showing {filtered.length} of {posts.length} entries across {groupedEntries.length} {groupedEntries.length === 1 ? 'website' : 'websites'}
         </p>
       )}
     </div>
