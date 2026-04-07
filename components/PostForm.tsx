@@ -66,6 +66,19 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [websites, setWebsites] = useState<string[]>([])
+
+  // Fetch registered websites for dropdown
+  useEffect(() => {
+    fetch('/api/websites')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setWebsites(data.map((s: { domain: string }) => s.domain))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (mode === 'new' && !slugLocked) {
@@ -257,15 +270,22 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Website <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={form.website}
-                  onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-                  className={inputClass(!!errors.website)}
-                  placeholder="e.g. oxihome.my"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = errors.website ? '#f87171' : '#e2e8f0'}
-                />
+                <div className="relative">
+                  <select
+                    value={form.website}
+                    onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
+                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors cursor-pointer ${errors.website ? 'border-red-400' : 'border-slate-200'}`}
+                    style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', paddingRight: '2.5rem' }}
+                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                    onBlur={e => e.currentTarget.style.borderColor = errors.website ? '#f87171' : '#e2e8f0'}
+                  >
+                    <option value="">Select website…</option>
+                    {websites.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
                 {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
               </div>
 

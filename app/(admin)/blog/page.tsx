@@ -28,6 +28,7 @@ export default function BlogListPage() {
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
   const [posts, setPosts] = useState<Post[]>([])
+  const [allWebsites, setAllWebsites] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterWebsite, setFilterWebsite] = useState(() => searchParams.get('website') ?? '')
@@ -39,6 +40,18 @@ export default function BlogListPage() {
     if (fromUrl) { setFilterWebsite(fromUrl); return }
     setFilterWebsite(selectedWebsite)
   }, [selectedWebsite, searchParams])
+
+  // Fetch all registered websites (from phone numbers / websites API)
+  useEffect(() => {
+    fetch('/api/websites')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAllWebsites(data.map((s: { domain: string }) => s.domain))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
@@ -74,12 +87,16 @@ export default function BlogListPage() {
     )
   })
 
-  // Group by website
+  // Group by website — always include all registered websites as folders
   const grouped = filtered.reduce<Record<string, Post[]>>((acc, p) => {
     if (!acc[p.website]) acc[p.website] = []
     acc[p.website].push(p)
     return acc
   }, {})
+  // Ensure all registered websites appear even if they have no posts
+  for (const w of allWebsites) {
+    if (!grouped[w]) grouped[w] = []
+  }
   const groupedEntries = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b))
 
   return (
@@ -199,7 +216,26 @@ export default function BlogListPage() {
                   </div>
                 </div>
 
-                {/* Posts table */}
+                {/* Posts table or empty state */}
+                {rows.length === 0 ? (
+                  <div className="px-5 py-8 text-center">
+                    <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-sm" style={{ color: '#475569' }}>No posts yet</p>
+                    <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Create the first blog post for this website</p>
+                    <Link
+                      href={`/blog/new?website=${encodeURIComponent(website)}`}
+                      className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
+                      style={{ background: 'var(--primary)' }}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      New Post
+                    </Link>
+                  </div>
+                ) : (
                 <table className="w-full text-sm" style={{ background: 'white', tableLayout: 'fixed' }}>
                   <colgroup>
                     <col />
@@ -286,6 +322,7 @@ export default function BlogListPage() {
                     ))}
                   </tbody>
                 </table>
+                )}
               </section>
             )
           })}
