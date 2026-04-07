@@ -191,10 +191,12 @@ export default function PhoneNumbersPage() {
               {/* Website header */}
               <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
                   </svg>
-                  <span className="text-sm font-semibold break-all" style={{ color: 'var(--foreground)' }}>{website}</span>
+                  <span className="text-sm font-semibold overflow-hidden" style={{ color: 'var(--foreground)' }}>
+                    <span className="block sm:inline marquee-text">{website}</span>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {activeRows.length > 0 && (
@@ -233,13 +235,19 @@ export default function PhoneNumbersPage() {
               )}
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px] text-sm" style={{ background: 'white' }}>
+                <table className="w-full text-sm" style={{ background: 'white', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col />
+                    <col className="w-16 sm:w-20" />
+                    <col className="w-16 sm:w-20" />
+                    <col className="w-20 sm:w-24" />
+                  </colgroup>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Number Details</th>
-                      <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>%</th>
-                      <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>Status</th>
-                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>Actions</th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Details</th>
+                      <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>%</th>
+                      <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
+                      <th className="px-2 sm:px-4 py-3 text-right text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -251,7 +259,7 @@ export default function PhoneNumbersPage() {
                         style={{ borderBottom: i < rows.length - 1 ? '1px solid #cbd5e1' : 'none' }}
                       >
                       {/* Number Details — stacked */}
-                      <td className="px-4 py-3 align-middle">
+                      <td className="px-3 sm:px-4 py-3 align-middle overflow-hidden">
                         {editingId === row.id ? (
                           <div className="space-y-2">
                             <input
@@ -277,19 +285,19 @@ export default function PhoneNumbersPage() {
                             />
                           </div>
                         ) : (
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
-                              {row.label && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-xs sm:text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                              {row.label && <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>}
                             </div>
-                            {row.whatsapp_text && <p className="text-xs mt-0.5 truncate max-w-[300px]" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
+                            {row.whatsapp_text && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
                             <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>{row.location_slug}</p>
                           </div>
                         )}
                       </td>
 
                       {/* Weight */}
-                      <td className="px-4 py-3 align-middle text-center">
+                      <td className="px-2 py-3 align-middle text-center">
                         {editingId === row.id ? (
                           <input
                             type="number"
@@ -311,7 +319,7 @@ export default function PhoneNumbersPage() {
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3 align-middle text-center">
+                      <td className="px-2 py-3 align-middle text-center">
                         {editingId === row.id ? (
                           <label className="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium"
                             style={{ color: editValues.is_active ? '#16a34a' : '#475569' }}>
@@ -350,7 +358,7 @@ export default function PhoneNumbersPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-4 py-3 align-middle">
+                      <td className="px-2 sm:px-4 py-3 align-middle">
                         <div className="flex items-center gap-1 justify-end">
                           {editingId === row.id ? (
                             <>
