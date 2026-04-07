@@ -285,7 +285,7 @@ export default function PhoneNumbersPage() {
                         ) : (
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-xs sm:text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                              <span className="text-xs sm:text-sm font-medium font-mono truncate" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
                               {row.label && <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>}
                             </div>
                             {row.whatsapp_text && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
