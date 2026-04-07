@@ -12,6 +12,7 @@ interface PhoneNumber {
   location_slug: string
   phone_number: string
   whatsapp_text: string
+  percentage: number
   label: string | null
   is_active: boolean
   created_at: string
@@ -56,7 +57,7 @@ export default function PhoneNumbersPage() {
 
   function startEdit(row: PhoneNumber) {
     setEditingId(row.id)
-    setEditValues({ phone_number: row.phone_number, whatsapp_text: row.whatsapp_text, label: row.label ?? '', is_active: row.is_active })
+    setEditValues({ phone_number: row.phone_number, whatsapp_text: row.whatsapp_text, percentage: row.percentage, label: row.label ?? '', is_active: row.is_active })
     setError('')
   }
 
@@ -65,7 +66,7 @@ export default function PhoneNumbersPage() {
     const res = await fetch(`/api/phone-numbers/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_number: editValues.phone_number, whatsapp_text: editValues.whatsapp_text, label: editValues.label || null, is_active: editValues.is_active }),
+      body: JSON.stringify({ phone_number: editValues.phone_number, whatsapp_text: editValues.whatsapp_text, percentage: editValues.percentage ?? 100, label: editValues.label || null, is_active: editValues.is_active }),
     })
     if (res.ok) { setEditingId(null); fetchNumbers() }
     else { const d = await res.json(); setError(d.error ?? 'Save failed') }
@@ -209,75 +210,90 @@ export default function PhoneNumbersPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-sm" style={{ background: 'white' }}>
+                <table className="w-full min-w-[700px] text-sm" style={{ background: 'white' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Location</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-44" style={{ color: '#475569' }}>Phone Number</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>WhatsApp Text</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-36" style={{ color: '#475569' }}>Label</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Status</th>
-                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Actions</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Number Details</th>
+                      <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>Weight</th>
+                      <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>Status</th>
+                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-24" style={{ color: '#475569' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row, i) => (
+                    {rows.map((row, i) => {
+                      const totalWeight = rows.filter(r => r.is_active).reduce((s, r) => s + (r.percentage ?? 100), 0)
+                      const share = row.is_active && totalWeight > 0 ? Math.round(((row.percentage ?? 100) / totalWeight) * 100) : 0
+                      return (
                       <tr
                         key={row.id}
                         className="hover:bg-[#f1f5f9] transition-colors"
                         style={{ borderBottom: i < rows.length - 1 ? '1px solid #cbd5e1' : 'none' }}
                       >
-                      {/* Location */}
-                      <td className="px-4 py-3 align-middle text-xs" style={{ color: '#475569' }}>{row.location_slug}</td>
-
-                      {/* Phone number */}
+                      {/* Number Details — stacked */}
                       <td className="px-4 py-3 align-middle">
                         {editingId === row.id ? (
-                          <input
-                            className="px-2 py-1 border rounded text-sm w-full max-w-[220px] outline-none focus:ring-2"
-                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
-                            value={editValues.phone_number ?? ''}
-                            onChange={e => setEditValues(v => ({ ...v, phone_number: e.target.value }))}
-                          />
+                          <div className="space-y-2">
+                            <input
+                              className="px-2 py-1 border rounded text-sm w-full outline-none focus:ring-2"
+                              style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
+                              value={editValues.phone_number ?? ''}
+                              placeholder="Phone number"
+                              onChange={e => setEditValues(v => ({ ...v, phone_number: e.target.value }))}
+                            />
+                            <input
+                              className="px-2 py-1 border rounded text-sm w-full outline-none focus:ring-2"
+                              style={{ borderColor: '#cbd5e1', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
+                              value={editValues.whatsapp_text ?? ''}
+                              placeholder="WhatsApp text"
+                              onChange={e => setEditValues(v => ({ ...v, whatsapp_text: e.target.value }))}
+                            />
+                            <input
+                              className="px-2 py-1 border rounded text-sm w-full outline-none focus:ring-2"
+                              style={{ borderColor: '#cbd5e1', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
+                              value={editValues.label ?? ''}
+                              placeholder="Label (optional)"
+                              onChange={e => setEditValues(v => ({ ...v, label: e.target.value }))}
+                            />
+                          </div>
                         ) : (
-                          <span className="font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                              {row.label && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>}
+                            </div>
+                            {row.whatsapp_text && <p className="text-xs mt-0.5 truncate max-w-[300px]" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
+                            <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>{row.location_slug}</p>
+                          </div>
                         )}
                       </td>
 
-                      {/* WhatsApp Text */}
-                      <td className="px-4 py-3 align-middle">
+                      {/* Weight */}
+                      <td className="px-4 py-3 align-middle text-center">
                         {editingId === row.id ? (
                           <input
-                            className="px-2 py-1 border rounded text-sm w-full max-w-[220px] outline-none focus:ring-2"
+                            type="number"
+                            min="1"
+                            max="100"
+                            className="px-2 py-1 border rounded text-sm w-16 text-center outline-none focus:ring-2"
                             style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
-                            value={editValues.whatsapp_text ?? ''}
-                            placeholder="WhatsApp message"
-                            onChange={e => setEditValues(v => ({ ...v, whatsapp_text: e.target.value }))}
+                            value={editValues.percentage ?? 100}
+                            onChange={e => setEditValues(v => ({ ...v, percentage: parseInt(e.target.value) || 1 }))}
                           />
                         ) : (
-                          <span className="text-xs truncate block max-w-[200px]" style={{ color: '#475569' }}>{row.whatsapp_text || '—'}</span>
-                        )}
-                      </td>
-
-                      {/* Label */}
-                      <td className="px-4 py-3 align-middle">
-                        {editingId === row.id ? (
-                          <input
-                            className="px-2 py-1 border rounded text-sm w-full max-w-[140px] outline-none focus:ring-2"
-                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
-                            value={editValues.label ?? ''}
-                            placeholder="Optional"
-                            onChange={e => setEditValues(v => ({ ...v, label: e.target.value }))}
-                          />
-                        ) : (
-                          <span style={{ color: '#475569' }}>{row.label ?? '—'}</span>
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{row.percentage ?? 100}</span>
+                            <div className="w-12 h-1.5 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
+                              <div className="h-full rounded-full" style={{ width: `${share}%`, background: 'var(--primary)' }} />
+                            </div>
+                            <span className="text-[10px]" style={{ color: '#94a3b8' }}>{share}%</span>
+                          </div>
                         )}
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3 align-middle whitespace-nowrap">
+                      <td className="px-4 py-3 align-middle text-center">
                         {editingId === row.id ? (
-                          <label className="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium w-full"
+                          <label className="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium"
                             style={{ color: editValues.is_active ? '#16a34a' : '#475569' }}>
                             <span
                               className="w-4 h-4 rounded flex items-center justify-center border"
@@ -298,25 +314,17 @@ export default function PhoneNumbersPage() {
                               checked={!!editValues.is_active}
                               onChange={e => setEditValues(v => ({ ...v, is_active: e.target.checked }))}
                             />
-                            {editValues.is_active ? 'Active' : 'Inactive'}
                           </label>
                         ) : (
-                          <span className="inline-flex items-center gap-2 text-xs font-medium"
-                            style={{ color: row.is_active ? '#16a34a' : '#475569' }}>
-                            <span
-                              className="w-4 h-4 rounded flex items-center justify-center border"
-                              style={row.is_active
-                                ? { background: '#16a34a', borderColor: '#16a34a' }
-                                : { background: 'white', borderColor: '#cbd5e1' }
-                              }
-                            >
-                              {row.is_active && (
-                                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </span>
-                            {row.is_active ? 'Active' : 'Inactive'}
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
+                            style={row.is_active
+                              ? { background: '#dcfce7', color: '#16a34a' }
+                              : { background: '#f1f5f9', color: '#94a3b8' }
+                            }
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: row.is_active ? '#16a34a' : '#94a3b8' }} />
+                            {row.is_active ? 'Active' : 'Off'}
                           </span>
                         )}
                       </td>
@@ -364,7 +372,7 @@ export default function PhoneNumbersPage() {
                         </div>
                       </td>
                     </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>

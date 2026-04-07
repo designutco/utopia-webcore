@@ -13,6 +13,7 @@ create table if not exists public.phone_numbers (
   location_slug text not null,
   phone_number  text not null,
   whatsapp_text text not null default '',
+  percentage    integer not null default 100,
   label         text,
   is_active     boolean not null default true,
   created_at    timestamptz not null default now()

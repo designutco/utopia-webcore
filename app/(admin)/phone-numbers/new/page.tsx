@@ -66,6 +66,7 @@ export default function NewPhoneNumberPage() {
     location_slug: '',
     phone_number: '',
     whatsapp_text: '',
+    percentage: '100',
     label: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -112,6 +113,7 @@ export default function NewPhoneNumberPage() {
         location_slug: form.location_slug || 'all',
         phone_number: form.phone_number.trim(),
         whatsapp_text: form.whatsapp_text.trim(),
+        percentage: parseInt(form.percentage) || 100,
         label: form.label.trim() || null,
       }),
     })
@@ -252,6 +254,25 @@ export default function NewPhoneNumberPage() {
                     </div>
                   </div>
                 )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                  Lead Weight <span className="text-xs font-normal" style={{ color: '#475569' }}>(default 100)</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={form.percentage}
+                  onChange={e => setForm(f => ({ ...f, percentage: e.target.value }))}
+                  className="w-24 px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors"
+                  style={{ borderColor: '#cbd5e1', background: 'white' }}
+                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'}
+                />
+                <p className="mt-1 text-xs" style={{ color: '#475569' }}>
+                  Higher weight = more leads. Numbers with equal weight share leads equally.
+                </p>
               </div>
               <InputField
                 label="Label"
