@@ -13,9 +13,20 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      {/* Welcome */}
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Dashboard</h1>
-      <p className="text-sm text-slate-500 mb-8">Overview of your websites, phone numbers, and content.</p>
+      {/* Welcome banner */}
+      <div className="rounded-xl overflow-hidden mb-8 relative" style={{ background: 'linear-gradient(to right, #f1f5f9, #ffffff)', minHeight: '140px' }}>
+        <div className="relative z-10 p-6 sm:p-8 pr-32 sm:pr-48">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">Welcome back!</h1>
+          <p className="text-sm text-slate-500 max-w-md">Manage your websites, phone numbers, and blog content all in one place.</p>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/character.gif"
+          alt=""
+          className="absolute right-0 bottom-0 h-full object-contain object-right-bottom pointer-events-none"
+          style={{ maxHeight: '140px' }}
+        />
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
