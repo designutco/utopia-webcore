@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const steps = ['Enter Details', 'Set Location', 'Confirm']
@@ -59,8 +59,10 @@ function InputField({
 
 export default function NewPhoneNumberPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const prefillWebsite = searchParams.get('website') ?? ''
   const [form, setForm] = useState({
-    website: '',
+    website: prefillWebsite,
     location_slug: '',
     phone_number: '',
     whatsapp_text: '',
