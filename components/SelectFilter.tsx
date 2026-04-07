@@ -10,7 +10,7 @@ interface SelectFilterProps {
 export default function SelectFilter({ label, value, onChange, options }: SelectFilterProps) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>{label}</label>
+      <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>{label}</label>
       <div className="relative inline-block">
         <select
           value={value}
@@ -20,9 +20,9 @@ export default function SelectFilter({ label, value, onChange, options }: Select
             appearance: 'none',
             WebkitAppearance: 'none',
             MozAppearance: 'none',
-            borderColor: 'var(--border)',
-            background: '#253347',
-            color: '#94a3b8',
+            borderColor: '#cbd5e1',
+            background: 'white',
+            color: '#475569',
             paddingTop: '0.5rem',
             paddingBottom: '0.5rem',
             paddingLeft: '0.75rem',
@@ -30,7 +30,7 @@ export default function SelectFilter({ label, value, onChange, options }: Select
             minWidth: '140px',
           }}
           onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-          onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'}
         >
           {options.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -39,7 +39,7 @@ export default function SelectFilter({ label, value, onChange, options }: Select
         <svg
           className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          style={{ color: '#94a3b8' }}
+          style={{ color: '#475569' }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>

@@ -85,7 +85,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Logo icon */}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0a1a3a, #1565c0, #2196f3)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1a3a6e, #2979d6)' }}>
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>
               </svg>
@@ -137,7 +137,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
       {/* Footer */}
       <div className="px-3 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="px-3 mb-3 flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0a1a3a, #1565c0, #2196f3)' }}>
+          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1a3a6e, #2979d6)' }}>
             {userEmail[0]?.toUpperCase()}
           </div>
           <p className="text-xs truncate" style={{ color: 'var(--sidebar-muted)' }}>{userEmail}</p>
