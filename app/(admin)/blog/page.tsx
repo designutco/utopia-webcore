@@ -77,7 +77,7 @@ export default function BlogListPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Blog Posts</h1>
         <Link
           href="/blog/new"
@@ -156,7 +156,8 @@ export default function BlogListPage() {
             <Link href="/blog/new" className="hover:underline" style={{ color: 'var(--primary)' }}>Create one</Link>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: '#f4f9fb' }}>
                 {['Title', 'Website', 'Slug', 'Status', 'Published', 'Updated', ''].map((h, i) => (
@@ -243,6 +244,7 @@ export default function BlogListPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

@@ -19,7 +19,7 @@ export default async function DashboardPage() {
       <h1 className="text-2xl font-bold text-slate-900 mb-1">Dashboard</h1>
       <p className="text-sm text-slate-500 mb-8">Manage phone numbers and blog content across all websites.</p>
 
-      <div className="grid grid-cols-2 gap-4 mb-8 max-w-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-lg">
         {stats.map(stat => (
           <Link
             key={stat.href}
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Link
           href="/phone-numbers/new"
           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"

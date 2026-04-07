@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { WebsiteProvider } from '@/contexts/WebsiteContext'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
@@ -10,11 +11,40 @@ interface AdminShellProps {
 }
 
 export default function AdminShell({ userEmail, children }: AdminShellProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <WebsiteProvider>
       <div className="flex h-screen" style={{ background: '#ffffff' }}>
-        <Sidebar userEmail={userEmail} />
-        <main className="flex-1 overflow-y-auto p-8" style={{ background: '#ffffff' }}>
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <Sidebar
+          userEmail={userEmail}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8" style={{ background: '#ffffff' }}>
+          {/* Mobile header with hamburger */}
+          <div className="flex items-center gap-3 mb-2 md:hidden">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-lg border"
+              style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Utopia Webcore</span>
+          </div>
+
           <Breadcrumb />
           {children}
         </main>

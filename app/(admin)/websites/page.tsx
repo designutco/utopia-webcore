@@ -47,7 +47,8 @@ export default function WebsitesPage() {
             No websites found. Add a phone number or blog post to register a website.
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: '#f4f9fb' }}>
                 {['Website', 'Phone Numbers', 'Active Numbers', 'Blog Posts', 'Published Posts', ''].map((h, i) => (
@@ -164,6 +165,7 @@ export default function WebsitesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
