@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -63,16 +63,34 @@ export default function NewPhoneNumberPage() {
     website: '',
     location_slug: '',
     phone_number: '',
+    whatsapp_text: '',
     label: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState('')
+  const [existingTexts, setExistingTexts] = useState<string[]>([])
+
+  const fetchExistingTexts = useCallback(async (website: string) => {
+    if (!website.trim()) { setExistingTexts([]); return }
+    const res = await fetch(`/api/phone-numbers?website=${encodeURIComponent(website.trim())}`)
+    const data = await res.json()
+    if (Array.isArray(data)) {
+      const texts = [...new Set(data.map((n: { whatsapp_text?: string }) => n.whatsapp_text).filter(Boolean))] as string[]
+      setExistingTexts(texts)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => fetchExistingTexts(form.website), 400)
+    return () => clearTimeout(timeout)
+  }, [form.website, fetchExistingTexts])
 
   function validate() {
     const e: Record<string, string> = {}
     if (!form.website.trim()) e.website = 'Website domain is required'
     if (!form.phone_number.trim()) e.phone_number = 'Phone number is required'
+    if (!form.whatsapp_text.trim()) e.whatsapp_text = 'WhatsApp text is required'
     return e
   }
 
@@ -91,6 +109,7 @@ export default function NewPhoneNumberPage() {
         product_slug: 'default',
         location_slug: form.location_slug || 'all',
         phone_number: form.phone_number.trim(),
+        whatsapp_text: form.whatsapp_text.trim(),
         label: form.label.trim() || null,
       }),
     })
@@ -202,6 +221,36 @@ export default function NewPhoneNumberPage() {
                 hint="Include country code, no spaces or dashes"
                 error={errors.phone_number}
               />
+              <div>
+                <InputField
+                  label="WhatsApp Text"
+                  value={form.whatsapp_text}
+                  onChange={v => setForm(f => ({ ...f, whatsapp_text: v }))}
+                  placeholder="e.g. Hi, I'd like to enquire about…"
+                  hint="Pre-filled message when a visitor clicks the WhatsApp button"
+                  error={errors.whatsapp_text}
+                />
+                {existingTexts.length > 0 && !form.whatsapp_text && (
+                  <div className="mt-2 rounded-lg border p-3" style={{ borderColor: '#cbd5e1', background: '#f8fafc' }}>
+                    <p className="text-xs font-medium mb-2" style={{ color: '#475569' }}>
+                      Existing texts for this website — click to use:
+                    </p>
+                    <div className="space-y-1.5">
+                      {existingTexts.map((text, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, whatsapp_text: text }))}
+                          className="block w-full text-left text-xs px-3 py-2 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                          style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}
+                        >
+                          {text}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <InputField
                 label="Label"
                 value={form.label}

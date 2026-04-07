@@ -11,6 +11,7 @@ interface PhoneNumber {
   product_slug: string
   location_slug: string
   phone_number: string
+  whatsapp_text: string
   label: string | null
   is_active: boolean
   created_at: string
@@ -55,7 +56,7 @@ export default function PhoneNumbersPage() {
 
   function startEdit(row: PhoneNumber) {
     setEditingId(row.id)
-    setEditValues({ phone_number: row.phone_number, label: row.label ?? '', is_active: row.is_active })
+    setEditValues({ phone_number: row.phone_number, whatsapp_text: row.whatsapp_text, label: row.label ?? '', is_active: row.is_active })
     setError('')
   }
 
@@ -64,7 +65,7 @@ export default function PhoneNumbersPage() {
     const res = await fetch(`/api/phone-numbers/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_number: editValues.phone_number, label: editValues.label || null, is_active: editValues.is_active }),
+      body: JSON.stringify({ phone_number: editValues.phone_number, whatsapp_text: editValues.whatsapp_text, label: editValues.label || null, is_active: editValues.is_active }),
     })
     if (res.ok) { setEditingId(null); fetchNumbers() }
     else { const d = await res.json(); setError(d.error ?? 'Save failed') }
@@ -196,14 +197,15 @@ export default function PhoneNumbersPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-sm" style={{ background: 'white' }}>
+                <table className="w-full min-w-[900px] text-sm" style={{ background: 'white' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
                       <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Location</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-64" style={{ color: '#475569' }}>Phone Number</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-52" style={{ color: '#475569' }}>Label</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-44" style={{ color: '#475569' }}>Status</th>
-                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-36" style={{ color: '#475569' }}>Actions</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-44" style={{ color: '#475569' }}>Phone Number</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>WhatsApp Text</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-36" style={{ color: '#475569' }}>Label</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Status</th>
+                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -230,11 +232,26 @@ export default function PhoneNumbersPage() {
                         )}
                       </td>
 
+                      {/* WhatsApp Text */}
+                      <td className="px-4 py-3 align-middle">
+                        {editingId === row.id ? (
+                          <input
+                            className="px-2 py-1 border rounded text-sm w-full max-w-[220px] outline-none focus:ring-2"
+                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
+                            value={editValues.whatsapp_text ?? ''}
+                            placeholder="WhatsApp message"
+                            onChange={e => setEditValues(v => ({ ...v, whatsapp_text: e.target.value }))}
+                          />
+                        ) : (
+                          <span className="text-xs truncate block max-w-[200px]" style={{ color: '#475569' }}>{row.whatsapp_text || '—'}</span>
+                        )}
+                      </td>
+
                       {/* Label */}
                       <td className="px-4 py-3 align-middle">
                         {editingId === row.id ? (
                           <input
-                            className="px-2 py-1 border rounded text-sm w-full max-w-[180px] outline-none focus:ring-2"
+                            className="px-2 py-1 border rounded text-sm w-full max-w-[140px] outline-none focus:ring-2"
                             style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
                             value={editValues.label ?? ''}
                             placeholder="Optional"
