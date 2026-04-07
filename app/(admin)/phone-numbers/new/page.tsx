@@ -52,7 +52,7 @@ function InputField({
         onBlur={e => e.currentTarget.style.borderColor = error ? '#fca5a5' : 'var(--border)'}
       />
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-      {hint && !error && <p className="mt-1 text-xs" style={{ color: '#7dbdd0' }}>{hint}</p>}
+      {hint && !error && <p className="mt-1 text-xs" style={{ color: '#94a3b8' }}>{hint}</p>}
     </div>
   )
 }
@@ -107,13 +107,13 @@ export default function NewPhoneNumberPage() {
     <div className="min-h-[calc(100vh-8rem)] flex flex-col justify-center">
       <div className="max-w-xl mx-auto w-full">
         <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Add Phone Number</h1>
-        <p className="text-sm mb-6" style={{ color: '#4a7a8a' }}>Add a new number to the rotation pool for a website and location.</p>
+        <p className="text-sm mb-6" style={{ color: '#475569' }}>Add a new number to the rotation pool for a website and location.</p>
 
         {/* Main card */}
         <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
 
           {/* Card header */}
-          <div className="px-5 py-4 flex items-center gap-2" style={{ background: '#f4f9fb', borderBottom: '1px solid var(--border)' }}>
+          <div className="px-5 py-4 flex items-center gap-2" style={{ background: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -121,7 +121,7 @@ export default function NewPhoneNumberPage() {
           </div>
 
           {/* Step indicator */}
-          <div className="px-5 pt-5 pb-4 flex items-center" style={{ background: '#f4f9fb', borderBottom: '1px solid var(--border)' }}>
+          <div className="px-5 pt-5 pb-4 flex items-center" style={{ background: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
             {steps.map((step, i) => (
               <div key={step} className="flex items-center flex-1">
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -129,12 +129,12 @@ export default function NewPhoneNumberPage() {
                     className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
                     style={i === 0
                       ? { background: 'var(--primary)', color: 'white' }
-                      : { background: '#e2eef2', color: '#7dbdd0' }
+                      : { background: '#e2eef2', color: '#94a3b8' }
                     }
                   >
                     {i + 1}
                   </div>
-                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: i === 0 ? 'var(--primary)' : '#7dbdd0' }}>
+                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: i === 0 ? 'var(--primary)' : '#94a3b8' }}>
                     {step}
                   </span>
                 </div>
@@ -167,7 +167,7 @@ export default function NewPhoneNumberPage() {
               {/* Location dropdown */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: '#1a1a2e' }}>
-                  Location <span className="text-xs font-normal" style={{ color: '#7dbdd0' }}>(optional)</span>
+                  Location <span className="text-xs font-normal" style={{ color: '#94a3b8' }}>(optional)</span>
                 </label>
                 <div className="relative">
                   <select
@@ -176,7 +176,7 @@ export default function NewPhoneNumberPage() {
                     className="w-full text-sm rounded-lg border focus:outline-none cursor-pointer"
                     style={{
                       appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-                      borderColor: 'var(--border)', background: 'white', color: '#4a7a8a',
+                      borderColor: 'var(--border)', background: 'white', color: '#475569',
                       padding: '0.625rem 2.5rem 0.625rem 0.75rem',
                     }}
                     onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
@@ -187,11 +187,11 @@ export default function NewPhoneNumberPage() {
                       <option key={s.slug} value={s.slug}>{s.label}</option>
                     ))}
                   </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7dbdd0' }}>
+                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <p className="mt-1 text-xs" style={{ color: '#7dbdd0' }}>Leave blank to apply this number to all locations</p>
+                <p className="mt-1 text-xs" style={{ color: '#94a3b8' }}>Leave blank to apply this number to all locations</p>
               </div>
 
               <InputField
@@ -251,7 +251,7 @@ export default function NewPhoneNumberPage() {
               <Link
                 href="/phone-numbers"
                 className="text-sm px-4 py-2 rounded-lg border transition-colors"
-                style={{ borderColor: 'var(--border)', color: '#4a7a8a' }}
+                style={{ borderColor: 'var(--border)', color: '#475569' }}
               >
                 Cancel
               </Link>

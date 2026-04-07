@@ -73,7 +73,7 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none transition-shadow"
                 style={{ borderColor: '#dde3e8', color: '#0f1720' }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(28,110,140,0.12)' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30,58,95,0.12)' }}
                 onBlur={e => { e.currentTarget.style.borderColor = '#dde3e8'; e.currentTarget.style.boxShadow = 'none' }}
                 placeholder="you@company.com"
                 autoComplete="email"
@@ -87,7 +87,7 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 className="w-full px-3.5 py-2.5 border rounded-xl text-sm focus:outline-none transition-shadow"
                 style={{ borderColor: '#dde3e8', color: '#0f1720' }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(28,110,140,0.12)' }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(30,58,95,0.12)' }}
                 onBlur={e => { e.currentTarget.style.borderColor = '#dde3e8'; e.currentTarget.style.boxShadow = 'none' }}
                 placeholder="••••••••"
                 autoComplete="current-password"

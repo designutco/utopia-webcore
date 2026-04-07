@@ -16,30 +16,40 @@ const navItems = [
   {
     href: '/websites',
     label: 'Websites',
+    color: '#818cf8',
     icon: (
+      // Monitor with browser window
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9" strokeWidth="2"/>
-        <path strokeWidth="2" d="M12 3c0 0-3 4-3 9s3 9 3 9"/>
-        <path strokeWidth="2" d="M12 3c0 0 3 4 3 9s-3 9-3 9"/>
-        <path strokeWidth="2" d="M3 12h18"/>
+        <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="1.8"/>
+        <path strokeWidth="1.8" strokeLinecap="round" d="M2 7h20"/>
+        <circle cx="5" cy="5" r="0.8" fill="currentColor" stroke="none"/>
+        <circle cx="7.5" cy="5" r="0.8" fill="currentColor" stroke="none"/>
+        <circle cx="10" cy="5" r="0.8" fill="currentColor" stroke="none"/>
+        <path strokeWidth="1.8" strokeLinecap="round" d="M8 21h8M12 17v4"/>
       </svg>
     ),
   },
   {
     href: '/phone-numbers',
     label: 'Phone Numbers',
+    color: '#34d399',
     icon: (
+      // Chat bubble with phone - WhatsApp style
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.5 10.5c.3.6.8 1.2 1.4 1.7.6.5 1.2.9 1.9 1.1l.7-.7a.5.5 0 01.5-.1l1.3.5a.5.5 0 01.3.5v1a.5.5 0 01-.5.5C11.5 15 8.5 12 8.5 8.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.3l.5 1.3a.5.5 0 01-.1.5l-.9.9z" />
       </svg>
     ),
   },
   {
     href: '/blog',
     label: 'Blog Posts',
+    color: '#f472b6',
     icon: (
+      // Pen writing on paper
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        <path strokeLinecap="round" strokeWidth={1.8} d="M7 13h3M7 9h7"/>
       </svg>
     ),
   },
@@ -80,15 +90,10 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
       <div className="px-5 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Globe icon */}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" strokeWidth="1.5"/>
-                <path strokeWidth="1.5" d="M12 3c0 0-3 4-3 9s3 9 3 9"/>
-                <path strokeWidth="1.5" d="M12 3c0 0 3 4 3 9s-3 9-3 9"/>
-                <path strokeWidth="1.5" d="M3 12h18"/>
-                <path strokeWidth="1.5" d="M4.5 7.5h15"/>
-                <path strokeWidth="1.5" d="M4.5 16.5h15"/>
+            {/* Logo icon */}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #818cf8, #f472b6)' }}>
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>
               </svg>
             </div>
             <div>
@@ -128,7 +133,12 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
               onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)' }}
               onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
-              {item.icon}
+              <span
+                className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+                style={{ background: active ? item.color : `${item.color}33`, color: active ? '#ffffff' : item.color }}
+              >
+                {item.icon}
+              </span>
               {item.label}
             </Link>
           )
@@ -138,7 +148,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
       {/* Footer */}
       <div className="px-3 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="px-3 mb-3 flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'rgba(255,255,255,0.2)' }}>
+          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #818cf8, #f472b6)' }}>
             {userEmail[0]?.toUpperCase()}
           </div>
           <p className="text-xs truncate" style={{ color: 'var(--sidebar-muted)' }}>{userEmail}</p>

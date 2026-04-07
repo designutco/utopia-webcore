@@ -110,15 +110,15 @@ export default function PhoneNumbersPage() {
           Add Number
         </Link>
       </div>
-      <p className="text-sm mb-6" style={{ color: '#4a7a8a' }}>Manage phone numbers per website and location. Multiple numbers rotate randomly on each WhatsApp click.</p>
+      <p className="text-sm mb-6" style={{ color: '#475569' }}>Manage phone numbers per website and location. Multiple numbers rotate randomly on each WhatsApp click.</p>
 
       {/* Search + website filter */}
-      <div className="rounded-xl border p-4 sm:p-5" style={{ borderColor: 'var(--border)', background: '#f9fcfd' }}>
+      <div className="rounded-xl border p-4 sm:p-5" style={{ borderColor: 'var(--border)', background: '#f8fafc' }}>
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-56">
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Search</label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Search</label>
           <div className="relative">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7dbdd0' }}>
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -127,12 +127,12 @@ export default function PhoneNumbersPage() {
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by domain, location, or number…"
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border outline-none focus:ring-2 focus:ring-offset-0"
-              style={{ borderColor: 'var(--border)', background: 'white', ['--tw-ring-color' as string]: 'rgba(28, 110, 140, 0.2)' }}
+              style={{ borderColor: 'var(--border)', background: 'white', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
             />
           </div>
         </div>
         <div className="min-w-44">
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#4a7a8a' }}>Website</label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Website</label>
           <div className="relative inline-block">
             <select
               value={filterWebsite}
@@ -140,16 +140,16 @@ export default function PhoneNumbersPage() {
               className="cursor-pointer text-sm rounded-lg border outline-none focus:ring-2 focus:ring-offset-0 w-full"
               style={{
                 appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-                borderColor: 'var(--border)', background: 'white', color: '#4a7a8a',
+                borderColor: 'var(--border)', background: 'white', color: '#475569',
                 paddingTop: '0.5rem', paddingBottom: '0.5rem', paddingLeft: '0.75rem', paddingRight: '2.25rem',
                 minWidth: '176px',
-                ['--tw-ring-color' as string]: 'rgba(28, 110, 140, 0.2)',
+                ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)',
               }}
             >
               <option value="">All websites</option>
               {websites.map(w => <option key={w} value={w}>{w}</option>)}
             </select>
-            <svg className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7dbdd0' }}>
+            <svg className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -158,7 +158,7 @@ export default function PhoneNumbersPage() {
             <button
               onClick={() => { setFilterWebsite(''); setSearch('') }}
               className="h-9 py-2 px-3 text-sm rounded-lg border hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors"
-              style={{ borderColor: 'var(--border)', color: '#4a7a8a', background: 'white' }}
+              style={{ borderColor: 'var(--border)', color: '#475569', background: 'white' }}
             >
               Clear
             </button>
@@ -172,9 +172,9 @@ export default function PhoneNumbersPage() {
 
       {/* Grouped tables */}
       {loading ? (
-        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: 'var(--border)', color: '#7dbdd0' }}>Loading…</div>
+        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: 'var(--border)', color: '#94a3b8' }}>Loading…</div>
       ) : groupedEntries.length === 0 ? (
-        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: 'var(--border)', color: '#7dbdd0' }}>
+        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: 'var(--border)', color: '#94a3b8' }}>
           No phone numbers found.{' '}
           <Link href="/phone-numbers/new" className="hover:underline" style={{ color: 'var(--primary)' }}>Add one</Link>
         </div>
@@ -183,7 +183,7 @@ export default function PhoneNumbersPage() {
           {groupedEntries.map(([website, rows]) => (
             <section key={website} className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: 'var(--border)' }}>
               {/* Website header */}
-              <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style={{ background: '#f4f9fb', borderBottom: '1px solid var(--border)' }}>
+              <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style={{ background: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
@@ -198,30 +198,30 @@ export default function PhoneNumbersPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-sm" style={{ background: 'white' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)', background: '#fafcfd' }}>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#4a7a8a' }}>Location</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-64" style={{ color: '#4a7a8a' }}>Phone Number</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-52" style={{ color: '#4a7a8a' }}>Label</th>
-                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-44" style={{ color: '#4a7a8a' }}>Status</th>
-                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-36" style={{ color: '#4a7a8a' }}>Actions</th>
+                    <tr style={{ borderBottom: '1px solid var(--border)', background: '#f8fafc' }}>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-28" style={{ color: '#475569' }}>Location</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-64" style={{ color: '#475569' }}>Phone Number</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-52" style={{ color: '#475569' }}>Label</th>
+                      <th className="px-4 py-3 text-left text-[10px] sm:text-xs font-semibold w-44" style={{ color: '#475569' }}>Status</th>
+                      <th className="px-4 py-3 text-right text-[10px] sm:text-xs font-semibold w-36" style={{ color: '#475569' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row, i) => (
                       <tr
                         key={row.id}
-                        className="hover:bg-[#f4f9fb] transition-colors"
+                        className="hover:bg-[#f1f5f9] transition-colors"
                         style={{ borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}
                       >
                       {/* Location */}
-                      <td className="px-4 py-3 align-middle font-mono text-xs" style={{ color: '#4a7a8a' }}>{row.location_slug}</td>
+                      <td className="px-4 py-3 align-middle font-mono text-xs" style={{ color: '#475569' }}>{row.location_slug}</td>
 
                       {/* Phone number */}
                       <td className="px-4 py-3 align-middle">
                         {editingId === row.id ? (
                           <input
                             className="px-2 py-1 border rounded text-sm w-full max-w-[220px] outline-none focus:ring-2"
-                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(28, 110, 140, 0.2)' }}
+                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
                             value={editValues.phone_number ?? ''}
                             onChange={e => setEditValues(v => ({ ...v, phone_number: e.target.value }))}
                           />
@@ -235,13 +235,13 @@ export default function PhoneNumbersPage() {
                         {editingId === row.id ? (
                           <input
                             className="px-2 py-1 border rounded text-sm w-full max-w-[180px] outline-none focus:ring-2"
-                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(28, 110, 140, 0.2)' }}
+                            style={{ borderColor: 'var(--primary)', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
                             value={editValues.label ?? ''}
                             placeholder="Optional"
                             onChange={e => setEditValues(v => ({ ...v, label: e.target.value }))}
                           />
                         ) : (
-                          <span style={{ color: '#7dbdd0' }}>{row.label ?? '—'}</span>
+                          <span style={{ color: '#94a3b8' }}>{row.label ?? '—'}</span>
                         )}
                       </td>
 
@@ -305,7 +305,7 @@ export default function PhoneNumbersPage() {
                               <button
                                 onClick={() => setEditingId(null)}
                                 className="px-3 py-1.5 text-xs rounded-lg border transition-colors hover:text-[var(--primary)] hover:border-[var(--primary)]"
-                                style={{ borderColor: 'var(--border)', color: '#4a7a8a' }}
+                                style={{ borderColor: 'var(--border)', color: '#475569' }}
                               >Cancel</button>
                             </>
                           ) : (
@@ -345,7 +345,7 @@ export default function PhoneNumbersPage() {
       )}
 
       {!loading && filtered.length > 0 && (
-        <p className="mt-3 text-xs" style={{ color: '#7dbdd0' }}>
+        <p className="mt-3 text-xs" style={{ color: '#94a3b8' }}>
           Showing {filtered.length} of {numbers.length} entries across {groupedEntries.length} {groupedEntries.length === 1 ? 'website' : 'websites'}
         </p>
       )}
