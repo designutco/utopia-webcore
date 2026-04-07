@@ -191,14 +191,14 @@ export default function PhoneNumbersPage() {
                   </svg>
                   <span className="text-sm font-semibold break-all" style={{ color: 'var(--foreground)' }}>{website}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap" style={{ background: 'var(--primary)', color: 'white' }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap" style={{ background: 'var(--primary)', color: 'white' }}>
                     {rows.length} {rows.length === 1 ? 'number' : 'numbers'}
                   </span>
                   <Link
                     href={`/phone-numbers/new?website=${encodeURIComponent(website)}`}
-                    className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-white transition-opacity hover:opacity-90 whitespace-nowrap"
-                    style={{ background: 'var(--primary)' }}
+                    className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium px-2.5 py-1 rounded-full text-white transition-opacity hover:opacity-90 whitespace-nowrap"
+                    style={{ background: '#475569' }}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />

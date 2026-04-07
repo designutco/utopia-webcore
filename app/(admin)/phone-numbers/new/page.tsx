@@ -265,31 +265,31 @@ export default function NewPhoneNumberPage() {
 
             {/* Info boxes */}
             <div className="grid grid-cols-2 gap-3 px-5 pb-5" style={{ background: 'white' }}>
-              <div className="rounded-lg border p-3" style={{ background: 'rgba(251,146,60,0.1)', borderColor: 'rgba(251,146,60,0.25)' }}>
+              <div className="rounded-lg border p-3" style={{ background: '#fff7ed', borderColor: '#fed7aa' }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <svg className="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                   </svg>
-                  <span className="text-xs font-semibold text-orange-400">Important</span>
+                  <span className="text-xs font-semibold text-orange-700">Important</span>
                 </div>
                 <ul className="space-y-1">
                   {['Domain must match exactly', 'Include country code (60…)', 'No spaces or dashes in number'].map(t => (
-                    <li key={t} className="text-xs text-orange-300 flex items-start gap-1">
+                    <li key={t} className="text-xs text-orange-700 flex items-start gap-1">
                       <span className="mt-0.5">•</span>{t}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="rounded-lg border p-3" style={{ background: 'rgba(22,163,106,0.1)', borderColor: 'rgba(22,163,106,0.25)' }}>
+              <div className="rounded-lg border p-3" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-xs font-semibold text-green-400">How rotation works</span>
+                  <span className="text-xs font-semibold text-green-700">How rotation works</span>
                 </div>
                 <ul className="space-y-1">
                   {['Add multiple numbers per location', 'One is picked at random per click', 'Toggle active to pause a number'].map(t => (
-                    <li key={t} className="text-xs text-green-300 flex items-start gap-1">
+                    <li key={t} className="text-xs text-green-700 flex items-start gap-1">
                       <span className="mt-0.5">•</span>{t}
                     </li>
                   ))}
