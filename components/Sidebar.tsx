@@ -16,9 +16,7 @@ const navItems = [
   {
     href: '/websites',
     label: 'Websites',
-    color: '#818cf8',
     icon: (
-      // Monitor with browser window
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="1.8"/>
         <path strokeWidth="1.8" strokeLinecap="round" d="M2 7h20"/>
@@ -32,9 +30,7 @@ const navItems = [
   {
     href: '/phone-numbers',
     label: 'Phone Numbers',
-    color: '#34d399',
     icon: (
-      // Chat bubble with phone - WhatsApp style
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.5 10.5c.3.6.8 1.2 1.4 1.7.6.5 1.2.9 1.9 1.1l.7-.7a.5.5 0 01.5-.1l1.3.5a.5.5 0 01.3.5v1a.5.5 0 01-.5.5C11.5 15 8.5 12 8.5 8.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.3l.5 1.3a.5.5 0 01-.1.5l-.9.9z" />
@@ -44,9 +40,7 @@ const navItems = [
   {
     href: '/blog',
     label: 'Blog Posts',
-    color: '#f472b6',
     icon: (
-      // Pen writing on paper
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         <path strokeLinecap="round" strokeWidth={1.8} d="M7 13h3M7 9h7"/>
@@ -91,7 +85,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Logo icon */}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #818cf8, #f472b6)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0a1a3a, #1565c0, #2196f3)' }}>
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/>
               </svg>
@@ -133,12 +127,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
               onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)' }}
               onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
-              <span
-                className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: active ? item.color : `${item.color}33`, color: active ? '#ffffff' : item.color }}
-              >
-                {item.icon}
-              </span>
+              {item.icon}
               {item.label}
             </Link>
           )
@@ -148,19 +137,19 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
       {/* Footer */}
       <div className="px-3 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="px-3 mb-3 flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #818cf8, #f472b6)' }}>
+          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0a1a3a, #1565c0, #2196f3)' }}>
             {userEmail[0]?.toUpperCase()}
           </div>
           <p className="text-xs truncate" style={{ color: 'var(--sidebar-muted)' }}>{userEmail}</p>
         </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 sm:gap-3 w-full px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors"
           style={{ color: 'var(--sidebar-text)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)'; (e.currentTarget as HTMLElement).style.color = '#ffffff' }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--sidebar-text)' }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
           Sign out

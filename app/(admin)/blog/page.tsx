@@ -92,17 +92,17 @@ export default function BlogListPage() {
           New Post
         </Link>
       </div>
-      <p className="text-sm mb-6" style={{ color: '#475569' }}>Create and manage blog content across all websites.</p>
+      <p className="text-sm mb-6" style={{ color: '#94a3b8' }}>Create and manage blog content across all websites.</p>
 
       {/* Info strip */}
-      <div className="rounded-lg border px-4 py-3 mb-6 text-sm" style={{ borderColor: 'var(--border)', background: '#fafafa', color: '#475569' }}>
+      <div className="rounded-lg border px-4 py-3 mb-6 text-sm" style={{ borderColor: 'var(--border)', background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>
         Click <strong style={{ color: 'var(--foreground)' }}>Edit</strong> to open the full post editor. Published posts are visible on the website immediately.
       </div>
 
       {/* Search + filters */}
       <div className="flex flex-wrap gap-4 mb-5 items-end">
         <div className="flex-1 min-w-56">
-          <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Search</label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Search</label>
           <div className="relative">
             <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -113,7 +113,7 @@ export default function BlogListPage() {
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by title, website, or slug…"
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none"
-              style={{ borderColor: 'var(--border)', background: 'white' }}
+              style={{ borderColor: 'var(--border)', background: '#253347' }}
               onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
               onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
             />
@@ -139,7 +139,7 @@ export default function BlogListPage() {
           <button
             onClick={() => { setFilterWebsite(''); setFilterStatus(''); setSearch('') }}
             className="py-2 px-3 text-sm rounded-lg border transition-colors"
-            style={{ borderColor: 'var(--border)', color: '#475569', background: 'white' }}
+            style={{ borderColor: 'var(--border)', color: '#94a3b8', background: '#253347' }}
           >
             Clear
           </button>
@@ -147,7 +147,7 @@ export default function BlogListPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'var(--border)', background: 'white' }}>
+      <div className="rounded-xl overflow-hidden border" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
         {loading ? (
           <div className="p-12 text-center text-sm" style={{ color: '#94a3b8' }}>Loading…</div>
         ) : filtered.length === 0 ? (
@@ -159,9 +159,9 @@ export default function BlogListPage() {
           <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[700px]">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', background: '#f1f5f9' }}>
+              <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.06)' }}>
                 {['Title', 'Website', 'Slug', 'Status', 'Published', 'Updated', ''].map((h, i) => (
-                  <th key={i} className="px-5 py-3.5 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>{h}</th>
+                  <th key={i} className="px-5 py-3.5 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#94a3b8' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -170,7 +170,7 @@ export default function BlogListPage() {
                 <tr
                   key={post.id}
                   style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f1f5f9'}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                 >
                   <td className="px-5 py-3.5 align-middle max-w-xs">
@@ -187,14 +187,14 @@ export default function BlogListPage() {
                       <p className="text-xs mt-0.5 truncate" style={{ color: '#94a3b8' }}>{post.excerpt}</p>
                     )}
                   </td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{post.website}</td>
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#94a3b8' }}>{post.website}</td>
                   <td className="px-5 py-3.5 align-middle font-mono text-xs" style={{ color: '#94a3b8' }}>{post.slug}</td>
                   <td className="px-5 py-3.5 align-middle">
                     <span
                       className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap"
                       style={post.status === 'published'
-                        ? { background: '#dcfce7', color: '#16a34a' }
-                        : { background: '#f1f5f9', color: '#64748b' }
+                        ? { background: 'rgba(22,163,106,0.15)', color: '#34d399' }
+                        : { background: 'rgba(255,255,255,0.08)', color: '#94a3b8' }
                       }
                     >
                       {post.status === 'published' ? (
@@ -209,16 +209,16 @@ export default function BlogListPage() {
                       {post.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{formatDate(post.published_at)}</td>
-                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#475569' }}>{formatDate(post.updated_at)}</td>
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#94a3b8' }}>{formatDate(post.published_at)}</td>
+                  <td className="px-5 py-3.5 align-middle whitespace-nowrap" style={{ color: '#94a3b8' }}>{formatDate(post.updated_at)}</td>
                   <td className="px-5 py-3.5 align-middle">
                     <div className="flex items-center gap-1 justify-end">
                       <button
                         onClick={() => router.push(`/blog/${post.id}/edit`)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors"
-                        style={{ borderColor: 'var(--border)', color: '#475569' }}
+                        style={{ borderColor: 'var(--border)', color: '#94a3b8' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = '#475569' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = '#94a3b8' }}
                         title="Edit"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,9 +229,9 @@ export default function BlogListPage() {
                         onClick={() => deletePost(post.id, post.title)}
                         disabled={deleting === post.id}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border transition-colors disabled:opacity-50"
-                        style={{ borderColor: 'var(--border)', color: '#475569' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#fca5a5'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = '#fef2f2' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = '#475569'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                        style={{ borderColor: 'var(--border)', color: '#94a3b8' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(239,68,68,0.3)'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = '#94a3b8'; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
                         title="Delete"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

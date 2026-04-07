@@ -10,14 +10,14 @@ export default async function DashboardPage() {
   ])
 
   const stats = [
-    { label: 'Phone Numbers', value: phoneCount ?? 0, href: '/phone-numbers', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    { label: 'Blog Posts', value: postCount ?? 0, href: '/blog', color: 'bg-green-50 text-green-700 border-green-200' },
+    { label: 'Phone Numbers', value: phoneCount ?? 0, href: '/phone-numbers', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+    { label: 'Blog Posts', value: postCount ?? 0, href: '/blog', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
   ]
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Dashboard</h1>
-      <p className="text-sm text-slate-500 mb-8">Manage phone numbers and blog content across all websites.</p>
+      <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
+      <p className="text-sm text-slate-400 mb-8">Manage phone numbers and blog content across all websites.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-lg">
         {stats.map(stat => (

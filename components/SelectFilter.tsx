@@ -10,7 +10,7 @@ interface SelectFilterProps {
 export default function SelectFilter({ label, value, onChange, options }: SelectFilterProps) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>{label}</label>
+      <label className="block text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>{label}</label>
       <div className="relative inline-block">
         <select
           value={value}
@@ -21,8 +21,8 @@ export default function SelectFilter({ label, value, onChange, options }: Select
             WebkitAppearance: 'none',
             MozAppearance: 'none',
             borderColor: 'var(--border)',
-            background: 'white',
-            color: '#475569',
+            background: '#253347',
+            color: '#94a3b8',
             paddingTop: '0.5rem',
             paddingBottom: '0.5rem',
             paddingLeft: '0.75rem',
