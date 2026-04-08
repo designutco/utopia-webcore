@@ -664,11 +664,15 @@ export default function PhoneNumbersPage() {
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
-        <p className="mt-3 text-xs" style={{ color: '#475569' }}>
-          Showing {filtered.length} of {numbers.length} entries across {groupedEntries.length} {groupedEntries.length === 1 ? 'website' : 'websites'}
-        </p>
-      )}
+      {!loading && visibleEntries.length > 0 && (() => {
+        const visibleNumbers = visibleEntries.flatMap(([, { websites }]) => websites.flatMap(([, rows]) => rows))
+        const visibleWebsiteCount = visibleEntries.reduce((s, [, { websites }]) => s + websites.length, 0)
+        return (
+          <p className="mt-3 text-xs" style={{ color: '#475569' }}>
+            {visibleNumbers.length} {visibleNumbers.length === 1 ? 'number' : 'numbers'} across {visibleWebsiteCount} {visibleWebsiteCount === 1 ? 'website' : 'websites'}
+          </p>
+        )
+      })()}
     </div>
   )
 }
