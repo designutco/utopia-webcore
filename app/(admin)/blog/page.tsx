@@ -33,8 +33,11 @@ export default function BlogListPage() {
   const router = useRouter()
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
+  const openCompany = searchParams.get('company') ?? ''
   const openFolder = searchParams.get('website') ?? ''
 
+  interface CompanyInfo { id: string; name: string; company_websites: { domain: string }[] }
+  const [companies, setCompanies] = useState<CompanyInfo[]>([])
   const [websites, setWebsites] = useState<WebsiteSummary[]>([])
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,15 +46,16 @@ export default function BlogListPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid')
 
-  // Fetch websites
+  // Fetch websites and companies
   useEffect(() => {
-    fetch('/api/websites')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data)) setWebsites(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/websites').then(r => r.json()),
+      fetch('/api/companies').then(r => r.json()),
+    ]).then(([sitesData, companiesData]) => {
+      if (Array.isArray(sitesData)) setWebsites(sitesData)
+      if (Array.isArray(companiesData)) setCompanies(companiesData)
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   // Fetch posts when a folder is open
@@ -80,100 +84,124 @@ export default function BlogListPage() {
     return p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q) || (p.excerpt ?? '').toLowerCase().includes(q)
   })
 
-  // Folder view (no folder selected)
-  if (!openFolder) {
+  // Company folder view (no company or website selected)
+  if (!openCompany && !openFolder) {
+    const companyStats = companies.map(c => {
+      const domains = c.company_websites.map(w => w.domain)
+      const companySites = websites.filter(s => domains.includes(s.domain))
+      return { ...c, blog_count: companySites.reduce((s, x) => s + x.blog_count, 0), published_count: companySites.reduce((s, x) => s + x.published_blog_count, 0) }
+    })
+    const filtered = search ? companyStats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : companyStats
+
     return (
       <div>
         <div className="sm:flex sm:items-center sm:justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Blog Posts</h1>
-            <p className="text-xs sm:text-sm mt-1" style={{ color: '#475569' }}>Select a website folder to manage its blog posts.</p>
+            <p className="text-xs sm:text-sm mt-1" style={{ color: '#475569' }}>Select a company to manage its blog posts.</p>
           </div>
-          <Link
-            href="/blog/new"
-            className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity mt-3 sm:mt-0 sm:flex-shrink-0"
-            style={{ background: 'var(--primary)' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+          <Link href="/blog/new" className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity mt-3 sm:mt-0" style={{ background: 'var(--primary)' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             New Post
           </Link>
         </div>
-
+        <div className="mb-5">
+          <div className="relative max-w-sm">
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#475569' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search companies…"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none" style={{ borderColor: '#cbd5e1', background: 'white' }}
+              onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'} onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'} />
+          </div>
+        </div>
         {loading ? (
           <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
-        ) : websites.length === 0 ? (
-          <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>
-            No websites found. Add a phone number first to register a website.
-          </div>
-        ) : (() => {
-          // Group by company
-          const companyGroups: Record<string, { name: string; sites: WebsiteSummary[] }> = {}
-          websites.forEach(site => {
-            const key = site.company_name ?? 'Unassigned'
-            if (!companyGroups[key]) companyGroups[key] = { name: key, sites: [] }
-            companyGroups[key].sites.push(site)
-          })
-          const entries = Object.entries(companyGroups).sort(([a], [b]) => {
-            if (a === 'Unassigned') return 1
-            if (b === 'Unassigned') return -1
-            return a.localeCompare(b)
-          })
-          return (
-          <div className="space-y-6">
-            {entries.map(([companyName, { sites: companySites }]) => (
-              <div key={companyName}>
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: companyName === 'Unassigned' ? '#94a3b8' : 'var(--primary)' }} strokeWidth="1.8">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map(c => (
+              <Link key={c.id} href={`/blog?company=${encodeURIComponent(c.name)}`}
+                className="group block rounded-xl border bg-white p-5 hover:shadow-sm transition-all hover:border-slate-300" style={{ borderColor: '#e2e8f0' }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }} strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{c.name}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px]" style={{ color: '#475569' }}>{c.blog_count} {c.blog_count === 1 ? 'post' : 'posts'}</span>
+                      {c.published_count > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>{c.published_count} live</span>}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
-                  <h2 className="text-sm font-semibold" style={{ color: companyName === 'Unassigned' ? '#94a3b8' : 'var(--foreground)' }}>{companyName}</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {companySites.map(site => (
-                    <Link
-                      key={site.domain}
-                      href={`/blog?website=${encodeURIComponent(site.domain)}`}
-                      className="group block rounded-xl border bg-white p-5 hover:shadow-sm transition-all hover:border-slate-300"
-                      style={{ borderColor: '#e2e8f0' }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }} strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                          </svg>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{site.domain}</p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-xs" style={{ color: '#475569' }}>{site.blog_count} {site.blog_count === 1 ? 'post' : 'posts'}</span>
-                            {site.published_blog_count > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>
-                                {site.published_blog_count} live
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
-          )
-        })()}
+        )}
       </div>
     )
   }
 
-  // Inside a folder
+  // Website folder view (company selected, no website)
+  if (openCompany && !openFolder) {
+    const companyDomains = new Set(companies.find(c => c.name === openCompany)?.company_websites.map(w => w.domain) ?? [])
+    const companySites = websites.filter(s => companyDomains.has(s.domain))
+
+    return (
+      <div>
+        <div className="sm:flex sm:items-center sm:justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <Link href="/blog" className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+              <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </Link>
+            <div>
+              <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>{openCompany}</h1>
+              <p className="text-xs" style={{ color: '#94a3b8' }}>Select a website to manage its blog posts</p>
+            </div>
+          </div>
+          <Link href="/blog/new" className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity mt-3 sm:mt-0" style={{ background: 'var(--primary)' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            New Post
+          </Link>
+        </div>
+        {loading ? (
+          <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
+        ) : companySites.length === 0 ? (
+          <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>No websites found for this company.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {companySites.map(site => (
+              <Link key={site.domain} href={`/blog?website=${encodeURIComponent(site.domain)}`}
+                className="group block rounded-xl border bg-white p-5 hover:shadow-sm transition-all hover:border-slate-300" style={{ borderColor: '#e2e8f0' }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }} strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{site.domain}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-xs" style={{ color: '#475569' }}>{site.blog_count} {site.blog_count === 1 ? 'post' : 'posts'}</span>
+                      {site.published_blog_count > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>{site.published_blog_count} live</span>}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Inside a website folder — show posts
   return (
     <div>
       {/* Header with back button */}
