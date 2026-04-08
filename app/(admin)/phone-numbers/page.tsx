@@ -112,7 +112,7 @@ export default function PhoneNumbersPage() {
           Add Number
         </Link>
       </div>
-      <p className="text-sm mb-6" style={{ color: '#475569' }}>Manage phone numbers per website and location. Multiple numbers rotate randomly on each WhatsApp click.</p>
+      <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Manage phone numbers per website and location. Multiple numbers rotate randomly on each WhatsApp click.</p>
 
       {/* Search + website filter */}
       <div className="rounded-xl border p-4 sm:p-5" style={{ borderColor: '#cbd5e1', background: '#f8fafc' }}>
@@ -242,10 +242,10 @@ export default function PhoneNumbersPage() {
                   </colgroup>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                      <th className="px-3 sm:px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Details</th>
+                      <th className="px-3 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Details</th>
                       <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>%</th>
                       <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
-                      <th className="px-2 sm:px-4 py-3 text-right text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
+                      <th className="px-2 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -133,7 +133,7 @@ export default function NewPhoneNumberPage() {
     <div className="min-h-[calc(100vh-8rem)] flex flex-col justify-center">
       <div className="max-w-xl mx-auto w-full">
         <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Add Phone Number</h1>
-        <p className="text-sm mb-6" style={{ color: '#475569' }}>Add a new number to the rotation pool for a website and location.</p>
+        <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Add a new number to the rotation pool for a website and location.</p>
 
         {/* Main card */}
         <div className="rounded-xl border overflow-hidden" style={{ borderColor: '#cbd5e1' }}>

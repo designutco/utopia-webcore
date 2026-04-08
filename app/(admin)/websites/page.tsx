@@ -28,7 +28,7 @@ export default function WebsitesPage() {
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Websites</h1>
       </div>
-      <p className="text-sm mb-6" style={{ color: '#475569' }}>
+      <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>
         All websites connected to this system. Manage phone numbers and blog content per site.
       </p>
 
@@ -52,7 +52,7 @@ export default function WebsitesPage() {
             <thead>
               <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f1f5f9' }}>
                 {['Website', 'Phone Numbers', 'Active Numbers', 'Blog Posts', 'Published Posts', ''].map((h, i) => (
-                  <th key={i} className="px-5 py-3.5 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>{h}</th>
+                  <th key={i} className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>{h}</th>
                 ))}
               </tr>
             </thead>

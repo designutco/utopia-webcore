@@ -98,7 +98,7 @@ export default function BlogListPage() {
             New Post
           </Link>
         </div>
-        <p className="text-sm mb-6" style={{ color: '#475569' }}>Select a website folder to manage its blog posts.</p>
+        <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Select a website folder to manage its blog posts.</p>
 
         {loading ? (
           <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
@@ -310,10 +310,10 @@ export default function BlogListPage() {
             </colgroup>
             <thead>
               <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                <th className="px-3 sm:px-4 py-3 text-left text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Post</th>
+                <th className="px-3 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Post</th>
                 <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
                 <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Updated</th>
-                <th className="px-2 sm:px-4 py-3 text-right text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
+                <th className="px-2 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
