@@ -347,43 +347,26 @@ export default function PhoneNumbersPage() {
                       {isGroupEditing ? (() => {
                         const existingTexts = [...new Set(rows.map(r => r.whatsapp_text).filter(Boolean).filter(t => t !== (vals?.whatsapp_text ?? '')))]
                         return (
-                        /* Editing row */
-                        <div className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-end gap-2" style={{ background: 'white' }}>
-                          {/* Left: Phone + Label row, then WA text */}
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-center gap-2">
-                              {isDefault ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
-                              ) : (
-                                <span className="text-[10px]" style={{ color: '#94a3b8' }}>Custom</span>
-                              )}
+                        /* Editing row — all fields in one row */
+                        <div className="px-4 sm:px-5 py-3" style={{ background: 'white' }}>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            {isDefault ? (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
+                            ) : row.label ? (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
+                            ) : null}
+                          </div>
+                          <div className="flex items-end gap-2">
+                            <div className="w-36 sm:w-40 flex-shrink-0">
+                              <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>Phone</label>
+                              <input
+                                className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono"
+                                style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.phone_number ?? ''}
+                                onChange={e => updateEditRow(row.id, { phone_number: e.target.value })}
+                              />
                             </div>
-                            {/* Phone + Label in one row */}
-                            <div className="flex gap-2">
-                              <div className="flex-1">
-                                <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>Phone</label>
-                                <input
-                                  className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
-                                  style={{ borderColor: '#e2e8f0' }}
-                                  value={vals?.phone_number ?? ''}
-                                  onChange={e => updateEditRow(row.id, { phone_number: e.target.value })}
-                                />
-                              </div>
-                              {!isDefault && (
-                                <div className="w-28">
-                                  <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>Label</label>
-                                  <input
-                                    className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
-                                    style={{ borderColor: '#e2e8f0' }}
-                                    value={vals?.label ?? ''}
-                                    placeholder="Agent A"
-                                    onChange={e => updateEditRow(row.id, { label: e.target.value })}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                            {/* WhatsApp text + suggestions */}
-                            <div>
+                            <div className="flex-1 min-w-0">
                               <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
                               <input
                                 className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
@@ -391,30 +374,12 @@ export default function PhoneNumbersPage() {
                                 value={vals?.whatsapp_text ?? ''}
                                 onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
                               />
-                              {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {existingTexts.slice(0, 3).map((text, ti) => (
-                                    <button
-                                      key={ti}
-                                      type="button"
-                                      onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
-                                      className="text-[10px] px-2 py-0.5 rounded-full border truncate max-w-[200px] transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)] hover:bg-blue-50 cursor-pointer"
-                                      style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}
-                                    >
-                                      {text}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
                             </div>
-                          </div>
-                          {/* Right: % + Active */}
-                          <div className="flex items-end gap-2 flex-shrink-0 sm:ml-auto">
-                            <div>
-                              <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>%</label>
+                            <div className="w-14 flex-shrink-0">
+                              <label className="block text-[10px] mb-1 text-center" style={{ color: '#94a3b8' }}>%</label>
                               <input
                                 type="number" min="0" max="100"
-                                className="px-2.5 py-1.5 border rounded-lg text-xs w-16 outline-none focus:border-[var(--primary)] transition-colors text-center"
+                                className="px-1 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors text-center"
                                 style={{ borderColor: '#e2e8f0' }}
                                 value={vals?.percentage ?? 100}
                                 onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)}
@@ -436,6 +401,27 @@ export default function PhoneNumbersPage() {
                               )}
                             </button>
                           </div>
+                          {/* WA text suggestions */}
+                          {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-[10px] flex-shrink-0" style={{ color: '#94a3b8' }}>Use:</span>
+                              <div className="flex gap-1.5 overflow-x-auto">
+                                {existingTexts.slice(0, 3).map((text, ti) => (
+                                  <button
+                                    key={ti}
+                                    type="button"
+                                    onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
+                                    className="text-[10px] px-2.5 py-1 rounded-md truncate max-w-[180px] transition-all cursor-pointer flex-shrink-0"
+                                    style={{ background: '#f1f5f9', color: 'var(--primary)' }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f1f5f9'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}
+                                  >
+                                    {text}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )})() : (
                         /* View row */
