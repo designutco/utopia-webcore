@@ -253,6 +253,7 @@ export default function PhoneNumbersPage() {
                   </thead>
                   <tbody>
                     {rows.map((row, i) => {
+                      const isDefault = row.product_slug === 'default' && row.location_slug === 'all' && !row.label
                       return (
                       <tr
                         key={row.id}
@@ -277,22 +278,28 @@ export default function PhoneNumbersPage() {
                               placeholder="WhatsApp text"
                               onChange={e => setEditValues(v => ({ ...v, whatsapp_text: e.target.value }))}
                             />
-                            <input
-                              className="px-2 py-1 border rounded text-sm w-full outline-none focus:ring-2"
-                              style={{ borderColor: '#cbd5e1', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
-                              value={editValues.label ?? ''}
-                              placeholder="Label (optional)"
-                              onChange={e => setEditValues(v => ({ ...v, label: e.target.value }))}
-                            />
+                            {!isDefault && (
+                              <input
+                                className="px-2 py-1 border rounded text-sm w-full outline-none focus:ring-2"
+                                style={{ borderColor: '#cbd5e1', ['--tw-ring-color' as string]: 'rgba(30, 58, 95, 0.2)' }}
+                                value={editValues.label ?? ''}
+                                placeholder="Label (optional)"
+                                onChange={e => setEditValues(v => ({ ...v, label: e.target.value }))}
+                              />
+                            )}
                           </div>
                         ) : (
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 min-w-0">
                               <span className="text-xs sm:text-sm font-medium font-mono truncate" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
-                              {row.label && <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>}
+                              {isDefault ? (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
+                              ) : row.label ? (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
+                              ) : null}
                             </div>
                             {row.whatsapp_text && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
-                            <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>{row.location_slug}</p>
+                            {!isDefault && <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>{row.location_slug}</p>}
                           </div>
                         )}
                       </td>
