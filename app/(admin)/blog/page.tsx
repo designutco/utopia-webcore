@@ -15,6 +15,7 @@ interface Post {
   created_at: string
   updated_at: string
   excerpt: string | null
+  languages: string[]
 }
 
 interface WebsiteSummary {
@@ -336,6 +337,16 @@ export default function BlogListPage() {
                 </button>
               </div>
               <h3 className="text-sm font-medium truncate mb-1" style={{ color: 'var(--foreground)' }}>{post.title}</h3>
+              {post.languages?.length > 0 && (
+                <div className="flex gap-1 mb-1">
+                  {['en', 'ms', 'zh'].map(lang => (
+                    <span key={lang} className="text-[9px] px-1.5 py-0.5 rounded font-medium uppercase"
+                      style={post.languages.includes(lang) ? { background: '#e0ecf5', color: '#1e3a5f' } : { background: '#f1f5f9', color: '#cbd5e1' }}>
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              )}
               {post.excerpt && <p className="text-xs truncate mb-2" style={{ color: '#475569' }}>{post.excerpt}</p>}
               <div className="flex items-center justify-between">
                 <p className="text-[10px]" style={{ color: '#94a3b8' }}>/{post.slug}</p>
@@ -379,6 +390,16 @@ export default function BlogListPage() {
                   <td className="px-3 sm:px-4 py-3 align-middle overflow-hidden">
                     <div className="min-w-0">
                       <Link href={`/blog/${post.id}/edit`} className="text-xs sm:text-sm font-medium hover:underline truncate block" style={{ color: 'var(--foreground)' }}>{post.title}</Link>
+                      {post.languages?.length > 0 && (
+                        <div className="flex gap-1 mt-0.5">
+                          {['en', 'ms', 'zh'].map(lang => (
+                            <span key={lang} className="text-[9px] px-1 py-0.5 rounded font-medium uppercase"
+                              style={post.languages.includes(lang) ? { background: '#e0ecf5', color: '#1e3a5f' } : { background: '#f1f5f9', color: '#cbd5e1' }}>
+                              {lang}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {post.excerpt && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{post.excerpt}</p>}
                       <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>/{post.slug}</p>
                     </div>

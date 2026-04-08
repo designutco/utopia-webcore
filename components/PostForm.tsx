@@ -7,115 +7,139 @@ import RichTextEditor from '@/components/RichTextEditor'
 
 interface PostFormProps {
   mode: 'new' | 'edit'
-  initialData?: Partial<PostValues>
+  initialData?: Record<string, unknown>
   postId?: string
 }
 
-interface PostValues {
-  website: string
+interface Translation {
+  language: string
   title: string
-  slug: string
   content: string
   excerpt: string
-  cover_image_url: string
   meta_title: string
   meta_description: string
-  status: 'draft' | 'published'
+}
+
+const LANGUAGES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'ms', label: 'Malay', flag: '🇲🇾' },
+  { code: 'zh', label: 'Chinese', flag: '🇨🇳' },
+]
+
+const EMPTY_TRANSLATION: Translation = {
+  language: '',
+  title: '',
+  content: '',
+  excerpt: '',
+  meta_title: '',
+  meta_description: '',
 }
 
 function toSlug(str: string) {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-}
-
-const EMPTY: PostValues = {
-  website: '',
-  title: '',
-  slug: '',
-  content: '',
-  excerpt: '',
-  cover_image_url: '',
-  meta_title: '',
-  meta_description: '',
-  status: 'draft',
-}
-
-function SectionHeader({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <div className="flex items-start gap-3 mb-4">
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: '#f1f5f9' }}>
-        {icon}
-      </div>
-      <div>
-        <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
-        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
-      </div>
-    </div>
-  )
+  return str.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
 }
 
 export default function PostForm({ mode, initialData = {}, postId }: PostFormProps) {
   const router = useRouter()
-  const [form, setForm] = useState<PostValues>({ ...EMPTY, ...initialData })
+
+  const [website, setWebsite] = useState((initialData.website as string) ?? '')
+  const [slug, setSlug] = useState((initialData.slug as string) ?? '')
+  const [coverImageUrl, setCoverImageUrl] = useState((initialData.cover_image_url as string) ?? '')
+  const [status, setStatus] = useState<'draft' | 'published'>((initialData.status as 'draft' | 'published') ?? 'draft')
   const [slugLocked, setSlugLocked] = useState(mode === 'edit')
+
+  const [activeLang, setActiveLang] = useState('en')
+  const [translations, setTranslations] = useState<Record<string, Translation>>({
+    en: { ...EMPTY_TRANSLATION, language: 'en' },
+    ms: { ...EMPTY_TRANSLATION, language: 'ms' },
+    zh: { ...EMPTY_TRANSLATION, language: 'zh' },
+  })
+
+  const [companies, setCompanies] = useState<{ id: string; name: string; company_websites: { domain: string }[] }[]>([])
+  const [selectedCompany, setSelectedCompany] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState('')
   const [saved, setSaved] = useState(false)
-  const [companies, setCompanies] = useState<{ id: string; name: string; company_websites: { domain: string }[] }[]>([])
-  const [selectedCompany, setSelectedCompany] = useState('')
 
-  // Fetch companies for dropdown
+  // Fetch companies
   useEffect(() => {
-    fetch('/api/companies')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setCompanies(data)
-          // Auto-select company if website is prefilled
-          if (form.website) {
-            const match = data.find((c: { company_websites: { domain: string }[] }) =>
-              c.company_websites.some((w: { domain: string }) => w.domain === form.website)
-            )
-            if (match) setSelectedCompany(match.id)
-          }
+    fetch('/api/companies').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) {
+        setCompanies(data)
+        if (website) {
+          const match = data.find((c: { company_websites: { domain: string }[] }) =>
+            c.company_websites.some((w: { domain: string }) => w.domain === website))
+          if (match) setSelectedCompany(match.id)
         }
-      })
-      .catch(() => {})
+      }
+    }).catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const companyWebsites = companies.find(c => c.id === selectedCompany)?.company_websites ?? []
+  // Load existing post data in edit mode
+  useEffect(() => {
+    if (mode === 'edit' && postId) {
+      fetch(`/api/blog/${postId}`).then(r => r.json()).then(data => {
+        if (data.id) {
+          setWebsite(data.website ?? '')
+          setSlug(data.slug ?? '')
+          setCoverImageUrl(data.cover_image_url ?? '')
+          setStatus(data.status ?? 'draft')
+          if (Array.isArray(data.blog_translations)) {
+            const map: Record<string, Translation> = {
+              en: { ...EMPTY_TRANSLATION, language: 'en' },
+              ms: { ...EMPTY_TRANSLATION, language: 'ms' },
+              zh: { ...EMPTY_TRANSLATION, language: 'zh' },
+            }
+            data.blog_translations.forEach((t: Translation) => {
+              map[t.language] = t
+            })
+            setTranslations(map)
+          }
+        }
+      })
+    }
+  }, [mode, postId])
 
+  // Auto-slug from English title
   useEffect(() => {
     if (mode === 'new' && !slugLocked) {
-      setForm(f => ({ ...f, slug: toSlug(f.title) }))
+      setSlug(toSlug(translations.en.title))
     }
-  }, [form.title, mode, slugLocked])
+  }, [translations.en.title, mode, slugLocked])
+
+  const companyWebsites = companies.find(c => c.id === selectedCompany)?.company_websites ?? []
+  const t = translations[activeLang]
+
+  function updateTranslation(lang: string, updates: Partial<Translation>) {
+    setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], ...updates } }))
+  }
 
   function validate() {
     const e: Record<string, string> = {}
-    if (!form.website.trim()) e.website = 'Website is required'
-    if (!form.title.trim()) e.title = 'Title is required'
-    if (!form.slug.trim()) e.slug = 'Slug is required'
+    if (!website) e.website = 'Please select a website'
+    if (!slug.trim()) e.slug = 'Slug is required'
+    if (!translations.en.title.trim()) e.title = 'English title is required'
     return e
   }
 
-  async function handleSave(status?: 'draft' | 'published') {
+  async function handleSave(newStatus?: 'draft' | 'published') {
     const errs = validate()
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
-    const payload = { ...form, slug: toSlug(form.slug) }
-    if (status) payload.status = status
-
     setSaving(true)
     setServerError('')
     setSaved(false)
+
+    const payload = {
+      website,
+      slug: toSlug(slug),
+      cover_image_url: coverImageUrl || null,
+      status: newStatus ?? status,
+      translations: Object.values(translations).filter(t => t.title.trim()),
+    }
 
     const url = mode === 'edit' ? `/api/blog/${postId}` : '/api/blog'
     const method = mode === 'edit' ? 'PATCH' : 'POST'
@@ -131,19 +155,13 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
     if (res.ok) {
       const data = await res.json()
       setSaved(true)
-      if (mode === 'new') {
-        router.push(`/blog/${data.id}/edit`)
-      } else {
-        setForm(f => ({ ...f, status: data.status }))
-      }
+      if (newStatus) setStatus(newStatus)
+      if (mode === 'new') router.push(`/blog/${data.id}/edit`)
     } else {
       const d = await res.json()
       setServerError(d.error ?? 'Save failed')
     }
   }
-
-  const inputClass = (hasError: boolean, extra = '') =>
-    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors ${hasError ? 'border-red-400' : 'border-slate-200'} ${extra}`
 
   return (
     <div>
@@ -151,39 +169,26 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <Link href="/blog" className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
-            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{mode === 'new' ? 'New Post' : 'Edit Post'}</h1>
+            <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>{mode === 'new' ? 'New Post' : 'Edit Post'}</h1>
             {mode === 'edit' && (
-              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                form.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-              }`}>
-                {form.status}
+              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                {status}
               </span>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="text-xs text-green-600 font-medium">Saved</span>}
-          <button
-            type="button"
-            onClick={() => handleSave('draft')}
-            disabled={saving}
-            className="px-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-          >
+          <button type="button" onClick={() => handleSave('draft')} disabled={saving}
+            className="px-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors">
             Save Draft
           </button>
-          <button
-            type="button"
-            onClick={() => handleSave(form.status === 'published' ? 'draft' : 'published')}
-            disabled={saving}
-            className="px-3 py-2 text-xs text-white font-medium rounded-lg disabled:opacity-50 transition-colors"
-            style={{ background: 'var(--primary)' }}
-          >
-            {saving ? 'Saving…' : form.status === 'published' ? 'Unpublish' : 'Publish'}
+          <button type="button" onClick={() => handleSave(status === 'published' ? 'draft' : 'published')} disabled={saving}
+            className="px-3 py-2 text-xs text-white font-medium rounded-lg disabled:opacity-50 transition-colors" style={{ background: 'var(--primary)' }}>
+            {saving ? 'Saving…' : status === 'published' ? 'Unpublish' : 'Publish'}
           </button>
         </div>
       </div>
@@ -195,184 +200,153 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-5">
-          {/* Post info */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <SectionHeader
-              icon={<svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>}
-              title="Post Details"
-              description="Title, URL slug, and summary for this post"
-            />
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Title <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  className={inputClass(!!errors.title)}
-                  placeholder="Post title"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = errors.title ? '#f87171' : '#e2e8f0'}
-                />
-                {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-slate-600">Slug <span className="text-red-500">*</span></label>
-                  {mode === 'edit' && (
-                    <button type="button" onClick={() => setSlugLocked(l => !l)} className="text-[10px] text-blue-600 hover:text-blue-800">
-                      {slugLocked ? 'Edit' : 'Lock'}
-                    </button>
+          {/* Language tabs */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="flex border-b" style={{ borderColor: '#e2e8f0' }}>
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => setActiveLang(lang.code)}
+                  className="flex-1 px-4 py-3 text-xs font-medium transition-colors relative"
+                  style={{
+                    color: activeLang === lang.code ? 'var(--primary)' : '#94a3b8',
+                    background: activeLang === lang.code ? 'white' : '#f8fafc',
+                  }}
+                >
+                  <span className="mr-1">{lang.flag}</span> {lang.label}
+                  {translations[lang.code]?.title && (
+                    <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#16a34a' }} />
                   )}
-                </div>
+                  {activeLang === lang.code && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'var(--primary)' }} />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Title {activeLang === 'en' && <span className="text-red-500">*</span>}
+                </label>
                 <input
                   type="text"
-                  value={form.slug}
-                  readOnly={mode === 'edit' && slugLocked}
-                  onChange={e => { setSlugLocked(true); setForm(f => ({ ...f, slug: e.target.value })) }}
-                  className={inputClass(!!errors.slug, mode === 'edit' && slugLocked ? 'bg-slate-50 text-slate-400' : '')}
-                  placeholder="post-slug"
+                  value={t?.title ?? ''}
+                  onChange={e => updateTranslation(activeLang, { title: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors ${errors.title && activeLang === 'en' ? 'border-red-400' : 'border-slate-200'}`}
+                  placeholder={`Post title in ${LANGUAGES.find(l => l.code === activeLang)?.label}`}
                   onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = errors.slug ? '#f87171' : '#e2e8f0'}
+                  onBlur={e => e.currentTarget.style.borderColor = errors.title && activeLang === 'en' ? '#f87171' : '#e2e8f0'}
                 />
-                {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
+                {errors.title && activeLang === 'en' && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Excerpt</label>
                 <textarea
-                  value={form.excerpt}
-                  onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))}
+                  value={t?.excerpt ?? ''}
+                  onChange={e => updateTranslation(activeLang, { excerpt: e.target.value })}
                   rows={2}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors resize-y"
-                  placeholder="Brief summary shown in blog listings"
+                  placeholder="Brief summary"
                   onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                   onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
                 />
               </div>
-            </div>
-          </div>
 
-          {/* Content Editor */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <SectionHeader
-              icon={<svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
-              title="Content"
-              description="Write your post using the rich text editor. Right-click text to add links."
-            />
-            <RichTextEditor
-              value={form.content}
-              onChange={html => setForm(f => ({ ...f, content: html }))}
-              placeholder="Write your post content…"
-            />
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-2">Content</label>
+                <RichTextEditor
+                  value={t?.content ?? ''}
+                  onChange={html => updateTranslation(activeLang, { content: html })}
+                  placeholder={`Write content in ${LANGUAGES.find(l => l.code === activeLang)?.label}…`}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-5">
-          {/* Website & Cover */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <SectionHeader
-              icon={<svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M2 7h20" strokeLinecap="round" /><path d="M8 21h8M12 17v4" strokeLinecap="round" /></svg>}
-              title="Publishing"
-              description="Choose which site this post belongs to"
-            />
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Company <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <select
-                    value={selectedCompany}
-                    onChange={e => { setSelectedCompany(e.target.value); setForm(f => ({ ...f, website: '' })) }}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors cursor-pointer"
-                    style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-                  >
-                    <option value="">Select company…</option>
-                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </div>
+          {/* Publishing */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+            <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Publishing</h2>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+              <select value={selectedCompany} onChange={e => { setSelectedCompany(e.target.value); setWebsite('') }}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors cursor-pointer"
+                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
+                <option value="">Select company…</option>
+                {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Website <span className="text-red-500">*</span></label>
+              <select value={website} onChange={e => setWebsite(e.target.value)} disabled={!selectedCompany}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors cursor-pointer disabled:opacity-50 ${errors.website ? 'border-red-400' : 'border-slate-200'}`}
+                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
+                <option value="">{selectedCompany ? 'Select website…' : 'Select company first'}</option>
+                {companyWebsites.map(w => <option key={w.domain} value={w.domain}>{w.domain}</option>)}
+              </select>
+              {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium text-slate-600">Slug <span className="text-red-500">*</span></label>
+                {mode === 'edit' && (
+                  <button type="button" onClick={() => setSlugLocked(l => !l)} className="text-[10px] text-blue-600 hover:text-blue-800">
+                    {slugLocked ? 'Edit' : 'Lock'}
+                  </button>
+                )}
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Website <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <select
-                    value={form.website}
-                    onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-                    disabled={!selectedCompany}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${errors.website ? 'border-red-400' : 'border-slate-200'}`}
-                    style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = errors.website ? '#f87171' : '#e2e8f0'}
-                  >
-                    <option value="">{selectedCompany ? 'Select website…' : 'Select a company first'}</option>
-                    {companyWebsites.map(w => <option key={w.domain} value={w.domain}>{w.domain}</option>)}
-                  </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                </div>
-                {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
-              </div>
+              <input type="text" value={slug} readOnly={mode === 'edit' && slugLocked}
+                onChange={e => { setSlugLocked(true); setSlug(e.target.value) }}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors ${errors.slug ? 'border-red-400' : 'border-slate-200'} ${mode === 'edit' && slugLocked ? 'bg-slate-50 text-slate-400' : ''}`}
+                placeholder="post-slug" />
+              {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Cover Image URL</label>
+              <input type="url" value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors" placeholder="https://…" />
+            </div>
+            {coverImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={coverImageUrl} alt="Cover" className="w-full h-32 object-cover rounded-lg border border-slate-200" />
+            )}
+          </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Cover Image URL</label>
-                <input
-                  type="url"
-                  value={form.cover_image_url}
-                  onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors"
-                  placeholder="https://…"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-                />
-              </div>
-
-              {form.cover_image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={form.cover_image_url} alt="Cover preview" className="w-full h-32 object-cover rounded-lg border border-slate-200" />
-              )}
+          {/* SEO for active language */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+            <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+              SEO — {LANGUAGES.find(l => l.code === activeLang)?.flag} {LANGUAGES.find(l => l.code === activeLang)?.label}
+            </h2>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Meta Title</label>
+              <input type="text" value={t?.meta_title ?? ''} onChange={e => updateTranslation(activeLang, { meta_title: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors" placeholder="SEO title (50-60 chars)" />
+              <p className="mt-1 text-[10px] text-slate-400">{(t?.meta_title ?? '').length} / 60</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Meta Description</label>
+              <textarea value={t?.meta_description ?? ''} onChange={e => updateTranslation(activeLang, { meta_description: e.target.value })}
+                rows={3} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors resize-none" placeholder="SEO description (150-160 chars)" />
+              <p className="mt-1 text-[10px] text-slate-400">{(t?.meta_description ?? '').length} / 160</p>
             </div>
           </div>
 
-          {/* SEO */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <SectionHeader
-              icon={<svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" /></svg>}
-              title="SEO"
-              description="Optimize how this post appears in search results"
-            />
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Meta Title</label>
-                <input
-                  type="text"
-                  value={form.meta_title}
-                  onChange={e => setForm(f => ({ ...f, meta_title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors"
-                  placeholder="SEO title (50–60 chars)"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-                />
-                <p className="mt-1 text-[10px] text-slate-400">{form.meta_title.length} / 60</p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Meta Description</label>
-                <textarea
-                  value={form.meta_description}
-                  onChange={e => setForm(f => ({ ...f, meta_description: e.target.value }))}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors resize-none"
-                  placeholder="SEO description (150–160 chars)"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-                />
-                <p className="mt-1 text-[10px] text-slate-400">{form.meta_description.length} / 160</p>
-              </div>
-            </div>
-          </div>
+          {/* View post link */}
+          {mode === 'edit' && (
+            <Link href={`/blog/${postId}/view`}
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-colors"
+              style={{ color: '#475569' }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Preview Post
+            </Link>
+          )}
         </div>
       </div>
     </div>

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const service = createServiceClient()
   let query = service
     .from('blog_posts')
-    .select('id, website, title, slug, status, published_at, created_at, updated_at, excerpt, author_id')
+    .select('id, website, slug, cover_image_url, status, published_at, created_at, updated_at, author_id, blog_translations(language, title, excerpt)')
     .order('created_at', { ascending: false })
 
   if (website) query = query.eq('website', website)
@@ -19,7 +19,24 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  // Flatten: add title/excerpt from English translation (or first available)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = (data ?? []).map((post: any) => {
+    const translations = post.blog_translations ?? []
+    const en = translations.find((t: { language: string }) => t.language === 'en')
+    const first = translations[0]
+    const t = en || first
+    return {
+      ...post,
+      title: t?.title ?? '(Untitled)',
+      excerpt: t?.excerpt ?? '',
+      languages: translations.map((tr: { language: string }) => tr.language),
+      blog_translations: undefined,
+    }
+  })
+
+  return NextResponse.json(result)
 }
 
 // POST /api/blog
@@ -29,18 +46,15 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const {
-    website, title, slug, content, excerpt,
-    cover_image_url, meta_title, meta_description, status,
-  } = body
+  const { website, slug, cover_image_url, status: postStatus, translations } = body
 
-  if (!website || !title || !slug) {
-    return NextResponse.json({ error: 'website, title, and slug are required' }, { status: 400 })
+  if (!website || !slug) {
+    return NextResponse.json({ error: 'website and slug are required' }, { status: 400 })
   }
 
   const service = createServiceClient()
 
-  // Check for duplicate slug within same website
+  // Check for duplicate slug
   const { data: existing } = await service
     .from('blog_posts')
     .select('id')
@@ -52,24 +66,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Slug "${slug}" already exists for website "${website}"` }, { status: 409 })
   }
 
-  const { data, error } = await service
+  // Create post
+  const { data: post, error: postError } = await service
     .from('blog_posts')
     .insert({
       website,
-      title,
       slug,
-      content: content ?? null,
-      excerpt: excerpt ?? null,
       cover_image_url: cover_image_url ?? null,
-      meta_title: meta_title ?? null,
-      meta_description: meta_description ?? null,
-      status: status ?? 'draft',
-      published_at: status === 'published' ? new Date().toISOString() : null,
+      status: postStatus ?? 'draft',
+      published_at: postStatus === 'published' ? new Date().toISOString() : null,
       author_id: user.id,
     })
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data, { status: 201 })
+  if (postError) return NextResponse.json({ error: postError.message }, { status: 500 })
+
+  // Insert translations if provided
+  if (Array.isArray(translations) && translations.length > 0) {
+    const rows = translations.map((t: { language: string; title: string; content: string; excerpt: string; meta_title: string; meta_description: string }) => ({
+      post_id: post.id,
+      language: t.language,
+      title: t.title ?? '',
+      content: t.content ?? '',
+      excerpt: t.excerpt ?? '',
+      meta_title: t.meta_title ?? '',
+      meta_description: t.meta_description ?? '',
+    }))
+    const { error: transError } = await service.from('blog_translations').insert(rows)
+    if (transError) return NextResponse.json({ error: transError.message }, { status: 500 })
+  }
+
+  return NextResponse.json(post, { status: 201 })
 }
