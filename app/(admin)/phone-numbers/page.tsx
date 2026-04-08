@@ -299,7 +299,7 @@ export default function PhoneNumbersPage() {
           </div>
         </div>
         <Link
-          href="/phone-numbers/new"
+          href={`/phone-numbers/new${openCompany ? `?company=${encodeURIComponent(openCompany)}` : ''}`}
           className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity mt-3 sm:mt-0 sm:flex-shrink-0"
           style={{ background: 'var(--primary)' }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
@@ -434,7 +434,7 @@ export default function PhoneNumbersPage() {
                       </button>
                     )}
                     <Link
-                      href={`/phone-numbers/new?website=${encodeURIComponent(website)}`}
+                      href={`/phone-numbers/new?website=${encodeURIComponent(website)}${openCompany ? `&company=${encodeURIComponent(openCompany)}` : ''}`}
                       className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full text-white transition-opacity hover:opacity-90 whitespace-nowrap"
                       style={{ background: 'var(--primary)' }}
                     >

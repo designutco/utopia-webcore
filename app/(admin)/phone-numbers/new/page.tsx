@@ -61,6 +61,7 @@ export default function NewPhoneNumberPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const prefillWebsite = searchParams.get('website') ?? ''
+  const prefillCompany = searchParams.get('company') ?? ''
   const [companies, setCompanies] = useState<{ id: string; name: string; company_websites: { domain: string }[] }[]>([])
   const [selectedCompany, setSelectedCompany] = useState('')
   const [form, setForm] = useState({
@@ -83,8 +84,11 @@ export default function NewPhoneNumberPage() {
       .then(data => {
         if (Array.isArray(data)) {
           setCompanies(data)
-          // Auto-select company if website is prefilled
-          if (prefillWebsite) {
+          // Auto-select company from URL params
+          if (prefillCompany) {
+            const match = data.find((c: { name: string }) => c.name === prefillCompany)
+            if (match) setSelectedCompany(match.id)
+          } else if (prefillWebsite) {
             const match = data.find((c: { company_websites: { domain: string }[] }) =>
               c.company_websites.some(w => w.domain === prefillWebsite)
             )

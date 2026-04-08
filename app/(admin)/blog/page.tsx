@@ -245,7 +245,7 @@ export default function BlogListPage() {
             </button>
           </div>
           <Link
-            href={`/blog/new?website=${encodeURIComponent(openFolder)}`}
+            href={`/blog/new?website=${encodeURIComponent(openFolder)}${websites.find(w => w.domain === openFolder)?.company_name ? `&company=${encodeURIComponent(websites.find(w => w.domain === openFolder)!.company_name!)}` : ''}`}
             className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity"
             style={{ background: 'var(--primary)' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
@@ -291,7 +291,7 @@ export default function BlogListPage() {
           <p className="text-sm font-medium" style={{ color: '#475569' }}>No posts yet</p>
           <p className="text-xs mt-1 mb-4" style={{ color: '#94a3b8' }}>Create the first blog post for {openFolder}</p>
           <Link
-            href={`/blog/new?website=${encodeURIComponent(openFolder)}`}
+            href={`/blog/new?website=${encodeURIComponent(openFolder)}${websites.find(w => w.domain === openFolder)?.company_name ? `&company=${encodeURIComponent(websites.find(w => w.domain === openFolder)!.company_name!)}` : ''}`}
             className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
             style={{ background: 'var(--primary)' }}
           >
@@ -345,7 +345,7 @@ export default function BlogListPage() {
           ))}
           {/* Add card */}
           <Link
-            href={`/blog/new?website=${encodeURIComponent(openFolder)}`}
+            href={`/blog/new?website=${encodeURIComponent(openFolder)}${websites.find(w => w.domain === openFolder)?.company_name ? `&company=${encodeURIComponent(websites.find(w => w.domain === openFolder)!.company_name!)}` : ''}`}
             className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors hover:border-slate-300 hover:bg-slate-50"
             style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
           >
