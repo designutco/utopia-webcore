@@ -82,7 +82,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
     >
       {/* Logo */}
       <div className="px-5 h-16 flex items-center border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between w-full">
           <Link href="/" onClick={onClose} className="flex items-center gap-3">
             {/* Logo icon */}
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1a3a6e, #2979d6)' }}>
