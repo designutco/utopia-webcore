@@ -135,7 +135,7 @@ export default function Sidebar({ userEmail, open, onClose }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <div className="px-3 py-4 pb-8 md:pb-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="px-3 mb-3 flex items-center gap-2">
           <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1a3a6e, #2979d6)' }}>
             {userEmail[0]?.toUpperCase()}
