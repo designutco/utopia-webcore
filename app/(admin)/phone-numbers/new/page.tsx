@@ -115,6 +115,7 @@ export default function NewPhoneNumberPage() {
         product_slug: 'default',
         location_slug: form.location_slug || 'all',
         phone_number: form.phone_number.trim(),
+        type: 'custom',
         whatsapp_text: form.whatsapp_text.trim(),
         percentage: parseInt(form.percentage) || 100,
         label: form.label.trim() || null,

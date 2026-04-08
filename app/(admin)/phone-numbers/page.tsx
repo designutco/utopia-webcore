@@ -11,6 +11,7 @@ interface PhoneNumber {
   product_slug: string
   location_slug: string
   phone_number: string
+  type: 'default' | 'custom'
   whatsapp_text: string
   percentage: number
   label: string | null
@@ -253,7 +254,7 @@ export default function PhoneNumbersPage() {
                   </thead>
                   <tbody>
                     {rows.map((row, i) => {
-                      const isDefault = row.product_slug === 'default' && row.location_slug === 'all' && !row.label
+                      const isDefault = row.type === 'default'
                       return (
                       <tr
                         key={row.id}

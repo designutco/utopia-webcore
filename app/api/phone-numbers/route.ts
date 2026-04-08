@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { website, product_slug, location_slug, phone_number, whatsapp_text, percentage, label } = body
+  const { website, product_slug, location_slug, phone_number, type, whatsapp_text, percentage, label } = body
 
   if (!website || !product_slug || !location_slug || !phone_number || !whatsapp_text) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const service = createServiceClient()
   const { data, error } = await service
     .from('phone_numbers')
-    .insert({ website, product_slug, location_slug, phone_number, whatsapp_text, percentage: percentage ?? 100, label: label || null, is_active: true })
+    .insert({ website, product_slug, location_slug, phone_number, type: type || 'custom', whatsapp_text, percentage: percentage ?? 100, label: label || null, is_active: true })
     .select()
     .single()
 
