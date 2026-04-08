@@ -73,9 +73,8 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <h2 className="text-sm font-semibold text-slate-700 mb-3">Quick Actions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link
             href="/phone-numbers/new"
             className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
@@ -138,7 +137,6 @@ export default async function DashboardPage() {
               <p className="text-xs text-slate-400">Adjust lead distribution weights per site</p>
             </div>
           </Link>
-        </div>
       </div>
     </div>
   )
