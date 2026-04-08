@@ -501,6 +501,7 @@ export default function PhoneNumbersPage() {
                         const existingTexts = [...new Set(rows.map(r => r.whatsapp_text).filter(Boolean).filter(t => t !== (vals?.whatsapp_text ?? '')))]
                         return (
                         <div className="px-4 sm:px-5 py-3" style={{ background: 'white' }}>
+                          {/* Badge */}
                           <div className="flex items-center gap-1.5 mb-2">
                             {isDefault ? (
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
@@ -508,13 +509,10 @@ export default function PhoneNumbersPage() {
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
                             ) : null}
                           </div>
-                          {/* All fields in one row */}
-                          <div className="flex items-end gap-2 flex-wrap sm:flex-nowrap">
-                            <div className="w-36 sm:w-40 flex-shrink-0">
-                              <label className="flex items-center gap-1 text-[10px] mb-1" style={{ color: '#94a3b8' }}>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                Phone
-                              </label>
+                          {/* Row 1: Phone + Location (if custom) */}
+                          <div className="flex gap-2 mb-2">
+                            <div className="flex-1">
+                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Phone</label>
                               <input
                                 className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono"
                                 style={{ borderColor: '#e2e8f0' }}
@@ -522,27 +520,12 @@ export default function PhoneNumbersPage() {
                                 onChange={e => updateEditRow(row.id, { phone_number: e.target.value })}
                               />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <label className="flex items-center gap-1 text-[10px] mb-1" style={{ color: '#94a3b8' }}>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                                WhatsApp Text
-                              </label>
-                              <input
-                                className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
-                                style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.whatsapp_text ?? ''}
-                                onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
-                              />
-                            </div>
                             {!isDefault && (
-                              <div className="w-28 flex-shrink-0">
-                                <label className="flex items-center gap-1 text-[10px] mb-1" style={{ color: '#94a3b8' }}>
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                  Location
-                                </label>
+                              <div className="w-28 sm:w-32 flex-shrink-0">
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Location</label>
                                 <select
                                   className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
-                                  style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center' }}
+                                  style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center', paddingRight: '1.5rem' }}
                                   value={vals?.location_slug ?? 'all'}
                                   onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}
                                 >
@@ -550,25 +533,40 @@ export default function PhoneNumbersPage() {
                                 </select>
                               </div>
                             )}
-                            <div className="w-14 flex-shrink-0">
-                              <label className="block text-[10px] mb-1 text-center" style={{ color: '#94a3b8' }}>%</label>
-                              <input
-                                type="number" min="0" max="100"
-                                className="px-1 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors text-center"
-                                style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.percentage ?? 100}
-                                onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)}
-                              />
-                            </div>
-                            <div className="flex-shrink-0">
-                              <label className="block text-[10px] mb-1 text-center" style={{ color: '#94a3b8' }}>Active</label>
-                              <button
-                                onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)}
-                                className="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
-                                style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}
-                              >
-                                <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
-                              </button>
+                          </div>
+                          {/* Row 2: WhatsApp Text */}
+                          <div className="mb-2">
+                            <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
+                            <input
+                              className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
+                              style={{ borderColor: '#e2e8f0' }}
+                              value={vals?.whatsapp_text ?? ''}
+                              onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
+                            />
+                          </div>
+                          {/* Row 3: % + Active */}
+                          <div className="flex items-end justify-between">
+                            <div className="flex items-end gap-3">
+                              <div>
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>%</label>
+                                <input
+                                  type="number" min="0" max="100"
+                                  className="px-2 py-1.5 border rounded-lg text-xs w-14 outline-none focus:border-[var(--primary)] transition-colors text-center"
+                                  style={{ borderColor: '#e2e8f0' }}
+                                  value={vals?.percentage ?? 100}
+                                  onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Active</label>
+                                <button
+                                  onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)}
+                                  className="relative w-9 h-5 rounded-full transition-colors"
+                                  style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}
+                                >
+                                  <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
+                                </button>
+                              </div>
                             </div>
                           </div>
                           {/* WA text suggestions */}
