@@ -509,81 +509,91 @@ export default function PhoneNumbersPage() {
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
                             ) : null}
                           </div>
-                          {/* Row 1: Phone + Location (if custom) */}
-                          <div className="flex gap-2 mb-2">
-                            <div className="flex-1">
+                          {/* Desktop: all in one row / Mobile: stacked */}
+                          <div className="hidden sm:flex items-end gap-2">
+                            <div className="w-40 flex-shrink-0">
                               <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Phone</label>
-                              <input
-                                className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono"
-                                style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.phone_number ?? ''}
-                                onChange={e => updateEditRow(row.id, { phone_number: e.target.value })}
-                              />
+                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono" style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.phone_number ?? ''} onChange={e => updateEditRow(row.id, { phone_number: e.target.value })} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
+                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors" style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.whatsapp_text ?? ''} onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })} />
                             </div>
                             {!isDefault && (
-                              <div className="w-28 sm:w-32 flex-shrink-0">
+                              <div className="w-28 flex-shrink-0">
                                 <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Location</label>
-                                <select
-                                  className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
+                                <select className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
                                   style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center', paddingRight: '1.5rem' }}
-                                  value={vals?.location_slug ?? 'all'}
-                                  onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}
-                                >
+                                  value={vals?.location_slug ?? 'all'} onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}>
                                   {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
                                 </select>
                               </div>
                             )}
-                          </div>
-                          {/* Row 2: WhatsApp Text */}
-                          <div className="mb-2">
-                            <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
-                            <input
-                              className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
-                              style={{ borderColor: '#e2e8f0' }}
-                              value={vals?.whatsapp_text ?? ''}
-                              onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
-                            />
-                            {/* Suggestions below WA text */}
-                            {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
-                              <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                                <span className="text-[10px]" style={{ color: '#94a3b8' }}>Suggestions:</span>
-                                {existingTexts.slice(0, 3).map((text, ti) => (
-                                  <button
-                                    key={ti}
-                                    type="button"
-                                    onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
-                                    className="text-[10px] px-2.5 py-1 rounded-md truncate max-w-[180px] transition-all cursor-pointer"
-                                    style={{ background: '#f1f5f9', color: 'var(--primary)' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f1f5f9'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}
-                                  >
-                                    {text}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {/* Row 3: % + Active */}
-                          <div className="flex items-end gap-3">
-                            <div>
-                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>%</label>
-                              <input
-                                type="number" min="0" max="100"
-                                className="px-2 py-1.5 border rounded-lg text-xs w-14 outline-none focus:border-[var(--primary)] transition-colors text-center"
-                                style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.percentage ?? 100}
-                                onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)}
-                              />
+                            <div className="w-14 flex-shrink-0">
+                              <label className="text-[10px] mb-1 block text-center" style={{ color: '#94a3b8' }}>%</label>
+                              <input type="number" min="0" max="100" className="px-1 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors text-center" style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.percentage ?? 100} onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)} />
                             </div>
-                            <div>
-                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Active</label>
-                              <button
-                                onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)}
-                                className="relative w-9 h-5 rounded-full transition-colors"
-                                style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}
-                              >
+                            <div className="flex-shrink-0">
+                              <label className="text-[10px] mb-1 block text-center" style={{ color: '#94a3b8' }}>Active</label>
+                              <button onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}>
                                 <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
                               </button>
+                            </div>
+                          </div>
+                          {/* Mobile: stacked rows */}
+                          <div className="sm:hidden space-y-2">
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Phone</label>
+                                <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono" style={{ borderColor: '#e2e8f0' }}
+                                  value={vals?.phone_number ?? ''} onChange={e => updateEditRow(row.id, { phone_number: e.target.value })} />
+                              </div>
+                              {!isDefault && (
+                                <div className="w-28 flex-shrink-0">
+                                  <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Location</label>
+                                  <select className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
+                                    style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center', paddingRight: '1.5rem' }}
+                                    value={vals?.location_slug ?? 'all'} onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}>
+                                    {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
+                                  </select>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
+                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors" style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.whatsapp_text ?? ''} onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })} />
+                              {/* Suggestions below WA text — mobile only */}
+                              {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
+                                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Suggestions:</span>
+                                  {existingTexts.slice(0, 3).map((text, ti) => (
+                                    <button key={ti} type="button" onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
+                                      className="text-[10px] px-2.5 py-1 rounded-md truncate max-w-[180px] transition-all cursor-pointer"
+                                      style={{ background: '#f1f5f9', color: 'var(--primary)' }}
+                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
+                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f1f5f9'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}>
+                                      {text}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-end gap-3">
+                              <div>
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>%</label>
+                                <input type="number" min="0" max="100" className="px-2 py-1.5 border rounded-lg text-xs w-14 outline-none focus:border-[var(--primary)] transition-colors text-center" style={{ borderColor: '#e2e8f0' }}
+                                  value={vals?.percentage ?? 100} onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)} />
+                              </div>
+                              <div>
+                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Active</label>
+                                <button onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}>
+                                  <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
