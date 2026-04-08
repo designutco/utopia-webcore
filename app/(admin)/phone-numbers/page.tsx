@@ -511,7 +511,7 @@ export default function PhoneNumbersPage() {
                             {!isDefault ? (
                               <button
                                 onClick={() => deleteNumber(row.id)}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg border transition-colors hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                                className="w-7 h-7 flex items-center justify-center rounded-lg border transition-colors hover:border-red-500 hover:text-white hover:bg-red-500"
                                 style={{ borderColor: '#e2e8f0', color: '#cbd5e1' }}
                                 title="Delete"
                               >
