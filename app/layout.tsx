@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter, Nunito } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
+const nunito = Nunito({ subsets: ['latin'], variable: '--font-display' })
 
 export const metadata: Metadata = {
   title: 'Utopia Webcore',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`h-full ${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`h-full ${inter.variable} ${nunito.variable}`}>
       <head>
         <meta name="theme-color" content="#1e293b" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
