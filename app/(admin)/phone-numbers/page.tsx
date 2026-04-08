@@ -197,21 +197,23 @@ export default function PhoneNumbersPage() {
                   </svg>
                   <span className="text-sm font-semibold truncate" style={{ color: 'var(--foreground)' }}>{website}</span>
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {activeRows.length > 0 && (
-                    <span
-                      className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap"
-                      style={pctOk
-                        ? { background: '#dcfce7', color: '#16a34a' }
-                        : { background: '#fef2f2', color: '#dc2626' }
-                      }
-                    >
-                      {totalPct}% total
+                <div className="flex items-center gap-1.5 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="flex items-center gap-1.5">
+                    {activeRows.length > 0 && (
+                      <span
+                        className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap"
+                        style={pctOk
+                          ? { background: '#dcfce7', color: '#16a34a' }
+                          : { background: '#fef2f2', color: '#dc2626' }
+                        }
+                      >
+                        {totalPct}% total
+                      </span>
+                    )}
+                    <span className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap" style={{ background: '#e2e8f0', color: '#475569' }}>
+                      {rows.length} {rows.length === 1 ? 'number' : 'numbers'}
                     </span>
-                  )}
-                  <span className="inline-flex items-center h-6 sm:h-7 text-[10px] sm:text-xs px-2.5 rounded-full font-medium whitespace-nowrap" style={{ background: '#e2e8f0', color: '#475569' }}>
-                    {rows.length} {rows.length === 1 ? 'number' : 'numbers'}
-                  </span>
+                  </div>
                   <Link
                     href={`/phone-numbers/new?website=${encodeURIComponent(website)}`}
                     className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full text-white transition-opacity hover:opacity-90 whitespace-nowrap"

@@ -42,6 +42,11 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Skip PWA/static assets
+  if (pathname === '/sw.js' || pathname === '/manifest.webmanifest' || pathname.startsWith('/icon-') || pathname === '/icon.svg' || pathname === '/character.gif') {
+    return supabaseResponse
+  }
+
   // Protected routes
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
