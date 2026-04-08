@@ -344,22 +344,23 @@ export default function PhoneNumbersPage() {
                   const vals = editRows[row.id]
                   return (
                     <div key={row.id} style={{ borderBottom: i < rows.length - 1 ? '1px solid #cbd5e1' : 'none' }}>
-                      {isGroupEditing ? (
+                      {isGroupEditing ? (() => {
+                        const existingTexts = [...new Set(rows.map(r => r.whatsapp_text).filter(Boolean).filter(t => t !== (vals?.whatsapp_text ?? '')))]
+                        return (
                         /* Editing row */
                         <div className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-end gap-2" style={{ background: 'white' }}>
-                          {/* Left: Phone + WA + Label */}
+                          {/* Left: Phone + Label row, then WA text */}
                           <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2">
                               {isDefault ? (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
-                              ) : row.label ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
                               ) : (
                                 <span className="text-[10px]" style={{ color: '#94a3b8' }}>Custom</span>
                               )}
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              <div>
+                            {/* Phone + Label in one row */}
+                            <div className="flex gap-2">
+                              <div className="flex-1">
                                 <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>Phone</label>
                                 <input
                                   className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
@@ -368,24 +369,41 @@ export default function PhoneNumbersPage() {
                                   onChange={e => updateEditRow(row.id, { phone_number: e.target.value })}
                                 />
                               </div>
-                              <div>
-                                <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
-                                <input
-                                  className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
-                                  style={{ borderColor: '#e2e8f0' }}
-                                  value={vals?.whatsapp_text ?? ''}
-                                  onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
-                                />
-                              </div>
                               {!isDefault && (
-                                <div>
+                                <div className="w-28">
                                   <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>Label</label>
                                   <input
                                     className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
                                     style={{ borderColor: '#e2e8f0' }}
                                     value={vals?.label ?? ''}
+                                    placeholder="Agent A"
                                     onChange={e => updateEditRow(row.id, { label: e.target.value })}
                                   />
+                                </div>
+                              )}
+                            </div>
+                            {/* WhatsApp text + suggestions */}
+                            <div>
+                              <label className="block text-[10px] mb-1" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
+                              <input
+                                className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors"
+                                style={{ borderColor: '#e2e8f0' }}
+                                value={vals?.whatsapp_text ?? ''}
+                                onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })}
+                              />
+                              {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {existingTexts.slice(0, 3).map((text, ti) => (
+                                    <button
+                                      key={ti}
+                                      type="button"
+                                      onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
+                                      className="text-[10px] px-2 py-0.5 rounded-full border truncate max-w-[200px] transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)] hover:bg-blue-50 cursor-pointer"
+                                      style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}
+                                    >
+                                      {text}
+                                    </button>
+                                  ))}
                                 </div>
                               )}
                             </div>
@@ -419,7 +437,7 @@ export default function PhoneNumbersPage() {
                             </button>
                           </div>
                         </div>
-                      ) : (
+                      )})() : (
                         /* View row */
                         <div className="px-4 sm:px-5 py-3 flex items-center gap-3 hover:bg-[#f1f5f9] transition-colors">
                           <div className="flex-1 min-w-0">
