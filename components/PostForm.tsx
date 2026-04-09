@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RichTextEditor from '@/components/RichTextEditor'
+import FlagIcon from '@/components/FlagIcon'
 
 interface PostFormProps {
   mode: 'new' | 'edit'
@@ -21,9 +22,9 @@ interface Translation {
 }
 
 const LANGUAGES = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'ms', label: 'Malay', flag: '🇲🇾' },
-  { code: 'zh', label: 'Chinese', flag: '🇨🇳' },
+  { code: 'en', label: 'English' },
+  { code: 'ms', label: 'Malay' },
+  { code: 'zh', label: 'Chinese' },
 ]
 
 const EMPTY_TRANSLATION: Translation = {
@@ -213,7 +214,7 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
                     background: activeLang === lang.code ? 'white' : '#f8fafc',
                   }}
                 >
-                  <span className="mr-1">{lang.flag}</span> {lang.label}
+                  <FlagIcon lang={lang.code} size={14} /> {lang.label}
                   {translations[lang.code]?.title && (
                     <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#16a34a' }} />
                   )}
@@ -331,7 +332,7 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
           {/* SEO for active language */}
           <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
             <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-              SEO — {LANGUAGES.find(l => l.code === activeLang)?.flag} {LANGUAGES.find(l => l.code === activeLang)?.label}
+              <span className="inline-flex items-center gap-1.5">SEO — <FlagIcon lang={activeLang} size={14} /> {LANGUAGES.find(l => l.code === activeLang)?.label}</span>
             </h2>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Meta Title</label>
