@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useUser } from '@/contexts/UserContext'
 
 interface WebsiteSummary {
   domain: string
@@ -21,6 +22,8 @@ interface Company {
 }
 
 export default function WebsitesPage() {
+  const { role } = useUser()
+  const isWriter = role === 'writer'
   const searchParams = useSearchParams()
   const openCompany = searchParams.get('company') ?? ''
 
@@ -124,7 +127,7 @@ export default function WebsitesPage() {
                     <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{company.name}</p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-[10px]" style={{ color: '#475569' }}>{company.site_count} {company.site_count === 1 ? 'site' : 'sites'}</span>
-                      {company.total_phones > 0 && <span className="text-[10px]" style={{ color: '#94a3b8' }}>{company.total_phones} phones</span>}
+                      {!isWriter && company.total_phones > 0 && <span className="text-[10px]" style={{ color: '#94a3b8' }}>{company.total_phones} phones</span>}
                       {company.total_blogs > 0 && <span className="text-[10px]" style={{ color: '#94a3b8' }}>{company.total_blogs} posts</span>}
                     </div>
                   </div>
@@ -210,7 +213,7 @@ export default function WebsitesPage() {
             <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f1f5f9' }}>
-                  {['Website', 'Phone Numbers', 'Active', 'Blog Posts', 'Published', ''].map((h, i) => (
+                  {['Website', ...(isWriter ? [] : ['Phone Numbers', 'Active']), 'Blog Posts', 'Published', ''].map((h, i) => (
                     <th key={i} className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>{h}</th>
                   ))}
                 </tr>
@@ -233,16 +236,20 @@ export default function WebsitesPage() {
                         </div>
                       </div>
                     </td>
+                    {!isWriter && (
                     <td className="px-5 py-4 align-middle text-center">
                       <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.phone_count}</span>
                       <span className="text-[10px] ml-1" style={{ color: '#94a3b8' }}>{site.phone_count === 1 ? 'number' : 'numbers'}</span>
                     </td>
+                    )}
+                    {!isWriter && (
                     <td className="px-5 py-4 align-middle text-center">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
                         style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#64748b' }}>
                         {site.active_phone_count} active
                       </span>
                     </td>
+                    )}
                     <td className="px-5 py-4 align-middle text-center">
                       <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.blog_count}</span>
                       <span className="text-[10px] ml-1" style={{ color: '#94a3b8' }}>{site.blog_count === 1 ? 'post' : 'posts'}</span>
@@ -255,12 +262,14 @@ export default function WebsitesPage() {
                     </td>
                     <td className="px-5 py-4 align-middle text-center">
                       <div className="flex items-center gap-2 justify-center">
+                        {!isWriter && (
                         <Link href={`/phone-numbers?website=${encodeURIComponent(site.domain)}`}
                           className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 rounded-lg border transition-colors whitespace-nowrap hover:border-[var(--primary)] hover:text-[var(--primary)]"
                           style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}>
                           Phones
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </Link>
+                        )}
                         <Link href={`/blog?website=${encodeURIComponent(site.domain)}`}
                           className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 rounded-lg border transition-colors whitespace-nowrap hover:border-[var(--primary)] hover:text-[var(--primary)]"
                           style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}>

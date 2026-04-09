@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { WebsiteProvider } from '@/contexts/WebsiteContext'
+import { UserProvider } from '@/contexts/UserContext'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 
@@ -26,6 +27,7 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
   }, [userRole])
 
   return (
+    <UserProvider value={{ email: userEmail, name: userName, role: userRole }}>
     <WebsiteProvider>
       <div className="flex flex-col h-screen" style={{ background: '#ffffff' }}>
         {/* Beta banner — full width above everything */}
@@ -97,5 +99,6 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
         </div>
       </div>
     </WebsiteProvider>
+    </UserProvider>
   )
 }
