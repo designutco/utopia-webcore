@@ -94,6 +94,10 @@ export default function BlogListPage() {
     })
     const filtered = search ? companyStats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : companyStats
 
+    // Unassigned websites (have posts but no company)
+    const assignedDomains = new Set(companies.flatMap(c => c.company_websites.map(w => w.domain)))
+    const unassignedSites = websites.filter(s => !assignedDomains.has(s.domain) && s.blog_count > 0)
+
     return (
       <div>
         <div className="sm:flex sm:items-center sm:justify-between gap-3 mb-6">
@@ -132,6 +136,28 @@ export default function BlogListPage() {
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className="text-[10px]" style={{ color: '#475569' }}>{c.blog_count} {c.blog_count === 1 ? 'post' : 'posts'}</span>
                       {c.published_count > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>{c.published_count} live</span>}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            ))}
+            {/* Unassigned websites with posts */}
+            {unassignedSites.map(site => (
+              <Link key={site.domain} href={`/blog?website=${encodeURIComponent(site.domain)}`}
+                className="group block rounded-xl border bg-white p-5 hover:shadow-sm transition-all hover:border-slate-300" style={{ borderColor: '#e2e8f0' }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: '#94a3b8' }}>{site.domain}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px]" style={{ color: '#94a3b8' }}>{site.blog_count} posts · Unassigned</span>
                     </div>
                   </div>
                   <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
