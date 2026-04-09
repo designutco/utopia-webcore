@@ -185,7 +185,7 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
           {saved && <span className="text-xs text-green-600 font-medium">Saved</span>}
           <button type="button" onClick={() => handleSave('draft')} disabled={saving}
             className="px-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors">
-            Save Draft
+            Save as Draft
           </button>
           <button type="button" onClick={() => handleSave(status === 'published' ? 'draft' : 'published')} disabled={saving}
             className="px-3 py-2 text-xs text-white font-medium rounded-lg disabled:opacity-50 transition-colors" style={{ background: 'var(--primary)' }}>
