@@ -81,7 +81,7 @@ export default function BlogViewPage() {
       </div>
 
       {/* Language switcher */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-1 p-1 rounded-lg mb-6" style={{ background: '#f1f5f9' }}>
         {LANGUAGES.map(lang => {
           const hasTranslation = availableLangs.includes(lang.code)
           return (
@@ -89,13 +89,11 @@ export default function BlogViewPage() {
               key={lang.code}
               onClick={() => hasTranslation && setActiveLang(lang.code)}
               disabled={!hasTranslation}
-              className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${!hasTranslation ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={{
-                background: activeLang === lang.code ? 'var(--primary)' : '#f1f5f9',
-                color: activeLang === lang.code ? 'white' : '#475569',
-              }}
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all ${activeLang === lang.code ? 'bg-white shadow-sm' : 'hover:bg-white/50'} ${!hasTranslation ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+              style={{ color: activeLang === lang.code ? 'var(--foreground)' : '#94a3b8' }}
             >
-              <span className="inline-flex items-center gap-1.5"><FlagIcon lang={lang.code} size={14} /> {lang.label}</span>
+              <FlagIcon lang={lang.code} size={16} />
+              <span>{lang.label}</span>
             </button>
           )
         })}
@@ -106,47 +104,82 @@ export default function BlogViewPage() {
           No translation available for this language.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          {/* Cover image */}
-          {post.cover_image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={post.cover_image_url} alt="" className="w-full h-48 sm:h-64 object-cover" />
-          )}
-
-          {/* Content */}
-          <div className="p-6 sm:p-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: 'var(--foreground)' }}>{t.title}</h1>
-
-            {t.excerpt && (
-              <p className="text-sm mb-6 leading-relaxed" style={{ color: '#475569' }}>{t.excerpt}</p>
-            )}
-
-            {post.published_at && (
-              <p className="text-xs mb-6" style={{ color: '#94a3b8' }}>
-                Published {new Date(post.published_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            )}
-
-            <div className="h-px mb-6" style={{ background: '#e2e8f0' }} />
-
-            {/* Rendered HTML content */}
-            <div
-              className="tiptap prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: t.content || '<p style="color: #94a3b8">No content yet.</p>' }}
-            />
-          </div>
-
-          {/* SEO preview */}
-          {(t.meta_title || t.meta_description) && (
-            <div className="border-t p-6 sm:p-8" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
-              <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#94a3b8' }}>SEO Preview</h3>
-              <div className="rounded-lg border p-4" style={{ borderColor: '#e2e8f0', background: 'white' }}>
-                <p className="text-sm font-medium truncate" style={{ color: '#1a0dab' }}>{t.meta_title || t.title}</p>
-                <p className="text-xs truncate mt-0.5" style={{ color: '#006621' }}>https://{post.website}/{post.slug}</p>
-                <p className="text-xs mt-1 line-clamp-2" style={{ color: '#545454' }}>{t.meta_description || t.excerpt}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Main content */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              {post.cover_image_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={post.cover_image_url} alt="" className="w-full h-48 sm:h-56 object-cover" />
+              )}
+              <div className="p-5 sm:p-6">
+                <h1 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>{t.title}</h1>
+                {t.excerpt && (
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: '#475569' }}>{t.excerpt}</p>
+                )}
+                {post.published_at && (
+                  <p className="text-[10px] mb-4" style={{ color: '#94a3b8' }}>
+                    Published {new Date(post.published_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                )}
+                <div className="h-px mb-4" style={{ background: '#f1f5f9' }} />
+                <div
+                  className="tiptap prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: t.content || '<p style="color: #94a3b8">No content yet.</p>' }}
+                />
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Sidebar meta */}
+          <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+            {/* Post info */}
+            <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <FlagIcon lang={activeLang} size={14} />
+                <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#94a3b8' }}>Post Info</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Website</span>
+                  <span className="text-xs font-medium truncate ml-2" style={{ color: 'var(--foreground)' }}>{post.website}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Slug</span>
+                  <span className="text-xs truncate ml-2" style={{ color: '#475569' }}>/{post.slug}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Status</span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    {post.status}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Created</span>
+                  <span className="text-[10px]" style={{ color: '#475569' }}>{new Date(post.created_at).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SEO preview */}
+            {(t.meta_title || t.meta_description) && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+                <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#94a3b8' }}>SEO Preview</span>
+                <div className="rounded-lg border p-3" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+                  <p className="text-xs font-medium truncate" style={{ color: '#1a0dab' }}>{t.meta_title || t.title}</p>
+                  <p className="text-[10px] truncate mt-0.5" style={{ color: '#006621' }}>https://{post.website}/blog/{post.slug}</p>
+                  <p className="text-[10px] mt-1 line-clamp-2" style={{ color: '#545454' }}>{t.meta_description || t.excerpt}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Blog link */}
+            <a href={`https://${post.website}/blog/${post.slug}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg border border-slate-200 text-xs font-medium hover:bg-slate-50 transition-colors" style={{ color: '#475569' }}>
+              Open in Browser
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+          </div>
         </div>
       )}
     </div>
