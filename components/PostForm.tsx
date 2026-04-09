@@ -200,151 +200,129 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Main content */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-4">
           {/* Language tabs */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="flex border-b" style={{ borderColor: '#e2e8f0' }}>
-              {LANGUAGES.map(lang => (
-                <button
-                  key={lang.code}
-                  onClick={() => setActiveLang(lang.code)}
-                  className="flex-1 px-4 py-3 text-xs font-medium transition-colors relative"
-                  style={{
-                    color: activeLang === lang.code ? 'var(--primary)' : '#94a3b8',
-                    background: activeLang === lang.code ? 'white' : '#f8fafc',
-                  }}
-                >
-                  <FlagIcon lang={lang.code} size={14} /> {lang.label}
-                  {translations[lang.code]?.title && (
-                    <span className="ml-1.5 w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#16a34a' }} />
-                  )}
-                  {activeLang === lang.code && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: 'var(--primary)' }} />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
-                  Title {activeLang === 'en' && <span className="text-red-500">*</span>}
-                </label>
-                <input
-                  type="text"
-                  value={t?.title ?? ''}
-                  onChange={e => updateTranslation(activeLang, { title: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors ${errors.title && activeLang === 'en' ? 'border-red-400' : 'border-slate-200'}`}
-                  placeholder={`Post title in ${LANGUAGES.find(l => l.code === activeLang)?.label}`}
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = errors.title && activeLang === 'en' ? '#f87171' : '#e2e8f0'}
-                />
-                {errors.title && activeLang === 'en' && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Excerpt</label>
-                <textarea
-                  value={t?.excerpt ?? ''}
-                  onChange={e => updateTranslation(activeLang, { excerpt: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors resize-y"
-                  placeholder="Brief summary"
-                  onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onBlur={e => e.currentTarget.style.borderColor = '#e2e8f0'}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-2">Content</label>
-                <RichTextEditor
-                  value={t?.content ?? ''}
-                  onChange={html => updateTranslation(activeLang, { content: html })}
-                  placeholder={`Write content in ${LANGUAGES.find(l => l.code === activeLang)?.label}…`}
-                />
-              </div>
-            </div>
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: '#f1f5f9' }}>
+            {LANGUAGES.map(lang => (
+              <button
+                key={lang.code}
+                onClick={() => setActiveLang(lang.code)}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all ${activeLang === lang.code ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
+                style={{ color: activeLang === lang.code ? 'var(--foreground)' : '#94a3b8' }}
+              >
+                <FlagIcon lang={lang.code} size={16} />
+                <span>{lang.label}</span>
+                {translations[lang.code]?.title && (
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#16a34a' }} />
+                )}
+              </button>
+            ))}
           </div>
+
+          {/* Title + Excerpt */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+            <input
+              type="text"
+              value={t?.title ?? ''}
+              onChange={e => updateTranslation(activeLang, { title: e.target.value })}
+              className={`w-full text-lg font-semibold border-0 border-b pb-2 focus:outline-none transition-colors placeholder:font-normal placeholder:text-slate-300 ${errors.title && activeLang === 'en' ? 'border-red-300' : 'border-slate-100'}`}
+              placeholder={`Title (${LANGUAGES.find(l => l.code === activeLang)?.label})`}
+              style={{ color: 'var(--foreground)' }}
+            />
+            {errors.title && activeLang === 'en' && <p className="text-xs text-red-500">{errors.title}</p>}
+            <textarea
+              value={t?.excerpt ?? ''}
+              onChange={e => updateTranslation(activeLang, { excerpt: e.target.value })}
+              rows={2}
+              className="w-full text-sm border-0 focus:outline-none resize-none placeholder:text-slate-300"
+              placeholder="Write a brief excerpt…"
+              style={{ color: '#475569' }}
+            />
+          </div>
+
+          {/* Content editor */}
+          <RichTextEditor
+            value={t?.content ?? ''}
+            onChange={html => updateTranslation(activeLang, { content: html })}
+            placeholder={`Write content in ${LANGUAGES.find(l => l.code === activeLang)?.label}…`}
+          />
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-5 lg:sticky lg:top-4 lg:self-start">
-          {/* Preview post link — top */}
+        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          {/* Preview */}
           {mode === 'edit' && (
             <Link href={`/blog/${postId}/view`}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-colors"
-              style={{ color: '#475569' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-xs font-medium transition-colors text-white"
+              style={{ background: 'var(--primary)' }}>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              Preview Post
+              Preview
             </Link>
           )}
-          {/* Publishing */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-            <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Publishing</h2>
+
+          {/* Publish settings */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+              <label className="text-[10px] font-medium uppercase tracking-wider mb-1.5 block" style={{ color: '#94a3b8' }}>Company</label>
               <select value={selectedCompany} onChange={e => { setSelectedCompany(e.target.value); setWebsite('') }}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors cursor-pointer"
-                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
-                <option value="">Select company…</option>
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none transition-colors cursor-pointer"
+                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2rem' }}>
+                <option value="">Select…</option>
                 {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Website <span className="text-red-500">*</span></label>
+              <label className="text-[10px] font-medium uppercase tracking-wider mb-1.5 block" style={{ color: '#94a3b8' }}>Website</label>
               <select value={website} onChange={e => setWebsite(e.target.value)} disabled={!selectedCompany}
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors cursor-pointer disabled:opacity-50 ${errors.website ? 'border-red-400' : 'border-slate-200'}`}
-                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
-                <option value="">{selectedCompany ? 'Select website…' : 'Select company first'}</option>
+                className={`w-full px-3 py-2 border rounded-lg text-xs focus:outline-none transition-colors cursor-pointer disabled:opacity-40 ${errors.website ? 'border-red-400' : 'border-slate-200'}`}
+                style={{ appearance: 'none', WebkitAppearance: 'none', paddingRight: '2rem' }}>
+                <option value="">{selectedCompany ? 'Select…' : '—'}</option>
                 {companyWebsites.map(w => <option key={w.domain} value={w.domain}>{w.domain}</option>)}
               </select>
-              {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
+              {errors.website && <p className="mt-1 text-[10px] text-red-500">{errors.website}</p>}
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-slate-600">Slug <span className="text-red-500">*</span></label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#94a3b8' }}>Slug</label>
                 {mode === 'edit' && (
-                  <button type="button" onClick={() => setSlugLocked(l => !l)} className="text-[10px] text-blue-600 hover:text-blue-800">
-                    {slugLocked ? 'Edit' : 'Lock'}
-                  </button>
+                  <button type="button" onClick={() => setSlugLocked(l => !l)} className="text-[10px] text-blue-600 hover:text-blue-800">{slugLocked ? 'Edit' : 'Lock'}</button>
                 )}
               </div>
               <input type="text" value={slug} readOnly={mode === 'edit' && slugLocked}
                 onChange={e => { setSlugLocked(true); setSlug(e.target.value) }}
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none transition-colors ${errors.slug ? 'border-red-400' : 'border-slate-200'} ${mode === 'edit' && slugLocked ? 'bg-slate-50 text-slate-400' : ''}`}
+                className={`w-full px-3 py-2 border rounded-lg text-xs focus:outline-none transition-colors ${errors.slug ? 'border-red-400' : 'border-slate-200'} ${mode === 'edit' && slugLocked ? 'bg-slate-50 text-slate-400' : ''}`}
                 placeholder="post-slug" />
-              {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
+              {errors.slug && <p className="mt-1 text-[10px] text-red-500">{errors.slug}</p>}
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Cover Image URL</label>
+              <label className="text-[10px] font-medium uppercase tracking-wider mb-1.5 block" style={{ color: '#94a3b8' }}>Cover Image</label>
               <input type="url" value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors" placeholder="https://…" />
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none transition-colors" placeholder="https://…" />
             </div>
             {coverImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={coverImageUrl} alt="Cover" className="w-full h-32 object-cover rounded-lg border border-slate-200" />
+              <img src={coverImageUrl} alt="Cover" className="w-full h-28 object-cover rounded-lg border border-slate-200" />
             )}
           </div>
 
-          {/* SEO for active language */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-            <h2 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-              <span className="inline-flex items-center gap-1.5">SEO — <FlagIcon lang={activeLang} size={14} /> {LANGUAGES.find(l => l.code === activeLang)?.label}</span>
-            </h2>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Meta Title</label>
-              <input type="text" value={t?.meta_title ?? ''} onChange={e => updateTranslation(activeLang, { meta_title: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors" placeholder="SEO title (50-60 chars)" />
-              <p className="mt-1 text-[10px] text-slate-400">{(t?.meta_title ?? '').length} / 60</p>
+          {/* SEO */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <FlagIcon lang={activeLang} size={14} />
+              <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: '#94a3b8' }}>SEO · {LANGUAGES.find(l => l.code === activeLang)?.label}</span>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Meta Description</label>
+              <input type="text" value={t?.meta_title ?? ''} onChange={e => updateTranslation(activeLang, { meta_title: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none transition-colors" placeholder="Meta title (50–60 chars)" />
+              <p className="mt-1 text-[10px] text-right" style={{ color: (t?.meta_title ?? '').length > 60 ? '#ef4444' : '#cbd5e1' }}>{(t?.meta_title ?? '').length}/60</p>
+            </div>
+            <div>
               <textarea value={t?.meta_description ?? ''} onChange={e => updateTranslation(activeLang, { meta_description: e.target.value })}
-                rows={3} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none transition-colors resize-none" placeholder="SEO description (150-160 chars)" />
-              <p className="mt-1 text-[10px] text-slate-400">{(t?.meta_description ?? '').length} / 160</p>
+                rows={2} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none transition-colors resize-none" placeholder="Meta description (150–160 chars)" />
+              <p className="mt-1 text-[10px] text-right" style={{ color: (t?.meta_description ?? '').length > 160 ? '#ef4444' : '#cbd5e1' }}>{(t?.meta_description ?? '').length}/160</p>
             </div>
           </div>
 
