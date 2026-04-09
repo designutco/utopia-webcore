@@ -645,8 +645,8 @@ export default function PhoneNumbersPage() {
                             {!isDefault ? (
                               <button
                                 onClick={() => deleteNumber(row.id)}
-                                className="w-6 h-6 flex items-center justify-center rounded-md border transition-colors hover:border-red-500 hover:text-white hover:bg-red-500"
-                                style={{ borderColor: '#e2e8f0', color: '#cbd5e1' }}
+                                className="w-6 h-6 flex items-center justify-center rounded-md transition-opacity hover:opacity-80"
+                                style={{ background: '#ef4444', color: 'white' }}
                                 title="Delete"
                               >
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
