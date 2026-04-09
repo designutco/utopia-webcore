@@ -1,40 +1,29 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 export default function LoadingBar() {
   const pathname = usePathname()
   const [loading, setLoading] = useState(false)
-  const [, startTransition] = useTransition()
 
   useEffect(() => {
     setLoading(true)
-    const timeout = setTimeout(() => setLoading(false), 500)
+    const timeout = setTimeout(() => setLoading(false), 600)
     return () => clearTimeout(timeout)
   }, [pathname])
 
   if (!loading) return null
 
   return (
-    <>
-      {/* Top progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-0.5">
-        <div
-          className="h-full rounded-r-full"
-          style={{
-            background: 'linear-gradient(90deg, #60a5fa, #93c5fd)',
-            animation: 'loadingBar 1.5s ease-in-out infinite',
-          }}
-        />
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(2px)' }}>
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-slate-200" style={{ borderTopColor: 'var(--primary)', animation: 'spin 0.6s linear infinite' }} />
+        <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>Loading…</span>
       </div>
       <style>{`
-        @keyframes loadingBar {
-          0% { width: 0%; margin-left: 0; }
-          50% { width: 60%; margin-left: 20%; }
-          100% { width: 0%; margin-left: 100%; }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
-    </>
+    </div>
   )
 }
