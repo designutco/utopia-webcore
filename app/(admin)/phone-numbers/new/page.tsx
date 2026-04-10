@@ -521,8 +521,8 @@ export default function NewPhoneNumberPage() {
                                 >
                                   Edit
                                 </button>
-                                {/* Delete only for non-default */}
-                                {!isDefault && (
+                                {/* Delete only for non-default — placeholder keeps default row aligned */}
+                                {!isDefault ? (
                                   <button
                                     type="button"
                                     onClick={() => deleteExisting(n.id)}
@@ -531,6 +531,8 @@ export default function NewPhoneNumberPage() {
                                   >
                                     Delete
                                   </button>
+                                ) : (
+                                  <span className="text-xs font-medium px-3 py-1.5 rounded-md border invisible" aria-hidden="true">Delete</span>
                                 )}
                               </div>
                             </div>

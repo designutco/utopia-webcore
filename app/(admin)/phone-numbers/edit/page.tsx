@@ -425,12 +425,14 @@ export default function EditPhoneNumbersPage() {
                                 style={{ borderColor: '#e2e8f0', color: '#64748b' }}>
                                 Edit
                               </button>
-                              {!isDefault && (
+                              {!isDefault ? (
                                 <button type="button" onClick={() => deleteExisting(n.id)}
                                   className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
                                   style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>
                                   Delete
                                 </button>
+                              ) : (
+                                <span className="text-xs font-medium px-3 py-1.5 rounded-md border invisible" aria-hidden="true">Delete</span>
                               )}
                             </div>
                           </div>
