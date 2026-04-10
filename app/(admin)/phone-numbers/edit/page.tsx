@@ -267,19 +267,63 @@ export default function EditPhoneNumbersPage() {
               </div>
             </div>
 
-            {/* Leads mode indicator */}
-            {website && currentMode && (
-              <div className="rounded-xl border p-4" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#64748b' }} strokeWidth="1.8">
+            {/* Leads Mode Indicator — all 4 modes displayed */}
+            {website && (
+              <div className="rounded-xl border p-5" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#64748b' }} strokeWidth="1.8">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Current Mode</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold ml-auto" style={{ background: LEADS_MODE[currentMode].bg, color: LEADS_MODE[currentMode].color }}>
-                    {LEADS_MODE[currentMode].label}
-                  </span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Leads Mode</span>
                 </div>
-                <p className="text-xs" style={{ color: '#64748b' }}>{LEADS_MODE[currentMode].desc}</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {(['single', 'rotation', 'location', 'hybrid'] as const).map(mode => {
+                    const isCurrent = currentMode === mode
+                    const m = LEADS_MODE[mode]
+                    return (
+                      <div
+                        key={mode}
+                        className="rounded-xl p-3 border-2 transition-all relative"
+                        style={{
+                          background: isCurrent ? m.bg : 'white',
+                          borderColor: isCurrent ? m.color : '#e2e8f0',
+                          opacity: isCurrent ? 1 : 0.5,
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-bold" style={{ color: isCurrent ? m.color : '#64748b' }}>{m.label}</span>
+                          {isCurrent && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" style={{ color: m.color }}><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+                          )}
+                        </div>
+                        <p className="text-xs leading-snug" style={{ color: isCurrent ? m.color : '#94a3b8' }}>{m.desc}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="text-sm mt-4 flex items-center gap-2 flex-wrap" style={{ color: '#475569' }}>
+                  {!currentMode && existingNumbers.length === 0 && (
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: '#94a3b8' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      This website has no numbers yet. The mode will be set once you add one.
+                    </span>
+                  )}
+                  {currentMode && (
+                    <>
+                      <span>This website is currently operating in</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: LEADS_MODE[currentMode].bg, color: LEADS_MODE[currentMode].color }}>
+                        {LEADS_MODE[currentMode].label}
+                      </span>
+                      <span>mode with</span>
+                      <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{existingNumbers.filter(n => n.is_active).length}</span>
+                      <span>of</span>
+                      <span className="font-semibold" style={{ color: 'var(--foreground)' }}>{existingNumbers.length}</span>
+                      <span>number{existingNumbers.length !== 1 ? 's' : ''} active.</span>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
@@ -441,93 +485,163 @@ export default function EditPhoneNumbersPage() {
               </div>
             )}
 
-            {/* Add new number (single row, immediate commit) */}
+            {/* Add New Number — matches /new row styling */}
             <div>
               <div className="mb-3">
                 <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>Add New Number</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Click &ldquo;Add to pool&rdquo; to insert immediately into the table above.</p>
+                <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Fill in the details and click &ldquo;Add to pool&rdquo; — the number will appear in the table above immediately.</p>
               </div>
 
-              <div className="rounded-xl border p-5" style={{ borderColor: '#e2e8f0', background: '#fafbfc' }}>
-                {newError && (
-                  <div className="mb-3 p-3 rounded-lg border text-sm" style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}>
-                    {newError}
-                  </div>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                  <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Phone Number</label>
-                    <input type="text" value={newRow.phone_number}
-                      onChange={e => setNewRow(r => ({ ...r, phone_number: e.target.value }))}
-                      placeholder="e.g. 60123456789"
-                      className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
-                      style={{ borderColor: '#cbd5e1', background: 'white' }} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>WhatsApp Text</label>
-                    <input type="text" value={newRow.whatsapp_text}
-                      onChange={e => setNewRow(r => ({ ...r, whatsapp_text: e.target.value }))}
-                      placeholder="e.g. Hi, I'd like to enquire…"
-                      className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
-                      style={{ borderColor: '#cbd5e1', background: 'white' }} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Location</label>
-                    <div className="relative">
-                      <select value={newRow.location_slug}
-                        onChange={e => setNewRow(r => ({ ...r, location_slug: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer"
-                        style={{ borderColor: '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
-                        <option value="">All locations</option>
-                        {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
-                      </select>
-                      <svg className="w-3 h-3 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <div className="space-y-4">
+                <div className="rounded-xl border p-5" style={{ borderColor: '#e2e8f0', background: '#fafbfc' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'var(--primary)', color: 'white' }}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-semibold" style={{ color: '#475569' }}>
+                        New Number
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <div className="w-20">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>%</label>
-                      <input type="number" min="0" max="100" value={newRow.percentage}
-                        onChange={e => setNewRow(r => ({ ...r, percentage: e.target.value }))}
-                        placeholder="0"
+
+                  {newError && (
+                    <div className="mb-3 p-3 rounded-lg border text-sm" style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}>
+                      {newError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Phone Number</label>
+                      <input type="text" value={newRow.phone_number}
+                        onChange={e => setNewRow(r => ({ ...r, phone_number: e.target.value }))}
+                        placeholder="e.g. 60123456789"
                         className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
-                        style={{ borderColor: '#cbd5e1', background: 'white' }} />
+                        style={{ borderColor: '#cbd5e1', background: 'white' }}
+                        onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                        onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'} />
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Label <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span></label>
-                      <input type="text" value={newRow.label}
-                        onChange={e => setNewRow(r => ({ ...r, label: e.target.value }))}
-                        placeholder="e.g. Agent A"
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>WhatsApp Text</label>
+                      <input type="text" value={newRow.whatsapp_text}
+                        onChange={e => setNewRow(r => ({ ...r, whatsapp_text: e.target.value }))}
+                        placeholder="e.g. Hi, I'd like to enquire…"
                         className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
-                        style={{ borderColor: '#cbd5e1', background: 'white' }} />
+                        style={{ borderColor: '#cbd5e1', background: 'white' }}
+                        onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                        onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'} />
                     </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Location</label>
+                      <div className="relative">
+                        <select value={newRow.location_slug}
+                          onChange={e => setNewRow(r => ({ ...r, location_slug: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer"
+                          style={{ borderColor: '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
+                          <option value="">All locations</option>
+                          {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
+                        </select>
+                        <svg className="w-3 h-3 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="w-20">
+                        <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>%</label>
+                        <input type="number" min="0" max="100" value={newRow.percentage}
+                          onChange={e => setNewRow(r => ({ ...r, percentage: e.target.value }))}
+                          placeholder="0"
+                          className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                          style={{ borderColor: '#cbd5e1', background: 'white' }} />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Label <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span></label>
+                        <input type="text" value={newRow.label}
+                          onChange={e => setNewRow(r => ({ ...r, label: e.target.value }))}
+                          placeholder="e.g. Agent A"
+                          className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                          style={{ borderColor: '#cbd5e1', background: 'white' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* WA text suggestions */}
+                  {existingTexts.length > 0 && !newRow.whatsapp_text && (
+                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
+                      <p className="text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Existing texts — click to use:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {existingTexts.map((text, ti) => (
+                          <button key={ti} type="button" onClick={() => setNewRow(r => ({ ...r, whatsapp_text: text }))}
+                            className="text-xs px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                            style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}>
+                            {text.length > 50 ? text.slice(0, 50) + '…' : text}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add to pool button — full width, prominent */}
+                  <div className="mt-5 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
+                    <button type="button" onClick={addNewNumber} disabled={addingNew || !website}
+                      className="group/btn w-full flex items-center justify-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none shadow-sm hover:shadow-md"
+                      style={{ background: 'var(--primary)' }}
+                      onMouseEnter={e => { if (website && !addingNew) (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)' }}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary)'}>
+                      {addingNew ? (
+                        <>
+                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                          Adding…
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          Add to Pool
+                          <svg className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* WA text suggestions */}
-                {existingTexts.length > 0 && !newRow.whatsapp_text && (
-                  <div className="mb-4 pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <p className="text-xs font-medium mb-1.5" style={{ color: '#94a3b8' }}>Existing texts — click to use:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {existingTexts.map((text, ti) => (
-                        <button key={ti} type="button" onClick={() => setNewRow(r => ({ ...r, whatsapp_text: text }))}
-                          className="text-xs px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
-                          style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}>
-                          {text.length > 50 ? text.slice(0, 50) + '…' : text}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <button type="button" onClick={addNewNumber} disabled={addingNew || !website}
-                  className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-lg text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                  style={{ background: 'var(--primary)' }}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            {/* Info boxes */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border p-3" style={{ background: '#fff7ed', borderColor: '#fed7aa' }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                   </svg>
-                  {addingNew ? 'Adding…' : 'Add to pool'}
-                </button>
+                  <span className="text-xs font-semibold text-orange-700">Important</span>
+                </div>
+                <ul className="space-y-1">
+                  {['Domain must match exactly', 'Include country code (60…)', 'No spaces or dashes'].map(t => (
+                    <li key={t} className="text-xs text-orange-700 flex items-start gap-1"><span className="mt-0.5">•</span>{t}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-lg border p-3" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-xs font-semibold text-green-700">How it works</span>
+                </div>
+                <ul className="space-y-1">
+                  {['Edits save individually on each row', 'New numbers commit on Add to Pool', 'Mode updates automatically'].map(t => (
+                    <li key={t} className="text-xs text-green-700 flex items-start gap-1"><span className="mt-0.5">•</span>{t}</li>
+                  ))}
+                </ul>
               </div>
             </div>
           </div>
