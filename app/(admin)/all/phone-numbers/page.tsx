@@ -28,6 +28,11 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   )
 }
 
+function formatDateTime(d: string) {
+  const date = new Date(d)
+  return date.toLocaleString('en-MY', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
 export default function AllPhoneNumbersPage() {
   const [numbers, setNumbers] = useState<PhoneNumber[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
@@ -121,7 +126,7 @@ export default function AllPhoneNumbersPage() {
       ) : (
         <div className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: '#e2e8f0' }}>
           <div className="overflow-auto" style={{ maxHeight: '60vh' }}>
-            <table className="w-full text-sm min-w-[700px]">
+            <table className="w-full text-sm min-w-[900px]">
               <thead>
                 <tr className="sticky top-0 z-10" style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
                   <ThSort label="Phone Number" col="phone_number" />
@@ -129,8 +134,12 @@ export default function AllPhoneNumbersPage() {
                   <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>WhatsApp Text</th>
                   <ThSort label="Location" col="location_slug" />
                   <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Type</th>
-                  <ThSort label="%" col="percentage" />
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-center cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
+                    style={{ color: '#94a3b8' }} onClick={() => toggleSort('percentage')}>
+                    <span className="w-full inline-flex items-center justify-center gap-1">%<SortIcon active={sortKey === 'percentage'} dir={sortKey === 'percentage' ? sortDir : 'asc'} /></span>
+                  </th>
                   <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Status</th>
+                  <ThSort label="Date Added" col="created_at" />
                 </tr>
               </thead>
               <tbody>
@@ -146,13 +155,14 @@ export default function AllPhoneNumbersPage() {
                       {n.type === 'default' ? <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
                         : <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label ?? 'Custom'}</span>}
                     </td>
-                    <td className="px-4 py-3 align-middle"><span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span></td>
+                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span></td>
                     <td className="px-4 py-3 align-middle">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
                         {n.is_active ? 'Active' : 'Off'}
                       </span>
                     </td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs whitespace-nowrap" style={{ color: '#94a3b8' }}>{formatDateTime(n.created_at)}</span></td>
                   </tr>
                 ))}
               </tbody>
