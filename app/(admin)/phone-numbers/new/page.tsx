@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-const steps = ['Enter Details', 'Set Location', 'Confirm']
-
 const MY_STATES = [
   { label: 'Johor', slug: 'johor' },
   { label: 'Kedah', slug: 'kedah' },
@@ -25,36 +23,50 @@ const MY_STATES = [
   { label: 'Terengganu', slug: 'terengganu' },
 ]
 
-function InputField({
-  label, value, onChange, placeholder, hint, error, required = true
-}: {
+const LEADS_MODE: Record<string, { label: string; color: string; bg: string; desc: string }> = {
+  single: { label: 'Single', color: '#475569', bg: '#f1f5f9', desc: '1 active number, all locations' },
+  rotation: { label: 'Rotation', color: '#0369a1', bg: '#e0f2fe', desc: 'Multiple numbers rotate for all locations' },
+  location: { label: 'Location', color: '#7c3aed', bg: '#ede9fe', desc: 'Each number targets a specific location' },
+  hybrid: { label: 'Hybrid', color: '#b45309', bg: '#fef3c7', desc: 'Mix of all-location and specific-location numbers' },
+}
+
+interface NumberRow {
+  id: string
+  phone_number: string
+  whatsapp_text: string
+  location_slug: string
+  percentage: string
   label: string
-  value: string
-  onChange: (v: string) => void
-  placeholder: string
-  hint?: string
-  error?: string
-  required?: boolean
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      <input
-        type="text"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors"
-        style={{ borderColor: error ? '#fca5a5' : '#cbd5e1', background: 'white' }}
-        onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-        onBlur={e => e.currentTarget.style.borderColor = error ? '#fca5a5' : '#cbd5e1'}
-      />
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-      {hint && !error && <p className="mt-1 text-xs" style={{ color: '#475569' }}>{hint}</p>}
-    </div>
-  )
+}
+
+interface ExistingNumber {
+  phone_number: string
+  location_slug: string
+  is_active: boolean
+  whatsapp_text?: string
+}
+
+function makeId() { return Math.random().toString(36).slice(2, 9) }
+
+function emptyRow(): NumberRow {
+  return { id: makeId(), phone_number: '', whatsapp_text: '', location_slug: '', percentage: '', label: '' }
+}
+
+/** Predict leads_mode from existing active numbers + new rows */
+function predictMode(existing: ExistingNumber[], newRows: NumberRow[]): string | null {
+  const allNums = [
+    ...existing.filter(n => n.is_active).map(n => n.location_slug),
+    ...newRows.map(r => r.location_slug || 'all'),
+  ]
+  if (allNums.length === 0) return null
+
+  const allLoc = allNums.filter(l => l === 'all')
+  const specificLoc = allNums.filter(l => l !== 'all')
+
+  if (allLoc.length > 0 && specificLoc.length > 0) return 'hybrid'
+  if (specificLoc.length > 0 && allLoc.length === 0) return 'location'
+  if (allLoc.length === 1) return 'single'
+  return 'rotation'
 }
 
 export default function NewPhoneNumberPage() {
@@ -64,27 +76,25 @@ export default function NewPhoneNumberPage() {
   const prefillCompany = searchParams.get('company') ?? ''
   const [companies, setCompanies] = useState<{ id: string; name: string; company_websites: { domain: string }[] }[]>([])
   const [selectedCompany, setSelectedCompany] = useState('')
-  const [form, setForm] = useState({
-    website: prefillWebsite,
-    location_slug: '',
-    phone_number: '',
-    whatsapp_text: '',
-    percentage: '100',
-    label: '',
-  })
+  const [website, setWebsite] = useState(prefillWebsite)
+  const [rows, setRows] = useState<NumberRow[]>([emptyRow()])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState('')
+  const [existingNumbers, setExistingNumbers] = useState<ExistingNumber[]>([])
   const [existingTexts, setExistingTexts] = useState<string[]>([])
 
-  // Fetch companies
+  // Current mode (from DB) and predicted mode (after adding new numbers)
+  const currentMode = predictMode(existingNumbers, [])
+  const predictedMode = predictMode(existingNumbers, rows)
+  const modeChanged = currentMode !== null && predictedMode !== currentMode
+
   useEffect(() => {
     fetch('/api/companies')
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
           setCompanies(data)
-          // Auto-select company from URL params
           if (prefillCompany) {
             const match = data.find((c: { name: string }) => c.name === prefillCompany)
             if (match) setSelectedCompany(match.id)
@@ -97,34 +107,60 @@ export default function NewPhoneNumberPage() {
         }
       })
       .catch(() => {})
-  }, [prefillWebsite])
+  }, [prefillWebsite, prefillCompany])
 
   const companyWebsites = companies.find(c => c.id === selectedCompany)?.company_websites ?? []
 
-  const fetchExistingTexts = useCallback(async (website: string) => {
-    if (!website.trim()) { setExistingTexts([]); return }
-    const res = await fetch(`/api/phone-numbers?website=${encodeURIComponent(website.trim())}`)
+  const fetchExisting = useCallback(async (ws: string) => {
+    if (!ws.trim()) { setExistingNumbers([]); setExistingTexts([]); return }
+    const res = await fetch(`/api/phone-numbers?website=${encodeURIComponent(ws.trim())}`)
     const data = await res.json()
     if (Array.isArray(data)) {
+      setExistingNumbers(data)
       const texts = [...new Set(data.map((n: { whatsapp_text?: string }) => n.whatsapp_text).filter(Boolean))] as string[]
       setExistingTexts(texts)
-      const activeCount = data.filter((n: { is_active?: boolean }) => n.is_active !== false).length
-      const suggested = Math.floor(100 / (activeCount + 1))
-      setForm(f => ({ ...f, percentage: String(suggested || 1) }))
     }
   }, [])
 
   useEffect(() => {
-    const timeout = setTimeout(() => fetchExistingTexts(form.website), 400)
+    const timeout = setTimeout(() => fetchExisting(website), 400)
     return () => clearTimeout(timeout)
-  }, [form.website, fetchExistingTexts])
+  }, [website, fetchExisting])
+
+  // Auto-distribute percentages evenly when rows change
+  useEffect(() => {
+    const activeExisting = existingNumbers.filter(n => n.is_active).length
+    const total = activeExisting + rows.length
+    if (total === 0) return
+    const each = Math.floor(100 / total)
+    const remainder = 100 - each * total
+    setRows(prev => prev.map((r, i) => ({
+      ...r,
+      percentage: String(i === 0 ? each + remainder : each),
+    })))
+  }, [rows.length, existingNumbers])
+
+  function updateRow(id: string, field: keyof NumberRow, value: string) {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  }
+
+  function addRow() {
+    setRows(prev => [...prev, emptyRow()])
+  }
+
+  function removeRow(id: string) {
+    if (rows.length <= 1) return
+    setRows(prev => prev.filter(r => r.id !== id))
+  }
 
   function validate() {
     const e: Record<string, string> = {}
-    if (!selectedCompany) e.website = 'Please select a company and website'
-    else if (!form.website.trim()) e.website = 'Please select a website'
-    if (!form.phone_number.trim()) e.phone_number = 'Phone number is required'
-    if (!form.whatsapp_text.trim()) e.whatsapp_text = 'WhatsApp text is required'
+    if (!selectedCompany) e.company = 'Please select a company'
+    if (!website.trim()) e.website = 'Please select a website'
+    rows.forEach((r, i) => {
+      if (!r.phone_number.trim()) e[`phone_${i}`] = 'Required'
+      if (!r.whatsapp_text.trim()) e[`wa_${i}`] = 'Required'
+    })
     return e
   }
 
@@ -135,72 +171,56 @@ export default function NewPhoneNumberPage() {
     if (Object.keys(errs).length > 0) return
     setSaving(true)
     setServerError('')
-    const res = await fetch('/api/phone-numbers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        website: form.website.trim(),
 
-        location_slug: form.location_slug || 'all',
-        phone_number: form.phone_number.trim(),
-        type: 'custom',
-        whatsapp_text: form.whatsapp_text.trim(),
-        percentage: parseInt(form.percentage) || 100,
-        label: form.label.trim() || null,
-      }),
-    })
-    setSaving(false)
-    if (res.ok) {
-      router.push('/phone-numbers')
-    } else {
-      const d = await res.json()
-      setServerError(d.error ?? 'Something went wrong')
+    try {
+      // Submit all rows
+      const results = await Promise.all(
+        rows.map(r =>
+          fetch('/api/phone-numbers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              website: website.trim(),
+              location_slug: r.location_slug || 'all',
+              phone_number: r.phone_number.trim(),
+              type: 'custom',
+              whatsapp_text: r.whatsapp_text.trim(),
+              percentage: parseInt(r.percentage) || Math.floor(100 / rows.length),
+              label: r.label.trim() || null,
+            }),
+          })
+        )
+      )
+
+      const failed = results.filter(r => !r.ok)
+      if (failed.length > 0) {
+        const d = await failed[0].json()
+        setServerError(d.error ?? `${failed.length} number(s) failed to save`)
+      } else {
+        router.push(`/phone-numbers?website=${encodeURIComponent(website)}`)
+      }
+    } catch {
+      setServerError('Something went wrong')
     }
+    setSaving(false)
   }
 
   return (
     <div className="min-h-[calc(100vh-8rem)] flex flex-col justify-center">
-      <div className="max-w-xl mx-auto w-full">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Add Phone Number</h1>
-        <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Add a new number to the rotation pool for a website and location.</p>
+      <div className="max-w-2xl mx-auto w-full">
+        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Add Phone Numbers</h1>
+        <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Add one or more numbers to a website&apos;s rotation pool.</p>
 
-        {/* Main card */}
         <div className="rounded-xl border overflow-hidden" style={{ borderColor: '#cbd5e1' }}>
 
           {/* Card header */}
           <div className="px-5 py-4 flex items-center gap-2" style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
             <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Phone Number Details</span>
           </div>
 
-          {/* Step indicator */}
-          <div className="px-5 pt-5 pb-4 flex items-center" style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
-            {steps.map((step, i) => (
-              <div key={step} className="flex items-center flex-1">
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
-                    style={i === 0
-                      ? { background: 'var(--primary)', color: 'white' }
-                      : { background: '#f1f5f9', color: '#475569' }
-                    }
-                  >
-                    {i + 1}
-                  </div>
-                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: i === 0 ? 'var(--primary)' : '#475569' }}>
-                    {step}
-                  </span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className="flex-1 h-px mx-3" style={{ background: i === 0 ? 'var(--primary)' : '#f1f5f9' }} />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Form body */}
           <form onSubmit={handleSubmit}>
             <div className="p-5 space-y-4" style={{ background: 'white' }}>
 
@@ -210,189 +230,263 @@ export default function NewPhoneNumberPage() {
                 </div>
               )}
 
-              {/* Company dropdown */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
-                  Company<span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCompany}
-                    onChange={e => {
-                      setSelectedCompany(e.target.value)
-                      setForm(f => ({ ...f, website: '' }))
-                    }}
-                    className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors cursor-pointer"
-                    style={{ borderColor: errors.website ? '#fca5a5' : '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = errors.website ? '#fca5a5' : '#cbd5e1'}
-                  >
-                    <option value="">Select company…</option>
-                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+              {/* Company & Website row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                    Company<span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedCompany}
+                      onChange={e => { setSelectedCompany(e.target.value); setWebsite('') }}
+                      className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors cursor-pointer"
+                      style={{ borderColor: errors.company ? '#fca5a5' : '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
+                    >
+                      <option value="">Select company…</option>
+                      {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                    <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                  {errors.company && <p className="mt-1 text-xs text-red-500">{errors.company}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                    Website<span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={website}
+                      onChange={e => setWebsite(e.target.value)}
+                      disabled={!selectedCompany}
+                      className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ borderColor: errors.website ? '#fca5a5' : '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
+                    >
+                      <option value="">{selectedCompany ? 'Select website…' : 'Select a company first'}</option>
+                      {companyWebsites.map(w => <option key={w.domain} value={w.domain}>{w.domain}</option>)}
+                    </select>
+                    <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                  {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
                 </div>
               </div>
 
-              {/* Website dropdown */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
-                  Website<span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={form.website}
-                    onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-                    disabled={!selectedCompany}
-                    className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ borderColor: errors.website ? '#fca5a5' : '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = errors.website ? '#fca5a5' : '#cbd5e1'}
-                  >
-                    <option value="">{selectedCompany ? 'Select website…' : 'Select a company first'}</option>
-                    {companyWebsites.map(w => <option key={w.domain} value={w.domain}>{w.domain}</option>)}
-                  </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
-                {!selectedCompany && <p className="mt-1 text-xs" style={{ color: '#475569' }}>Choose a company to see its websites</p>}
-              </div>
-
-              {/* Location dropdown */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
-                  Location <span className="text-xs font-normal" style={{ color: '#475569' }}>(optional)</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={form.location_slug}
-                    onChange={e => setForm(f => ({ ...f, location_slug: e.target.value }))}
-                    className="w-full text-sm rounded-lg border focus:outline-none cursor-pointer"
-                    style={{
-                      appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-                      borderColor: '#cbd5e1', background: 'white', color: '#475569',
-                      padding: '0.625rem 2.5rem 0.625rem 0.75rem',
-                    }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'}
-                  >
-                    <option value="">All locations (no filter)</option>
-                    {MY_STATES.map(s => (
-                      <option key={s.slug} value={s.slug}>{s.label}</option>
-                    ))}
-                  </select>
-                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#475569' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <p className="mt-1 text-xs" style={{ color: '#475569' }}>Leave blank to apply this number to all locations</p>
-              </div>
-
-              <InputField
-                label="Phone Number"
-                value={form.phone_number}
-                onChange={v => setForm(f => ({ ...f, phone_number: v }))}
-                placeholder="e.g. 60123456789"
-                hint="Include country code, no spaces or dashes"
-                error={errors.phone_number}
-              />
-              <div>
-                <InputField
-                  label="WhatsApp Text"
-                  value={form.whatsapp_text}
-                  onChange={v => setForm(f => ({ ...f, whatsapp_text: v }))}
-                  placeholder="e.g. Hi, I'd like to enquire about…"
-                  hint="Pre-filled message when a visitor clicks the WhatsApp button"
-                  error={errors.whatsapp_text}
-                />
-                {existingTexts.length > 0 && !form.whatsapp_text && (
-                  <div className="mt-2 rounded-lg border p-3" style={{ borderColor: '#cbd5e1', background: '#f8fafc' }}>
-                    <p className="text-xs font-medium mb-2" style={{ color: '#475569' }}>
-                      Existing texts for this website — click to use:
-                    </p>
-                    <div className="space-y-1.5">
-                      {existingTexts.map((text, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setForm(f => ({ ...f, whatsapp_text: text }))}
-                          className="block w-full text-left text-xs px-3 py-2 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
-                          style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}
-                        >
-                          {text}
-                        </button>
-                      ))}
+              {/* Leads Mode Indicator */}
+              {website && (
+                <div className="rounded-lg border p-4" style={{ borderColor: modeChanged ? '#fbbf24' : '#e2e8f0', background: modeChanged ? '#fffbeb' : '#f8fafc' }}>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: modeChanged ? '#d97706' : '#64748b' }} strokeWidth="1.8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-xs font-medium" style={{ color: '#475569' }}>Leads Mode</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Current mode */}
+                      {currentMode && LEADS_MODE[currentMode] && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: LEADS_MODE[currentMode].bg, color: LEADS_MODE[currentMode].color }}>
+                          {LEADS_MODE[currentMode].label}
+                        </span>
+                      )}
+                      {!currentMode && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#f1f5f9', color: '#94a3b8' }}>
+                          No numbers yet
+                        </span>
+                      )}
+                      {/* Arrow + new mode if changed */}
+                      {modeChanged && predictedMode && LEADS_MODE[predictedMode] && (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#d97706' }} strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium ring-2 ring-offset-1" style={{ background: LEADS_MODE[predictedMode].bg, color: LEADS_MODE[predictedMode].color, ringColor: '#fbbf24' }}>
+                            {LEADS_MODE[predictedMode].label}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
-                  Lead Percentage<span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={form.percentage}
-                    onChange={e => setForm(f => ({ ...f, percentage: e.target.value }))}
-                    className="w-20 px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors"
-                    style={{ borderColor: '#cbd5e1', background: 'white' }}
-                    onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                    onBlur={e => e.currentTarget.style.borderColor = '#cbd5e1'}
-                  />
-                  <span className="text-sm" style={{ color: '#475569' }}>%</span>
+                  {/* Description */}
+                  <p className="text-[10px] mt-2" style={{ color: modeChanged ? '#92400e' : '#94a3b8' }}>
+                    {modeChanged
+                      ? `Adding ${rows.length} number${rows.length > 1 ? 's' : ''} will change mode from ${LEADS_MODE[currentMode!]?.label} → ${LEADS_MODE[predictedMode!]?.label}. ${LEADS_MODE[predictedMode!]?.desc}.`
+                      : predictedMode && LEADS_MODE[predictedMode]
+                        ? LEADS_MODE[predictedMode].desc
+                        : 'Select a website to see the current leads mode.'
+                    }
+                  </p>
+                  {/* Existing number count */}
+                  {existingNumbers.length > 0 && (
+                    <p className="text-[10px] mt-1" style={{ color: '#94a3b8' }}>
+                      Currently {existingNumbers.filter(n => n.is_active).length} active / {existingNumbers.length} total numbers on this website
+                    </p>
+                  )}
                 </div>
-                <p className="mt-1 text-xs" style={{ color: '#475569' }}>
-                  All active numbers under the same website must total exactly 100%. You may need to adjust existing numbers after adding this one.
-                </p>
-              </div>
-              <InputField
-                label="Label"
-                value={form.label}
-                onChange={v => setForm(f => ({ ...f, label: v }))}
-                placeholder="e.g. Agent A"
-                hint="Optional — helps identify this number in the list"
-                required={false}
-              />
-            </div>
+              )}
 
-            {/* Info boxes */}
-            <div className="grid grid-cols-2 gap-3 px-5 pb-5" style={{ background: 'white' }}>
-              <div className="rounded-lg border p-3" style={{ background: '#fff7ed', borderColor: '#fed7aa' }}>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                  </svg>
-                  <span className="text-xs font-semibold text-orange-700">Important</span>
+              {/* Number rows */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                    Phone Numbers<span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addRow}
+                    className="text-xs font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                    style={{ borderColor: '#cbd5e1', color: '#475569' }}
+                  >
+                    + Add another number
+                  </button>
                 </div>
-                <ul className="space-y-1">
-                  {['Domain must match exactly', 'Include country code (60…)', 'No spaces or dashes in number'].map(t => (
-                    <li key={t} className="text-xs text-orange-700 flex items-start gap-1">
-                      <span className="mt-0.5">•</span>{t}
-                    </li>
+
+                <div className="space-y-3">
+                  {rows.map((row, i) => (
+                    <div key={row.id} className="rounded-lg border p-4" style={{ borderColor: '#e2e8f0', background: '#fafbfc' }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-semibold" style={{ color: '#475569' }}>
+                          Number {i + 1}
+                        </span>
+                        {rows.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeRow(row.id)}
+                            className="text-xs px-2 py-0.5 rounded transition-colors hover:bg-red-50 hover:text-red-500"
+                            style={{ color: '#94a3b8' }}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Phone number */}
+                        <div>
+                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Phone Number</label>
+                          <input
+                            type="text"
+                            value={row.phone_number}
+                            onChange={e => updateRow(row.id, 'phone_number', e.target.value)}
+                            placeholder="e.g. 60123456789"
+                            className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                            style={{ borderColor: errors[`phone_${i}`] ? '#fca5a5' : '#cbd5e1', background: 'white' }}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                            onBlur={e => e.currentTarget.style.borderColor = errors[`phone_${i}`] ? '#fca5a5' : '#cbd5e1'}
+                          />
+                          {errors[`phone_${i}`] && <p className="mt-0.5 text-[10px] text-red-500">{errors[`phone_${i}`]}</p>}
+                        </div>
+
+                        {/* WhatsApp text */}
+                        <div>
+                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>WhatsApp Text</label>
+                          <input
+                            type="text"
+                            value={row.whatsapp_text}
+                            onChange={e => updateRow(row.id, 'whatsapp_text', e.target.value)}
+                            placeholder="e.g. Hi, I'd like to enquire…"
+                            className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                            style={{ borderColor: errors[`wa_${i}`] ? '#fca5a5' : '#cbd5e1', background: 'white' }}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                            onBlur={e => e.currentTarget.style.borderColor = errors[`wa_${i}`] ? '#fca5a5' : '#cbd5e1'}
+                          />
+                          {errors[`wa_${i}`] && <p className="mt-0.5 text-[10px] text-red-500">{errors[`wa_${i}`]}</p>}
+                        </div>
+
+                        {/* Location */}
+                        <div>
+                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Location</label>
+                          <div className="relative">
+                            <select
+                              value={row.location_slug}
+                              onChange={e => updateRow(row.id, 'location_slug', e.target.value)}
+                              className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer"
+                              style={{ borderColor: '#cbd5e1', background: 'white', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}
+                            >
+                              <option value="">All locations</option>
+                              {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
+                            </select>
+                            <svg className="w-3 h-3 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                          </div>
+                        </div>
+
+                        {/* Percentage + Label */}
+                        <div className="flex gap-3">
+                          <div className="w-20">
+                            <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>%</label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="100"
+                              value={row.percentage}
+                              onChange={e => updateRow(row.id, 'percentage', e.target.value)}
+                              className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                              style={{ borderColor: '#cbd5e1', background: 'white' }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Label <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span></label>
+                            <input
+                              type="text"
+                              value={row.label}
+                              onChange={e => updateRow(row.id, 'label', e.target.value)}
+                              placeholder="e.g. Agent A"
+                              className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors"
+                              style={{ borderColor: '#cbd5e1', background: 'white' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* WA text suggestions (only show for first row if no text filled) */}
+                      {i === 0 && existingTexts.length > 0 && !row.whatsapp_text && (
+                        <div className="mt-3 pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
+                          <p className="text-[10px] font-medium mb-1.5" style={{ color: '#94a3b8' }}>Existing texts — click to use:</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {existingTexts.map((text, ti) => (
+                              <button
+                                key={ti}
+                                type="button"
+                                onClick={() => updateRow(row.id, 'whatsapp_text', text)}
+                                className="text-[10px] px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                                style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}
+                              >
+                                {text.length > 50 ? text.slice(0, 50) + '…' : text}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-              <div className="rounded-lg border p-3" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-xs font-semibold text-green-700">How rotation works</span>
+
+              {/* Info boxes */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg border p-3" style={{ background: '#fff7ed', borderColor: '#fed7aa' }}>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                    <span className="text-xs font-semibold text-orange-700">Important</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {['Domain must match exactly', 'Include country code (60…)', 'No spaces or dashes'].map(t => (
+                      <li key={t} className="text-xs text-orange-700 flex items-start gap-1"><span className="mt-0.5">•</span>{t}</li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1">
-                  {['Add multiple numbers per location', 'One is picked at random per click', 'Toggle active to pause a number'].map(t => (
-                    <li key={t} className="text-xs text-green-700 flex items-start gap-1">
-                      <span className="mt-0.5">•</span>{t}
-                    </li>
-                  ))}
-                </ul>
+                <div className="rounded-lg border p-3" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-semibold text-green-700">How it works</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {['Percentages auto-distribute evenly', 'Mode updates automatically on save', 'Toggle active to pause a number'].map(t => (
+                      <li key={t} className="text-xs text-green-700 flex items-start gap-1"><span className="mt-0.5">•</span>{t}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
 
@@ -413,7 +507,7 @@ export default function NewPhoneNumberPage() {
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary)'}
               >
-                {saving ? 'Saving…' : 'Add Phone Number'}
+                {saving ? 'Saving…' : `Add ${rows.length} Number${rows.length > 1 ? 's' : ''}`}
               </button>
             </div>
           </form>
