@@ -60,9 +60,6 @@ export default function PhoneNumbersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterWebsite, setFilterWebsite] = useState(() => searchParams.get('website') ?? '')
-  const [editingWebsite, setEditingWebsite] = useState<string | null>(null)
-  const [editRows, setEditRows] = useState<Record<string, Partial<PhoneNumber>>>({})
-  const [error, setError] = useState('')
 
   useEffect(() => {
     const fromUrl = searchParams.get('website')
@@ -110,73 +107,6 @@ export default function PhoneNumbersPage() {
     })
     if (!ok) return
     await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
-    fetchNumbers()
-  }
-
-  function startEditGroup(website: string, rows: PhoneNumber[]) {
-    const map: Record<string, Partial<PhoneNumber>> = {}
-    rows.forEach(r => {
-      map[r.id] = { phone_number: r.phone_number, whatsapp_text: r.whatsapp_text, percentage: r.percentage ?? 100, label: r.label ?? '', is_active: r.is_active, location_slug: r.location_slug }
-    })
-    setEditRows(map)
-    setEditingWebsite(website)
-    setError('')
-  }
-
-  function updateEditRow(id: string, updates: Partial<PhoneNumber>, allRows?: PhoneNumber[]) {
-    setEditRows(prev => {
-      const next = { ...prev, [id]: { ...prev[id], ...updates } }
-      // Auto-redistribute if percentage changed
-      if (updates.percentage !== undefined && allRows) {
-        const activeIds = allRows.filter(r => next[r.id]?.is_active !== false).map(r => r.id)
-        const otherIds = activeIds.filter(oid => oid !== id)
-        if (otherIds.length > 0) {
-          const remaining = 100 - (updates.percentage as number)
-          const base = Math.floor(remaining / otherIds.length)
-          const rem = remaining - base * otherIds.length
-          otherIds.forEach((oid, i) => {
-            next[oid] = { ...next[oid], percentage: Math.max(0, base + (i < rem ? 1 : 0)) }
-          })
-        }
-      }
-      return next
-    })
-  }
-
-  function distributeEvenly(rows: PhoneNumber[]) {
-    const activeIds = rows.filter(r => editRows[r.id]?.is_active !== false).map(r => r.id)
-    if (activeIds.length === 0) return
-    const base = Math.floor(100 / activeIds.length)
-    const remainder = 100 - base * activeIds.length
-    setEditRows(prev => {
-      const next = { ...prev }
-      activeIds.forEach((id, i) => {
-        next[id] = { ...next[id], percentage: base + (i < remainder ? 1 : 0) }
-      })
-      return next
-    })
-  }
-
-  async function saveAllEdits() {
-    setError('')
-    for (const [id, vals] of Object.entries(editRows)) {
-      if (!vals.phone_number) { setError('All phone numbers are required'); return }
-      const res = await fetch(`/api/phone-numbers/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone_number: vals.phone_number,
-          whatsapp_text: vals.whatsapp_text,
-          percentage: vals.percentage ?? 100,
-          label: vals.label || null,
-          is_active: vals.is_active,
-          location_slug: vals.location_slug,
-        }),
-      })
-      if (!res.ok) { const d = await res.json(); setError(d.error ?? 'Save failed'); return }
-    }
-    setEditingWebsite(null)
-    setEditRows({})
     fetchNumbers()
   }
 
@@ -364,11 +294,7 @@ export default function PhoneNumbersPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 rounded-lg border text-sm" style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}>{error}</div>
-      )}
-
-      {/* Grouped by company then website */}
+{/* Grouped by company then website */}
       {loading ? (
         <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
       ) : visibleEntries.length === 0 ? (
@@ -391,13 +317,8 @@ export default function PhoneNumbersPage() {
               )}
               <div className="space-y-5">
           {companyWebsites.map(([website, rows]) => {
-            const isGroupEditing = editingWebsite === website
-            const activeRows = isGroupEditing
-              ? rows.filter(r => editRows[r.id]?.is_active !== false)
-              : rows.filter(r => r.is_active)
-            const totalPct = isGroupEditing
-              ? activeRows.reduce((s, r) => s + ((editRows[r.id]?.percentage as number) ?? r.percentage ?? 100), 0)
-              : activeRows.reduce((s, r) => s + (r.percentage ?? 100), 0)
+            const activeRows = rows.filter(r => r.is_active)
+            const totalPct = activeRows.reduce((s, r) => s + (r.percentage ?? 100), 0)
             const pctOk = activeRows.length === 0 || totalPct === 100
             return (
             <section key={website} className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: '#cbd5e1' }}>
@@ -422,16 +343,14 @@ export default function PhoneNumbersPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    {!isGroupEditing && (
-                      <button
-                        onClick={() => startEditGroup(website, rows)}
-                        className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full transition-colors hover:bg-slate-200 whitespace-nowrap"
-                        style={{ background: '#e2e8f0', color: '#475569' }}
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                        Edit
-                      </button>
-                    )}
+                    <Link
+                      href={`/phone-numbers/new?website=${encodeURIComponent(website)}${openCompany ? `&company=${encodeURIComponent(openCompany)}` : ''}`}
+                      className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full transition-colors hover:bg-slate-200 whitespace-nowrap"
+                      style={{ background: '#e2e8f0', color: '#475569' }}
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      Edit
+                    </Link>
                     <Link
                       href={`/phone-numbers/new?website=${encodeURIComponent(website)}${openCompany ? `&company=${encodeURIComponent(openCompany)}` : ''}`}
                       className="inline-flex items-center gap-1 h-6 sm:h-7 text-[10px] sm:text-xs font-medium px-2.5 rounded-full text-white transition-opacity hover:opacity-90 whitespace-nowrap"
@@ -446,239 +365,70 @@ export default function PhoneNumbersPage() {
                 </div>
               </div>
 
-              {/* Edit mode: percentage distribution bar */}
-              {isGroupEditing && (
-                <div className="px-4 sm:px-5 py-3" style={{ background: '#f8fafc', borderBottom: '1px solid #cbd5e1' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-medium" style={{ color: '#475569' }}>Lead Distribution</span>
-                    <button
-                      onClick={() => distributeEvenly(rows)}
-                      className="text-[10px] font-medium px-2 py-1 rounded-md transition-colors hover:bg-slate-200"
-                      style={{ color: 'var(--primary)', background: '#e2e8f0' }}
-                    >
-                      Distribute equally
-                    </button>
-                  </div>
-                  {/* Visual bar */}
-                  <div className="flex h-3 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
-                    {rows.map(row => {
-                      const val = (editRows[row.id]?.percentage as number) ?? row.percentage ?? 100
-                      const active = editRows[row.id]?.is_active !== false
-                      if (!active || val <= 0) return null
-                      const colors = ['#1e3a5f', '#2979d6', '#475569', '#64748b', '#94a3b8', '#cbd5e1']
-                      const idx = rows.indexOf(row) % colors.length
-                      return <div key={row.id} style={{ width: `${val}%`, background: colors[idx] }} title={`${row.phone_number}: ${val}%`} />
-                    })}
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    {rows.map((row, idx) => {
-                      const val = (editRows[row.id]?.percentage as number) ?? row.percentage ?? 100
-                      const active = editRows[row.id]?.is_active !== false
-                      const colors = ['#1e3a5f', '#2979d6', '#475569', '#64748b', '#94a3b8', '#cbd5e1']
+              {/* Rows — professional table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Phone Number</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>WhatsApp Text</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Location</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Type</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-center" style={{ color: '#94a3b8' }}>%</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Status</th>
+                      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-right" style={{ color: '#94a3b8' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, i) => {
+                      const isDefault = row.type === 'default'
                       return (
-                        <div key={row.id} className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: active ? colors[idx % colors.length] : '#e2e8f0' }} />
-                          <span className="text-[10px]" style={{ color: active ? '#475569' : '#94a3b8' }}>{row.phone_number.slice(-4)}: {val}%</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  {!pctOk && (
-                    <p className="text-[10px] mt-2" style={{ color: '#dc2626' }}>Total is {totalPct}% — must equal 100%</p>
-                  )}
-                </div>
-              )}
-
-              {/* Rows */}
-              <div>
-                {rows.map((row, i) => {
-                  const isDefault = row.type === 'default'
-                  const vals = editRows[row.id]
-                  return (
-                    <div key={row.id} style={{ borderBottom: i < rows.length - 1 ? '1px solid #cbd5e1' : 'none' }}>
-                      {isGroupEditing ? (() => {
-                        const existingTexts = [...new Set(rows.map(r => r.whatsapp_text).filter(Boolean).filter(t => t !== (vals?.whatsapp_text ?? '')))]
-                        return (
-                        <div className="px-4 sm:px-5 py-3" style={{ background: 'white' }}>
-                          {/* Badge */}
-                          <div className="flex items-center gap-1.5 mb-2">
+                        <tr key={row.id} className="hover:bg-[#f8fafc] transition-colors" style={{ borderBottom: i < rows.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                          <td className="px-4 py-3 align-middle">
+                            <span className="text-sm font-medium font-mono" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
+                          </td>
+                          <td className="px-4 py-3 align-middle">
+                            <span className="text-xs truncate block max-w-[240px]" style={{ color: '#94a3b8' }}>{row.whatsapp_text || '—'}</span>
+                          </td>
+                          <td className="px-4 py-3 align-middle">
+                            <span className="text-xs" style={{ color: '#94a3b8' }}>{row.location_slug === 'all' ? 'All' : (MY_STATES.find(s => s.slug === row.location_slug)?.label ?? row.location_slug)}</span>
+                          </td>
+                          <td className="px-4 py-3 align-middle">
                             {isDefault ? (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
-                            ) : row.label ? (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
-                            ) : null}
-                          </div>
-                          {/* Desktop: all in one row / Mobile: stacked */}
-                          <div className="hidden sm:flex items-end gap-2">
-                            <div className="w-40 flex-shrink-0">
-                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Phone</label>
-                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono" style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.phone_number ?? ''} onChange={e => updateEditRow(row.id, { phone_number: e.target.value })} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
-                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors" style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.whatsapp_text ?? ''} onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })} />
-                              {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
-                                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Suggestions:</span>
-                                  {existingTexts.slice(0, 3).map((text, ti) => (
-                                    <button key={ti} type="button" onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
-                                      className="text-[10px] px-2.5 py-1 rounded-md truncate max-w-[180px] transition-all cursor-pointer"
-                                      style={{ background: '#f1f5f9', color: 'var(--primary)' }}
-                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
-                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f1f5f9'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}>
-                                      {text}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            {!isDefault && (
-                              <div className="w-28 flex-shrink-0">
-                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Location</label>
-                                <select className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
-                                  style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center', paddingRight: '1.5rem' }}
-                                  value={vals?.location_slug ?? 'all'} onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}>
-                                  {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
-                                </select>
-                              </div>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label ?? 'Custom'}</span>
                             )}
-                            <div className="w-14 flex-shrink-0">
-                              <label className="text-[10px] mb-1 block text-center" style={{ color: '#94a3b8' }}>%</label>
-                              <input type="number" min="0" max="100" className="px-1 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors text-center" style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.percentage ?? 100} onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)} />
-                            </div>
-                            <div className="flex-shrink-0">
-                              <label className="text-[10px] mb-1 block text-center" style={{ color: '#94a3b8' }}>Active</label>
-                              <button onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}>
-                                <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
-                              </button>
-                            </div>
-                          </div>
-                          {/* Mobile: stacked rows */}
-                          <div className="sm:hidden space-y-2">
-                            <div className="flex gap-2">
-                              <div className="flex-1">
-                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Phone</label>
-                                <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors font-mono" style={{ borderColor: '#e2e8f0' }}
-                                  value={vals?.phone_number ?? ''} onChange={e => updateEditRow(row.id, { phone_number: e.target.value })} />
-                              </div>
-                              {!isDefault && (
-                                <div className="w-28 flex-shrink-0">
-                                  <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Location</label>
-                                  <select className="px-2 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors cursor-pointer"
-                                    style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2394a3b8\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E") no-repeat right 6px center', paddingRight: '1.5rem' }}
-                                    value={vals?.location_slug ?? 'all'} onChange={e => updateEditRow(row.id, { location_slug: e.target.value })}>
-                                    {MY_STATES.map(s => <option key={s.slug} value={s.slug}>{s.label}</option>)}
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>WhatsApp Text</label>
-                              <input className="px-2.5 py-1.5 border rounded-lg text-xs w-full outline-none focus:border-[var(--primary)] transition-colors" style={{ borderColor: '#e2e8f0' }}
-                                value={vals?.whatsapp_text ?? ''} onChange={e => updateEditRow(row.id, { whatsapp_text: e.target.value })} />
-                              {/* Suggestions below WA text — mobile only */}
-                              {existingTexts.length > 0 && !(vals?.whatsapp_text) && (
-                                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
-                                  <span className="text-[10px]" style={{ color: '#94a3b8' }}>Suggestions:</span>
-                                  {existingTexts.slice(0, 3).map((text, ti) => (
-                                    <button key={ti} type="button" onClick={() => updateEditRow(row.id, { whatsapp_text: text })}
-                                      className="text-[10px] px-2.5 py-1 rounded-md truncate max-w-[180px] transition-all cursor-pointer"
-                                      style={{ background: '#f1f5f9', color: 'var(--primary)' }}
-                                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--primary)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
-                                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f1f5f9'; (e.currentTarget as HTMLElement).style.color = 'var(--primary)' }}>
-                                      {text}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-end gap-3">
-                              <div>
-                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>%</label>
-                                <input type="number" min="0" max="100" className="px-2 py-1.5 border rounded-lg text-xs w-14 outline-none focus:border-[var(--primary)] transition-colors text-center" style={{ borderColor: '#e2e8f0' }}
-                                  value={vals?.percentage ?? 100} onChange={e => updateEditRow(row.id, { percentage: parseInt(e.target.value) || 0 }, rows)} />
-                              </div>
-                              <div>
-                                <label className="text-[10px] mb-1 block" style={{ color: '#94a3b8' }}>Active</label>
-                                <button onClick={() => updateEditRow(row.id, { is_active: !vals?.is_active }, rows)} className="relative w-9 h-5 rounded-full transition-colors" style={{ background: vals?.is_active ? '#16a34a' : '#cbd5e1' }}>
-                                  <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ left: vals?.is_active ? '18px' : '2px' }} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )})() : (
-                        /* View row */
-                        <div className="px-4 sm:px-5 py-3 flex items-center gap-3 hover:bg-[#f1f5f9] transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-xs sm:text-sm font-medium font-mono truncate" style={{ color: 'var(--foreground)' }}>{row.phone_number}</span>
-                              {isDefault ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
-                              ) : row.label ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{row.label}</span>
-                              ) : null}
-                            </div>
-                            {row.whatsapp_text && <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: '#475569' }}>{row.whatsapp_text}</p>}
-                            {!isDefault && row.location_slug !== 'all' && (
-                              <p className="text-[10px] mt-0.5" style={{ color: '#94a3b8' }}>{MY_STATES.find(s => s.slug === row.location_slug)?.label ?? row.location_slug}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0">
-                            <div className="flex flex-col items-center gap-0.5">
-                              <span className="text-[10px] font-semibold" style={{ color: 'var(--foreground)' }}>{row.percentage ?? 100}%</span>
-                              <div className="w-8 h-1 rounded-full" style={{ background: '#e2e8f0' }}>
-                                <div className="h-full rounded-full" style={{ width: `${row.percentage ?? 100}%`, background: row.is_active ? 'var(--primary)' : '#94a3b8' }} />
-                              </div>
-                            </div>
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
-                              style={row.is_active ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#94a3b8' }}
-                            >
+                          </td>
+                          <td className="px-4 py-3 align-middle text-center">
+                            <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{row.percentage ?? 100}%</span>
+                          </td>
+                          <td className="px-4 py-3 align-middle">
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${row.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                               <span className="w-1.5 h-1.5 rounded-full" style={{ background: row.is_active ? '#16a34a' : '#94a3b8' }} />
                               {row.is_active ? 'Active' : 'Off'}
                             </span>
-                            {!isDefault ? (
+                          </td>
+                          <td className="px-4 py-3 align-middle text-right">
+                            {!isDefault && (
                               <button
                                 onClick={() => deleteNumber(row.id)}
-                                className="w-6 h-6 flex items-center justify-center rounded-md border transition-colors hover:bg-red-500 hover:border-red-500 hover:text-white"
-                                style={{ borderColor: '#e2e8f0', color: '#cbd5e1' }}
+                                className="w-7 h-7 inline-flex items-center justify-center rounded-md border transition-colors hover:bg-red-50 hover:border-red-300 hover:text-red-500"
+                                style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
                                 title="Delete"
                               >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
-                            ) : (
-                              <div className="w-6 flex-shrink-0" />
                             )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
-
-              {/* Edit mode footer */}
-              {isGroupEditing && (
-                <div className="px-4 sm:px-5 py-3 flex items-center justify-end gap-2" style={{ background: '#f8fafc', borderTop: '1px solid #cbd5e1' }}>
-                  <button
-                    onClick={() => { setEditingWebsite(null); setEditRows({}) }}
-                    className="px-4 py-2 text-xs rounded-lg border transition-colors hover:bg-white"
-                    style={{ borderColor: '#cbd5e1', color: '#475569' }}
-                  >Cancel</button>
-                  <button
-                    onClick={saveAllEdits}
-                    disabled={!pctOk}
-                    className="px-4 py-2 text-xs font-medium text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-                    style={{ background: 'var(--primary)' }}
-                  >Save All Changes</button>
-                </div>
-              )}
             </section>
           )})}
               </div>

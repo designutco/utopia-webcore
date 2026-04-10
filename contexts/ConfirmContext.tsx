@@ -26,21 +26,21 @@ interface PendingConfirm extends ConfirmOptions {
 
 const VARIANT_STYLES: Record<ConfirmVariant, { ring: string; iconColor: string; iconBg: string; btn: string; btnHover: string }> = {
   danger: {
-    ring: '#dbeafe',
+    ring: '#fee2e2',
     iconColor: '#ffffff',
-    iconBg: '#2979d6',
-    btn: '#2979d6',
-    btnHover: '#1e60b8',
+    iconBg: '#dc2626',
+    btn: '#dc2626',
+    btnHover: '#b91c1c',
   },
   warning: {
-    ring: '#fed7aa',
+    ring: '#fef3c7',
     iconColor: '#ffffff',
     iconBg: '#d97706',
     btn: '#d97706',
     btnHover: '#b45309',
   },
   info: {
-    ring: '#bfdbfe',
+    ring: '#dbeafe',
     iconColor: '#ffffff',
     iconBg: '#2979d6',
     btn: '#2979d6',
@@ -84,8 +84,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           onClick={handleCancel}
         >
           <div
-            className="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl p-7 pt-10"
-            style={{ animation: 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+            className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl p-8 pt-10"
+            style={{
+              animation: 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close X */}
@@ -126,12 +129,18 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-bold text-center mb-2" style={{ color: 'var(--foreground)' }}>
+            <h3
+              className="text-[22px] font-semibold text-center mb-2 tracking-tight"
+              style={{ color: '#0f172a', letterSpacing: '-0.01em' }}
+            >
               {pending.title ?? 'Are you sure?'}
             </h3>
 
             {/* Message */}
-            <div className="text-sm text-center leading-relaxed mb-7 max-w-xs mx-auto" style={{ color: '#64748b' }}>
+            <div
+              className="text-[14px] text-center leading-relaxed mb-8 max-w-xs mx-auto"
+              style={{ color: '#64748b' }}
+            >
               {pending.message}
             </div>
 
@@ -140,8 +149,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="min-w-[110px] text-sm font-semibold px-5 py-2.5 rounded-xl border transition-colors hover:bg-slate-50"
-                style={{ borderColor: '#1e293b', color: '#1e293b', background: 'white' }}
+                className="flex-1 max-w-[140px] text-[14px] font-semibold px-5 py-2.5 rounded-lg border transition-colors hover:bg-slate-50"
+                style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}
               >
                 {pending.cancelLabel ?? 'Cancel'}
               </button>
@@ -149,7 +158,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={handleConfirm}
                 autoFocus
-                className="min-w-[110px] text-sm font-semibold px-5 py-2.5 rounded-xl text-white transition-colors shadow-sm"
+                className="flex-1 max-w-[140px] text-[14px] font-semibold px-5 py-2.5 rounded-lg text-white transition-colors shadow-sm"
                 style={{ background: styles.btn }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = styles.btnHover)}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = styles.btn)}
