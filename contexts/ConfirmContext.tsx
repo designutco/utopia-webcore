@@ -24,27 +24,27 @@ interface PendingConfirm extends ConfirmOptions {
   resolve: (value: boolean) => void
 }
 
-const VARIANT_STYLES: Record<ConfirmVariant, { ring: string; icon: string; iconBg: string; btn: string; btnHover: string }> = {
+const VARIANT_STYLES: Record<ConfirmVariant, { ring: string; iconColor: string; iconBg: string; btn: string; btnHover: string }> = {
   danger: {
-    ring: '#fecaca',
-    icon: '#dc2626',
-    iconBg: '#fef2f2',
-    btn: '#dc2626',
-    btnHover: '#b91c1c',
+    ring: '#dbeafe',
+    iconColor: '#ffffff',
+    iconBg: '#2979d6',
+    btn: '#2979d6',
+    btnHover: '#1e60b8',
   },
   warning: {
     ring: '#fed7aa',
-    icon: '#d97706',
-    iconBg: '#fff7ed',
+    iconColor: '#ffffff',
+    iconBg: '#d97706',
     btn: '#d97706',
     btnHover: '#b45309',
   },
   info: {
     ring: '#bfdbfe',
-    icon: '#2563eb',
-    iconBg: '#eff6ff',
-    btn: 'var(--primary)',
-    btnHover: 'var(--primary-hover)',
+    iconColor: '#ffffff',
+    iconBg: '#2979d6',
+    btn: '#2979d6',
+    btnHover: '#1e60b8',
   },
 }
 
@@ -80,54 +80,68 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {pending && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ background: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.15s ease' }}
+          style={{ background: 'rgba(15, 23, 42, 0.45)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.15s ease' }}
           onClick={handleCancel}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border bg-white shadow-2xl overflow-hidden"
-            style={{ borderColor: '#e2e8f0', animation: 'popIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)' }}
+            className="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl p-7 pt-10"
+            style={{ animation: 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Body */}
-            <div className="p-6 flex gap-4">
-              {/* Icon */}
-              <div className="flex-shrink-0">
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center"
-                  style={{ background: styles.iconBg, boxShadow: `0 0 0 6px ${styles.ring}33` }}
-                >
-                  {variant === 'danger' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.icon }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  )}
-                  {variant === 'warning' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.icon }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                    </svg>
-                  )}
-                  {variant === 'info' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.icon }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                {pending.title && (
-                  <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--foreground)' }}>{pending.title}</h3>
+            {/* Close X */}
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="absolute top-4 right-4 w-6 h-6 flex items-center justify-center rounded-md transition-colors hover:bg-slate-100"
+              style={{ color: '#94a3b8' }}
+              aria-label="Close"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ background: styles.iconBg, boxShadow: `0 0 0 8px ${styles.ring}` }}
+              >
+                {variant === 'danger' && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" style={{ color: styles.iconColor }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
                 )}
-                <div className="text-sm leading-relaxed" style={{ color: '#64748b' }}>{pending.message}</div>
+                {variant === 'warning' && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" style={{ color: styles.iconColor }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                )}
+                {variant === 'info' && (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" style={{ color: styles.iconColor }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
               </div>
             </div>
-            {/* Footer */}
-            <div className="px-6 py-4 flex items-center justify-end gap-2" style={{ background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+
+            {/* Title */}
+            <h3 className="text-xl font-bold text-center mb-2" style={{ color: 'var(--foreground)' }}>
+              {pending.title ?? 'Are you sure?'}
+            </h3>
+
+            {/* Message */}
+            <div className="text-sm text-center leading-relaxed mb-7 max-w-xs mx-auto" style={{ color: '#64748b' }}>
+              {pending.message}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="text-sm font-medium px-4 py-2 rounded-lg border transition-colors hover:bg-white"
-                style={{ borderColor: '#cbd5e1', color: '#475569', background: 'white' }}
+                className="min-w-[110px] text-sm font-semibold px-5 py-2.5 rounded-xl border transition-colors hover:bg-slate-50"
+                style={{ borderColor: '#1e293b', color: '#1e293b', background: 'white' }}
               >
                 {pending.cancelLabel ?? 'Cancel'}
               </button>
@@ -135,7 +149,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={handleConfirm}
                 autoFocus
-                className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-colors"
+                className="min-w-[110px] text-sm font-semibold px-5 py-2.5 rounded-xl text-white transition-colors shadow-sm"
                 style={{ background: styles.btn }}
                 onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = styles.btnHover)}
                 onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = styles.btn)}
@@ -150,7 +164,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               to { opacity: 1; }
             }
             @keyframes popIn {
-              from { transform: scale(0.95) translateY(4px); opacity: 0; }
+              from { transform: scale(0.92) translateY(8px); opacity: 0; }
               to { transform: scale(1) translateY(0); opacity: 1; }
             }
           `}</style>
