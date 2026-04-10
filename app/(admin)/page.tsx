@@ -1,24 +1,65 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getUserScope } from '@/lib/getUserScope'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const service = createServiceClient()
-  const { data: profile } = await service.from('user_profiles').select('role').eq('id', user?.id ?? '').maybeSingle()
-  const role = profile?.role ?? 'admin'
+  const scope = user ? await getUserScope(user.id) : { role: 'admin' as const, isScoped: false, companyIds: null, domains: null }
+  const role = scope.role
   const isWriter = role === 'writer'
 
-  const [{ count: phoneCount }, { count: postCount }, { data: websitesData }, { data: recentPosts }, { data: recentPhones }] = await Promise.all([
-    supabase.from('phone_numbers').select('*', { count: 'exact', head: true }),
-    supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
-    supabase.from('phone_numbers').select('website'),
-    service.from('blog_posts').select('id, website, slug, status, updated_at, blog_translations(language, title)').order('updated_at', { ascending: false }).limit(5),
-    service.from('phone_numbers').select('id, website, phone_number, label, type, updated_at').order('updated_at', { ascending: false }).limit(5),
-  ])
-  const websiteCount = new Set((websitesData ?? []).map((r: { website: string }) => r.website)).size
+  // Build scoped queries — if user is restricted to certain domains, apply .in() filter
+  const allowedDomains = scope.isScoped ? (scope.domains ?? []) : null
+  const noAccess = scope.isScoped && allowedDomains!.length === 0
+
+  type CountQuery = { count: number | null }
+  type WebsitesData = { data: { website: string }[] | null }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type RecentData = { data: any[] | null }
+
+  let phoneCountRes: CountQuery = { count: 0 }
+  let postCountRes: CountQuery = { count: 0 }
+  let websitesRes: WebsitesData = { data: [] }
+  let recentPostsRes: RecentData = { data: [] }
+  let recentPhonesRes: RecentData = { data: [] }
+
+  if (!noAccess) {
+    const phoneCountQuery = service.from('phone_numbers').select('*', { count: 'exact', head: true })
+    const postCountQuery = service.from('blog_posts').select('*', { count: 'exact', head: true })
+    const websitesQuery = service.from('phone_numbers').select('website')
+    const recentPostsQuery = service.from('blog_posts').select('id, website, slug, status, updated_at, blog_translations(language, title)').order('updated_at', { ascending: false }).limit(5)
+    const recentPhonesQuery = service.from('phone_numbers').select('id, website, phone_number, label, type, updated_at').order('updated_at', { ascending: false }).limit(5)
+
+    if (allowedDomains) {
+      phoneCountQuery.in('website', allowedDomains)
+      postCountQuery.in('website', allowedDomains)
+      websitesQuery.in('website', allowedDomains)
+      recentPostsQuery.in('website', allowedDomains)
+      recentPhonesQuery.in('website', allowedDomains)
+    }
+
+    const results = await Promise.all([phoneCountQuery, postCountQuery, websitesQuery, recentPostsQuery, recentPhonesQuery])
+    phoneCountRes = results[0] as CountQuery
+    postCountRes = results[1] as CountQuery
+    websitesRes = results[2] as WebsitesData
+    recentPostsRes = results[3] as RecentData
+    recentPhonesRes = results[4] as RecentData
+  }
+
+  const phoneCount = phoneCountRes.count
+  const postCount = postCountRes.count
+  const websitesData = websitesRes.data
+  const recentPosts = recentPostsRes.data
+  const recentPhones = recentPhonesRes.data
+
+  // For scoped users, include their assigned domains even if no phone/blog data exists yet
+  const websitesSet = new Set((websitesData ?? []).map((r: { website: string }) => r.website))
+  if (allowedDomains) allowedDomains.forEach(d => websitesSet.add(d))
+  const websiteCount = websitesSet.size
 
   return (
     <div>
