@@ -39,7 +39,7 @@ const VARIANT_STYLES: Record<ToastVariant, { iconBg: string; border: string; bg:
 }
 
 function VariantIcon({ variant }: { variant: ToastVariant }) {
-  const common = 'w-5 h-5 text-white'
+  const common = 'w-3.5 h-3.5 text-white'
   if (variant === 'success') {
     return (
       <svg className={common} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
@@ -92,8 +92,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast, success, info, warning, error }}>
       {children}
-      {/* Toast stack */}
-      <div className="fixed top-4 right-4 z-[200] flex flex-col gap-3 max-w-sm w-[calc(100vw-2rem)] pointer-events-none">
+      {/* Toast stack — centered below the top bar (h-16 = 64px) */}
+      <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 pointer-events-none" style={{ top: '80px' }}>
         {toasts.map(t => {
           const variant = t.variant ?? 'info'
           const styles = VARIANT_STYLES[variant]
@@ -101,28 +101,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={t.id}
               role="status"
-              className="pointer-events-auto relative rounded-xl border p-4 pr-10 shadow-lg flex items-start gap-3"
+              className="pointer-events-auto relative rounded-lg border py-2.5 pl-3 pr-9 shadow-md flex items-center gap-2.5 max-w-[420px]"
               style={{
                 background: styles.bg,
                 borderColor: styles.border,
                 animation: 'toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: styles.iconBg }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: styles.iconBg }}>
                 <VariantIcon variant={variant} />
               </div>
-              <div className="flex-1 min-w-0 pt-0.5">
-                {t.title && <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{t.title}</p>}
-                <p className={`text-sm ${t.title ? 'mt-0.5' : ''}`} style={{ color: t.title ? '#475569' : '#0f172a' }}>{t.message}</p>
+              <div className="flex-1 min-w-0">
+                {t.title && <p className="text-xs font-semibold leading-tight" style={{ color: '#0f172a' }}>{t.title}</p>}
+                <p className={`text-xs leading-tight ${t.title ? 'mt-0.5' : ''}`} style={{ color: t.title ? '#475569' : '#0f172a' }}>{t.message}</p>
               </div>
               <button
                 type="button"
                 onClick={() => dismiss(t.id)}
-                className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/60 transition-colors"
+                className="absolute top-1/2 -translate-y-1/2 right-2 w-5 h-5 flex items-center justify-center rounded hover:bg-white/60 transition-colors"
                 style={{ color: '#64748b' }}
                 aria-label="Dismiss"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -132,8 +132,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       </div>
       <style jsx>{`
         @keyframes toastIn {
-          from { transform: translateX(20px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+          from { transform: translateY(-8px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
     </ToastContext.Provider>
