@@ -307,8 +307,8 @@ export default function PhoneNumbersPage() {
 
       {/* Search + website filter */}
       <div className="rounded-xl border p-4 sm:p-5 mb-5" style={{ borderColor: '#cbd5e1', background: '#f8fafc' }}>
-        <div className="space-y-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex-1 min-w-0">
           <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Search</label>
           <div className="relative">
             <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#475569' }}>
@@ -329,7 +329,7 @@ export default function PhoneNumbersPage() {
             )}
           </div>
         </div>
-        <div>
+        <div className="sm:w-56 flex-shrink-0">
           <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Website</label>
           <div className="relative">
             <select
