@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { useWebsite } from '@/contexts/WebsiteContext'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useConfirm } from '@/contexts/ConfirmContext'
 
 const MY_STATES = [
   { label: 'All Locations', slug: 'all' },
@@ -49,6 +50,7 @@ interface CompanyInfo {
 
 export default function PhoneNumbersPage() {
   const { t } = useLanguage()
+  const confirm = useConfirm()
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
   const openCompany = searchParams.get('company') ?? ''
@@ -100,7 +102,13 @@ export default function PhoneNumbersPage() {
   useEffect(() => { fetchNumbers() }, [fetchNumbers])
 
   async function deleteNumber(id: string) {
-    if (!confirm('Delete this phone number?')) return
+    const ok = await confirm({
+      title: 'Delete phone number',
+      message: 'This number will be permanently removed from the rotation pool. This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
     fetchNumbers()
   }

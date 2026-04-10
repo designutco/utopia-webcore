@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useWebsite } from '@/contexts/WebsiteContext'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useConfirm } from '@/contexts/ConfirmContext'
 
 interface Post {
   id: string
@@ -36,6 +37,7 @@ function formatDate(d: string | null) {
 export default function BlogListPage() {
   const router = useRouter()
   const { t } = useLanguage()
+  const confirm = useConfirm()
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
   const openCompany = searchParams.get('company') ?? ''
@@ -76,7 +78,17 @@ export default function BlogListPage() {
   useEffect(() => { fetchPosts() }, [fetchPosts])
 
   async function deletePost(id: string, title: string) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
+    const ok = await confirm({
+      title: 'Delete blog post',
+      message: (
+        <>
+          Are you sure you want to delete <strong className="text-slate-800">&ldquo;{title}&rdquo;</strong>? This will remove the post and all its translations. This action cannot be undone.
+        </>
+      ),
+      confirmLabel: 'Delete post',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeleting(id)
     await fetch(`/api/blog/${id}`, { method: 'DELETE' })
     setDeleting(null)

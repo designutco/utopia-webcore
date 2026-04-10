@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { WebsiteProvider } from '@/contexts/WebsiteContext'
 import { UserProvider, type UserRole } from '@/contexts/UserContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
+import { ConfirmProvider } from '@/contexts/ConfirmContext'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 import TopBar from './TopBar'
@@ -30,6 +31,7 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
 
   return (
     <LanguageProvider>
+    <ConfirmProvider>
     <UserProvider value={{ email: userEmail, name: userName, role: userRole }}>
     <WebsiteProvider>
       <div className="flex flex-col h-screen" style={{ background: '#ffffff' }}>
@@ -107,6 +109,7 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
       </div>
     </WebsiteProvider>
     </UserProvider>
+    </ConfirmProvider>
     </LanguageProvider>
   )
 }

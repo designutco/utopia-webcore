@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useConfirm } from '@/contexts/ConfirmContext'
 
 const MY_STATES = [
   { label: 'Johor', slug: 'johor' },
@@ -80,6 +81,7 @@ function predictMode(existing: ExistingNumber[], newRows: NumberRow[]): string |
 export default function NewPhoneNumberPage() {
   const router = useRouter()
   const { t } = useLanguage()
+  const confirm = useConfirm()
   const searchParams = useSearchParams()
   const prefillWebsite = searchParams.get('website') ?? ''
   const prefillCompany = searchParams.get('company') ?? ''
@@ -192,7 +194,13 @@ export default function NewPhoneNumberPage() {
   }
 
   async function deleteExisting(id: string) {
-    if (!confirm('Delete this phone number?')) return
+    const ok = await confirm({
+      title: 'Delete phone number',
+      message: 'This number will be permanently removed from the rotation pool. This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     const res = await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
     if (res.ok) await fetchExisting(website)
   }
