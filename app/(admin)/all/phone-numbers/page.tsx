@@ -146,7 +146,7 @@ export default function AllPhoneNumbersPage() {
                       {n.type === 'default' ? <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
                         : <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label ?? 'Custom'}</span>}
                     </td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span></td>
                     <td className="px-4 py-3 align-middle text-center">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
