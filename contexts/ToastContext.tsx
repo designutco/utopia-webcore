@@ -92,8 +92,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast, success, info, warning, error }}>
       {children}
-      {/* Toast stack — centered below the top bar (h-16 = 64px) */}
-      <div className="fixed left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 pointer-events-none" style={{ top: '80px' }}>
+      {/* Toast stack — centered within the content area (offset by half the 240px sidebar on md+) */}
+      <div
+        className="fixed z-[200] flex flex-col items-center gap-2 pointer-events-none left-1/2 -translate-x-1/2 md:left-[calc(50%+7.5rem)]"
+        style={{ top: '80px' }}
+      >
         {toasts.map(t => {
           const variant = t.variant ?? 'info'
           const styles = VARIANT_STYLES[variant]

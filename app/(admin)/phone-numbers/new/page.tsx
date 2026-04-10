@@ -540,8 +540,7 @@ export default function NewPhoneNumberPage() {
                                   <button
                                     type="button"
                                     onClick={() => deleteExisting(n.id)}
-                                    className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
-                                    style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
+                                    className="text-xs font-medium px-3 py-1.5 rounded-md border border-[#e2e8f0] text-[#94a3b8] transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
                                   >
                                     Delete
                                   </button>
@@ -707,8 +706,7 @@ export default function NewPhoneNumberPage() {
                           <button
                             type="button"
                             onClick={() => removeRow(row.id)}
-                            className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
-                            style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
+                            className="text-xs font-medium px-3 py-1.5 rounded-md border border-[#e2e8f0] text-[#94a3b8] transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
                           >
                             Remove
                           </button>
