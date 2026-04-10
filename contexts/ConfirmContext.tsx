@@ -24,22 +24,10 @@ interface PendingConfirm extends ConfirmOptions {
   resolve: (value: boolean) => void
 }
 
-const VARIANT_STYLES: Record<ConfirmVariant, { accent: string; btn: string; btnHover: string }> = {
-  danger: {
-    accent: '#ef4444',
-    btn: '#ef4444',
-    btnHover: '#dc2626',
-  },
-  warning: {
-    accent: '#f59e0b',
-    btn: '#f59e0b',
-    btnHover: '#d97706',
-  },
-  info: {
-    accent: '#2979d6',
-    btn: '#2979d6',
-    btnHover: '#1e60b8',
-  },
+const VARIANT_STYLES: Record<ConfirmVariant, { btn: string; btnHover: string }> = {
+  danger: { btn: '#ef4444', btnHover: '#dc2626' },
+  warning: { btn: '#f59e0b', btnHover: '#d97706' },
+  info: { btn: '#2979d6', btnHover: '#1e60b8' },
 }
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
@@ -78,70 +66,16 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           onClick={handleCancel}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl px-8 pt-10 pb-6"
+            className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl p-8"
             style={{
               animation: 'popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Icon with concentric ripple rings */}
-            <div className="flex justify-center mb-6">
-              <div className="relative w-32 h-32 flex items-center justify-center">
-                {/* Outer ring */}
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{ border: `1px solid ${styles.accent}22` }}
-                />
-                {/* Middle ring */}
-                <div
-                  className="absolute rounded-full"
-                  style={{
-                    top: '12%',
-                    left: '12%',
-                    right: '12%',
-                    bottom: '12%',
-                    border: `1px solid ${styles.accent}44`,
-                  }}
-                />
-                {/* Inner ring */}
-                <div
-                  className="absolute rounded-full"
-                  style={{
-                    top: '24%',
-                    left: '24%',
-                    right: '24%',
-                    bottom: '24%',
-                    border: `1.5px solid ${styles.accent}77`,
-                  }}
-                />
-                {/* Icon circle */}
-                <div
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ border: `1.5px solid ${styles.accent}`, background: 'white' }}
-                >
-                  {variant === 'danger' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.accent }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                  {variant === 'warning' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.accent }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                    </svg>
-                  )}
-                  {variant === 'info' && (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" style={{ color: styles.accent }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-            </div>
-
             {/* Title */}
             <h3
-              className="text-[18px] font-bold text-center mb-2 tracking-tight"
+              className="text-[20px] font-bold text-center mb-3 tracking-tight"
               style={{ color: '#0f172a', letterSpacing: '-0.01em' }}
             >
               {pending.title ?? 'Are you sure?'}
@@ -150,7 +84,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             {/* Message */}
             <div
               className="text-[14px] text-center leading-relaxed mb-7 max-w-sm mx-auto"
-              style={{ color: '#64748b' }}
+              style={{ color: '#475569' }}
             >
               {pending.message}
             </div>
