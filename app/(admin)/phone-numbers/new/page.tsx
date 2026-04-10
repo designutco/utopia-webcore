@@ -6,6 +6,7 @@ import Link from 'next/link'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useConfirm } from '@/contexts/ConfirmContext'
+import { useToast } from '@/contexts/ToastContext'
 import { validatePhoneNumber, isDuplicatePhone } from '@/lib/validatePhone'
 
 const MY_STATES = [
@@ -83,6 +84,7 @@ export default function NewPhoneNumberPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const confirm = useConfirm()
+  const toast = useToast()
   const searchParams = useSearchParams()
   const prefillWebsite = searchParams.get('website') ?? ''
   const prefillCompany = searchParams.get('company') ?? ''
@@ -192,6 +194,10 @@ export default function NewPhoneNumberPage() {
     if (res.ok) {
       await fetchExisting(website)
       cancelEdit()
+      toast.success('Phone number updated', 'Saved')
+    } else {
+      const d = await res.json().catch(() => ({}))
+      toast.error(d.error ?? 'Failed to update number', 'Save failed')
     }
   }
 
@@ -204,7 +210,12 @@ export default function NewPhoneNumberPage() {
     })
     if (!ok) return
     const res = await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
-    if (res.ok) await fetchExisting(website)
+    if (res.ok) {
+      await fetchExisting(website)
+      toast.success('Phone number deleted', 'Deleted')
+    } else {
+      toast.error('Failed to delete number', 'Delete failed')
+    }
   }
 
   function updateRow(id: string, field: keyof NumberRow, value: string) {
@@ -274,11 +285,14 @@ export default function NewPhoneNumberPage() {
       if (failed.length > 0) {
         const d = await failed[0].json()
         setServerError(d.error ?? `${failed.length} number(s) failed to save`)
+        toast.error(d.error ?? `${failed.length} number(s) failed to save`, 'Save failed')
       } else {
+        toast.success(`Added ${rows.length} number${rows.length > 1 ? 's' : ''} to ${website}`, 'Numbers added')
         router.push(`/phone-numbers?website=${encodeURIComponent(website)}`)
       }
     } catch {
       setServerError('Something went wrong')
+      toast.error('Something went wrong', 'Save failed')
     }
     setSaving(false)
   }

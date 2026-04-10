@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Ticket {
   id: string
@@ -20,6 +21,7 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
 
 export default function HelpPage() {
   const { t } = useLanguage()
+  const toast = useToast()
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -51,7 +53,7 @@ export default function HelpPage() {
     })
     setSaving(false)
     if (res.ok) {
-      setSuccess('Ticket submitted! We\'ll look into it.')
+      toast.success("Ticket submitted! We'll look into it.", 'Thanks')
       setSubject('')
       setDescription('')
       setShowForm(false)
@@ -59,6 +61,7 @@ export default function HelpPage() {
     } else {
       const d = await res.json()
       setError(d.error ?? 'Failed to submit')
+      toast.error(d.error ?? 'Failed to submit', 'Submit failed')
     }
   }
 

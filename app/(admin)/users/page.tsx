@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useToast } from '@/contexts/ToastContext'
 
 type UserRole = 'admin' | 'designer' | 'writer' | 'indoor_sales' | 'manager'
 
@@ -32,6 +33,7 @@ function isScoped(r: UserRole) { return SCOPED_ROLES.includes(r) }
 
 export default function UsersPage() {
   const { t } = useLanguage()
+  const toast = useToast()
   const [users, setUsers] = useState<UserProfile[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
@@ -89,12 +91,13 @@ export default function UsersPage() {
     const data = await res.json()
     setSaving(false)
     if (res.ok) {
-      setSuccess(`User "${data.name}" created as ${ROLE_META[data.role as UserRole]?.label ?? data.role}`)
+      toast.success(`User "${data.name}" created as ${ROLE_META[data.role as UserRole]?.label ?? data.role}`, 'User created')
       setForm({ email: '', password: '', name: '', role: 'writer', company_ids: [] })
       setShowForm(false)
       fetchAll()
     } else {
       setError(data.error ?? 'Failed to create user')
+      toast.error(data.error ?? 'Failed to create user', 'Create failed')
     }
   }
 
@@ -124,12 +127,13 @@ export default function UsersPage() {
     })
     setSaving(false)
     if (res.ok) {
-      setSuccess('User updated')
+      toast.success('User updated successfully', 'Saved')
       cancelEdit()
       fetchAll()
     } else {
       const d = await res.json()
       setError(d.error ?? 'Failed to update user')
+      toast.error(d.error ?? 'Failed to update user', 'Update failed')
     }
   }
 

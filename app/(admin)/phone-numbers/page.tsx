@@ -7,6 +7,7 @@ import { useWebsite } from '@/contexts/WebsiteContext'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useConfirm } from '@/contexts/ConfirmContext'
+import { useToast } from '@/contexts/ToastContext'
 import ViewToggle, { type ViewMode } from '@/components/ViewToggle'
 
 const MY_STATES = [
@@ -52,6 +53,7 @@ interface CompanyInfo {
 export default function PhoneNumbersPage() {
   const { t } = useLanguage()
   const confirm = useConfirm()
+  const toast = useToast()
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
   const openCompany = searchParams.get('company') ?? ''
@@ -108,7 +110,12 @@ export default function PhoneNumbersPage() {
       variant: 'danger',
     })
     if (!ok) return
-    await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      toast.success('Phone number deleted', 'Deleted')
+    } else {
+      toast.error('Failed to delete number', 'Delete failed')
+    }
     fetchNumbers()
   }
 

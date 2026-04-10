@@ -7,6 +7,7 @@ import RichTextEditor from '@/components/RichTextEditor'
 import FlagIcon from '@/components/FlagIcon'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useToast } from '@/contexts/ToastContext'
 
 interface PostFormProps {
   mode: 'new' | 'edit'
@@ -45,6 +46,7 @@ function toSlug(str: string) {
 export default function PostForm({ mode, initialData = {}, postId }: PostFormProps) {
   const router = useRouter()
   const { t: tr } = useLanguage()
+  const toast = useToast()
 
   const [website, setWebsite] = useState((initialData.website as string) ?? '')
   const [slug, setSlug] = useState((initialData.slug as string) ?? '')
@@ -160,10 +162,19 @@ export default function PostForm({ mode, initialData = {}, postId }: PostFormPro
       const data = await res.json()
       setSaved(true)
       if (newStatus) setStatus(newStatus)
+      const actionLabel = mode === 'new'
+        ? 'Post created'
+        : newStatus === 'published'
+          ? (status === 'published' ? 'Post republished' : 'Post published')
+          : newStatus === 'draft' && status === 'published'
+            ? 'Post unpublished'
+            : 'Post saved'
+      toast.success(actionLabel, 'Saved')
       if (mode === 'new') router.push(`/blog/${data.id}/edit`)
     } else {
       const d = await res.json()
       setServerError(d.error ?? 'Save failed')
+      toast.error(d.error ?? 'Save failed', 'Save failed')
     }
   }
 

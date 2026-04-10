@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/PageHeader'
 import { useConfirm } from '@/contexts/ConfirmContext'
+import { useToast } from '@/contexts/ToastContext'
 import { validatePhoneNumber, isDuplicatePhone } from '@/lib/validatePhone'
 
 const MY_STATES = [
@@ -70,6 +71,7 @@ export default function EditPhoneNumbersPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const confirm = useConfirm()
+  const toast = useToast()
   const prefillWebsite = searchParams.get('website') ?? ''
   const prefillCompany = searchParams.get('company') ?? ''
 
@@ -180,9 +182,11 @@ export default function EditPhoneNumbersPage() {
     if (res.ok) {
       await fetchExisting(website)
       cancelEdit()
+      toast.success('Phone number updated', 'Saved')
     } else {
       const d = await res.json()
       setEditError(d.error ?? 'Save failed')
+      toast.error(d.error ?? 'Save failed', 'Update failed')
     }
   }
 
@@ -195,7 +199,12 @@ export default function EditPhoneNumbersPage() {
     })
     if (!ok) return
     const res = await fetch(`/api/phone-numbers/${id}`, { method: 'DELETE' })
-    if (res.ok) await fetchExisting(website)
+    if (res.ok) {
+      await fetchExisting(website)
+      toast.success('Phone number deleted', 'Deleted')
+    } else {
+      toast.error('Failed to delete number', 'Delete failed')
+    }
   }
 
   // ─── Add new number (immediate) ───────────────────────────────
@@ -228,9 +237,11 @@ export default function EditPhoneNumbersPage() {
     if (res.ok) {
       setNewRow(emptyNewRow())
       await fetchExisting(website)
+      toast.success('Phone number added to the pool', 'Added')
     } else {
       const d = await res.json()
       setNewError(d.error ?? 'Failed to add number')
+      toast.error(d.error ?? 'Failed to add number', 'Add failed')
     }
   }
 

@@ -6,6 +6,7 @@ import { WebsiteProvider } from '@/contexts/WebsiteContext'
 import { UserProvider, type UserRole } from '@/contexts/UserContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ConfirmProvider } from '@/contexts/ConfirmContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 import TopBar from './TopBar'
@@ -31,6 +32,7 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
 
   return (
     <LanguageProvider>
+    <ToastProvider>
     <ConfirmProvider>
     <UserProvider value={{ email: userEmail, name: userName, role: userRole }}>
     <WebsiteProvider>
@@ -113,6 +115,7 @@ export default function AdminShell({ userEmail, userName, userRole, children }: 
     </WebsiteProvider>
     </UserProvider>
     </ConfirmProvider>
+    </ToastProvider>
     </LanguageProvider>
   )
 }

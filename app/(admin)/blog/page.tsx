@@ -7,6 +7,7 @@ import { useWebsite } from '@/contexts/WebsiteContext'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useConfirm } from '@/contexts/ConfirmContext'
+import { useToast } from '@/contexts/ToastContext'
 import ViewToggle from '@/components/ViewToggle'
 
 interface Post {
@@ -48,6 +49,7 @@ export default function BlogListPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const confirm = useConfirm()
+  const toast = useToast()
   const { selectedWebsite } = useWebsite()
   const searchParams = useSearchParams()
   const openCompany = searchParams.get('company') ?? ''
@@ -108,8 +110,13 @@ export default function BlogListPage() {
     })
     if (!ok) return
     setDeleting(id)
-    await fetch(`/api/blog/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/blog/${id}`, { method: 'DELETE' })
     setDeleting(null)
+    if (res.ok) {
+      toast.success(`Post "${title}" deleted`, 'Deleted')
+    } else {
+      toast.error('Failed to delete post', 'Delete failed')
+    }
     fetchPosts()
   }
 
