@@ -19,7 +19,12 @@ interface Company { id: string; name: string; company_websites: { domain: string
 type SortKey = 'title' | 'website' | 'status' | 'updated_at'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  return <svg className={`w-3 h-3 inline-block ml-0.5 ${active ? '' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d={dir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} /></svg>
+  return (
+    <span className="inline-flex flex-col ml-1 -space-y-0.5 align-middle">
+      <svg className={`w-2.5 h-2.5 ${active && dir === 'asc' ? 'text-[var(--primary)]' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 8 5"><path d="M4 0L8 5H0z"/></svg>
+      <svg className={`w-2.5 h-2.5 ${active && dir === 'desc' ? 'text-[var(--primary)]' : 'text-slate-300'}`} fill="currentColor" viewBox="0 0 8 5"><path d="M4 5L0 0h8z"/></svg>
+    </span>
+  )
 }
 
 function formatDate(d: string) {
