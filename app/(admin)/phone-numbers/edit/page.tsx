@@ -425,10 +425,8 @@ export default function EditPhoneNumbersPage() {
                               </button>
                               {!isDefault && (
                                 <button type="button" onClick={() => deleteExisting(n.id)}
-                                  className="text-xs font-semibold px-3 py-1.5 rounded-md text-white transition-colors shadow-sm"
-                                  style={{ background: '#ef4444' }}
-                                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#dc2626'}
-                                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#ef4444'}>
+                                  className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-[#ef4444] hover:border-[#ef4444] hover:text-white"
+                                  style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>
                                   Delete
                                 </button>
                               )}
