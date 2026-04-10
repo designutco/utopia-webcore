@@ -69,7 +69,11 @@ export default async function DashboardPage() {
         <div className="relative z-10 p-6 sm:p-8 pr-32 sm:pr-48">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-display)' }}>Welcome back!</h1>
           <p className="text-sm text-slate-500 max-w-md">
-            {isWriter ? 'Manage blog content across all websites.' : 'Manage your websites, phone numbers, and blog content all in one place.'}
+            {role === 'admin' && 'You have full access to manage websites, phone numbers, users, and blog content.'}
+            {role === 'designer' && 'Manage websites, phone numbers, and blog content across all companies.'}
+            {role === 'writer' && 'Create and publish blog content across all websites.'}
+            {role === 'manager' && 'View your assigned company websites and track phone number performance.'}
+            {role === 'indoor_sales' && 'Monitor websites and phone numbers for your assigned companies.'}
           </p>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
