@@ -690,7 +690,7 @@ export default function NewPhoneNumberPage() {
                           <button
                             type="button"
                             onClick={() => removeRow(row.id)}
-                            className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:border-red-400 hover:text-red-500 hover:bg-red-50"
+                            className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:bg-[#ef4444] hover:border-white hover:text-white"
                             style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
                           >
                             Remove

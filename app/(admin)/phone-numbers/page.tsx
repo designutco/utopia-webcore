@@ -7,6 +7,7 @@ import { useWebsite } from '@/contexts/WebsiteContext'
 import PageHeader from '@/components/PageHeader'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useConfirm } from '@/contexts/ConfirmContext'
+import ViewToggle, { type ViewMode } from '@/components/ViewToggle'
 
 const MY_STATES = [
   { label: 'All Locations', slug: 'all' },
@@ -60,6 +61,7 @@ export default function PhoneNumbersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterWebsite, setFilterWebsite] = useState(() => searchParams.get('website') ?? '')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   useEffect(() => {
     const fromUrl = searchParams.get('website')
@@ -168,10 +170,13 @@ export default function PhoneNumbersPage() {
           title={t('page.phoneNumbers.title')}
           description={t('page.phoneNumbers.description')}
           actions={
-            <Link href="/phone-numbers/new" className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity" style={{ background: 'var(--primary)' }}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-              {t('button.addNumber')}
-            </Link>
+            <>
+              <ViewToggle value={viewMode} onChange={setViewMode} />
+              <Link href="/phone-numbers/new" className="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2 rounded-lg transition-opacity" style={{ background: 'var(--primary)' }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                {t('button.addNumber')}
+              </Link>
+            </>
           }
         />
         <div className="mb-5">
@@ -184,7 +189,7 @@ export default function PhoneNumbersPage() {
         </div>
         {loading ? (
           <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#cbd5e1', color: '#475569' }}>Loading…</div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCompanies.map(c => (
               <Link key={c.id} href={`/phone-numbers?company=${encodeURIComponent(c.name)}`}
@@ -205,6 +210,28 @@ export default function PhoneNumbersPage() {
                     </div>
                   </div>
                   <svg className="w-4 h-4 mt-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border bg-white overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+            {filteredCompanies.map((c, i) => (
+              <Link key={c.id} href={`/phone-numbers?company=${encodeURIComponent(c.name)}`}
+                className="group flex items-center gap-3 px-4 py-3.5 hover:bg-[#f8fafc] transition-colors"
+                style={{ borderBottom: i < filteredCompanies.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }} strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <p className="text-sm font-semibold truncate flex-1 group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{c.name}</p>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-xs" style={{ color: '#64748b' }}>{c.phone_count} numbers</span>
+                  {c.active_count > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: '#dcfce7', color: '#16a34a' }}>{c.active_count} active</span>}
+                  <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
