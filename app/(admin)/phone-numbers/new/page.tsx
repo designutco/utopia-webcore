@@ -40,10 +40,14 @@ interface NumberRow {
 }
 
 interface ExistingNumber {
+  id: string
   phone_number: string
   location_slug: string
   is_active: boolean
   whatsapp_text?: string
+  percentage: number
+  label: string | null
+  type: string
 }
 
 function makeId() { return Math.random().toString(36).slice(2, 9) }
@@ -322,20 +326,76 @@ export default function NewPhoneNumberPage() {
                 </div>
               )}
 
+              {/* Existing numbers list */}
+              {website && existingNumbers.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Current Numbers</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                      {existingNumbers.filter(n => n.is_active).length} active / {existingNumbers.length} total
+                    </span>
+                  </div>
+                  <div className="rounded-lg border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                          <th className="px-3 py-2 text-left font-medium" style={{ color: '#94a3b8' }}>Number</th>
+                          <th className="px-3 py-2 text-left font-medium" style={{ color: '#94a3b8' }}>Location</th>
+                          <th className="px-3 py-2 text-left font-medium" style={{ color: '#94a3b8' }}>%</th>
+                          <th className="px-3 py-2 text-left font-medium" style={{ color: '#94a3b8' }}>Label</th>
+                          <th className="px-3 py-2 text-center font-medium" style={{ color: '#94a3b8' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {existingNumbers.map((n, i) => (
+                          <tr key={n.id} style={{ borderBottom: i < existingNumbers.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                            <td className="px-3 py-2 font-mono font-medium" style={{ color: 'var(--foreground)' }}>{n.phone_number}</td>
+                            <td className="px-3 py-2" style={{ color: '#64748b' }}>{n.location_slug === 'all' ? 'All' : n.location_slug}</td>
+                            <td className="px-3 py-2 font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</td>
+                            <td className="px-3 py-2" style={{ color: '#94a3b8' }}>{n.label || '—'}</td>
+                            <td className="px-3 py-2 text-center">
+                              <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                <span className="w-1 h-1 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
+                                {n.is_active ? 'Active' : 'Off'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {website && existingNumbers.length === 0 && (
+                <div className="rounded-lg border p-4 text-center" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+                  <p className="text-xs" style={{ color: '#94a3b8' }}>No phone numbers exist for this website yet. Add the first one below.</p>
+                </div>
+              )}
+
               {/* Number rows */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                    Phone Numbers<span className="text-red-500 ml-0.5">*</span>
+                    New Numbers<span className="text-red-500 ml-0.5">*</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={addRow}
-                    className="text-xs font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
-                    style={{ borderColor: '#cbd5e1', color: '#475569' }}
-                  >
-                    + Add another number
-                  </button>
+                  <div className="relative group/add">
+                    <button
+                      type="button"
+                      onClick={addRow}
+                      disabled={!website}
+                      className="text-xs font-medium px-2.5 py-1 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                      style={{ borderColor: '#cbd5e1', color: '#475569' }}
+                    >
+                      + Add another number
+                    </button>
+                    {!website && (
+                      <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover/add:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
+                        Select a website first
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-b-4" style={{ borderBottomColor: '#1e293b' }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -499,16 +559,24 @@ export default function NewPhoneNumberPage() {
               >
                 Cancel
               </Link>
-              <button
-                type="submit"
-                disabled={saving}
-                className="text-sm font-semibold px-6 py-2.5 rounded-lg text-white transition-opacity disabled:opacity-50"
-                style={{ background: 'var(--primary)', minWidth: '160px' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary)'}
-              >
-                {saving ? 'Saving…' : `Add ${rows.length} Number${rows.length > 1 ? 's' : ''}`}
-              </button>
+              <div className="relative group/submit">
+                <button
+                  type="submit"
+                  disabled={saving || !website}
+                  className="text-sm font-semibold px-6 py-2.5 rounded-lg text-white transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--primary)', minWidth: '160px' }}
+                  onMouseEnter={e => { if (website) (e.currentTarget as HTMLElement).style.background = 'var(--primary-hover)' }}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--primary)'}
+                >
+                  {saving ? 'Saving…' : `Add ${rows.length} Number${rows.length > 1 ? 's' : ''}`}
+                </button>
+                {!website && (
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover/submit:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
+                    Select a company and website first
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4" style={{ borderTopColor: '#1e293b' }} />
+                  </div>
+                )}
+              </div>
             </div>
           </form>
         </div>
