@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { WebsiteProvider } from '@/contexts/WebsiteContext'
-import { UserProvider } from '@/contexts/UserContext'
+import { UserProvider, type UserRole } from '@/contexts/UserContext'
 import Sidebar from './Sidebar'
 import Breadcrumb from './Breadcrumb'
 import TopBar from './TopBar'
@@ -11,7 +11,7 @@ import TopBar from './TopBar'
 interface AdminShellProps {
   userEmail: string
   userName: string
-  userRole: 'admin' | 'designer' | 'writer'
+  userRole: UserRole
   children: React.ReactNode
 }
 

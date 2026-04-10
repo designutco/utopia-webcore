@@ -5,8 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useWebsite } from '@/contexts/WebsiteContext'
-
-type UserRole = 'admin' | 'designer' | 'writer'
+import type { UserRole } from '@/contexts/UserContext'
 
 interface SidebarProps {
   userEmail: string
@@ -16,11 +15,19 @@ interface SidebarProps {
   onClose?: () => void
 }
 
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'Admin',
+  designer: 'Designer',
+  writer: 'Writer',
+  indoor_sales: 'Indoor Sales',
+  manager: 'Manager',
+}
+
 const navItems: { href: string; label: string; roles: UserRole[]; icon: React.ReactNode }[] = [
   {
     href: '/',
     label: 'Dashboard',
-    roles: ['admin', 'designer', 'writer'],
+    roles: ['admin', 'designer', 'writer', 'indoor_sales', 'manager'],
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -30,7 +37,7 @@ const navItems: { href: string; label: string; roles: UserRole[]; icon: React.Re
   {
     href: '/websites',
     label: 'Websites',
-    roles: ['admin', 'designer', 'writer'],
+    roles: ['admin', 'designer', 'writer', 'indoor_sales', 'manager'],
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <rect x="2" y="3" width="20" height="14" rx="2" strokeWidth="1.8"/>
@@ -45,7 +52,7 @@ const navItems: { href: string; label: string; roles: UserRole[]; icon: React.Re
   {
     href: '/phone-numbers',
     label: 'Phone Numbers',
-    roles: ['admin', 'designer'],
+    roles: ['admin', 'designer', 'indoor_sales', 'manager'],
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
@@ -87,7 +94,7 @@ const navItems: { href: string; label: string; roles: UserRole[]; icon: React.Re
   {
     href: '/help',
     label: 'Help',
-    roles: ['admin', 'designer', 'writer'],
+    roles: ['admin', 'designer', 'writer', 'indoor_sales', 'manager'],
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -189,7 +196,7 @@ export default function Sidebar({ userEmail, userName, userRole, open, onClose }
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium text-white truncate">{userName}</p>
-            <p className="text-[10px] truncate capitalize" style={{ color: 'var(--sidebar-muted)' }}>{userRole}</p>
+            <p className="text-[10px] truncate" style={{ color: 'var(--sidebar-muted)' }}>{ROLE_LABELS[userRole] ?? userRole}</p>
           </div>
         </div>
         <button

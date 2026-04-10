@@ -1,17 +1,24 @@
 import { createServiceClient } from '@/lib/supabase/service'
+import { createClient } from '@/lib/supabase/server'
+import { getUserScope } from '@/lib/getUserScope'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const supabase = createServiceClient()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const scope = await getUserScope(user.id)
+  const service = createServiceClient()
 
   const [
     { data: phoneData },
     { data: blogData },
     { data: companyWebsites },
   ] = await Promise.all([
-    supabase.from('phone_numbers').select('website, is_active'),
-    supabase.from('blog_posts').select('website, status'),
-    supabase.from('company_websites').select('domain, company_id, leads_mode, companies(id, name)'),
+    service.from('phone_numbers').select('website, is_active'),
+    service.from('blog_posts').select('website, status'),
+    service.from('company_websites').select('domain, company_id, leads_mode, companies(id, name)'),
   ])
 
   const phoneRows = phoneData ?? []
@@ -23,7 +30,13 @@ export async function GET() {
     ...blogRows.map((r: { website: string }) => r.website),
     ...cwRows.map((r: { domain: string }) => r.domain),
   ]
-  const unique = [...new Set(allDomains)].sort()
+  let unique = [...new Set(allDomains)].sort()
+
+  // Scope by user's assigned domains when applicable
+  if (scope.isScoped) {
+    const allowed = new Set(scope.domains ?? [])
+    unique = unique.filter(d => allowed.has(d))
+  }
 
   const result = unique.map(domain => {
     const phones = phoneRows.filter((r: { website: string }) => r.website === domain)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
+import { getUserScope } from '@/lib/getUserScope'
 
 // GET /api/companies — list all companies with their websites
 export async function GET() {
@@ -8,12 +9,21 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const scope = await getUserScope(user.id)
   const service = createServiceClient()
-  const { data, error } = await service
+
+  let query = service
     .from('companies')
     .select('*, company_websites(domain)')
     .order('name')
 
+  if (scope.isScoped) {
+    const ids = scope.companyIds ?? []
+    if (ids.length === 0) return NextResponse.json([])
+    query = query.in('id', ids)
+  }
+
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }

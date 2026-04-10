@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminShell from '@/components/AdminShell'
+import type { UserRole } from '@/contexts/UserContext'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -20,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .single()
 
   const userName = profile?.name || user.email?.split('@')[0] || 'User'
-  const userRole = (profile?.role as 'admin' | 'designer' | 'writer') || 'admin'
+  const userRole = (profile?.role as UserRole) || 'admin'
 
   return (
     <AdminShell

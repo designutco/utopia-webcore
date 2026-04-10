@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
 import { updateLeadsMode } from '@/lib/updateLeadsMode'
+import { getUserScope } from '@/lib/getUserScope'
 
 // GET /api/phone-numbers?website=
 export async function GET(request: Request) {
@@ -12,10 +13,21 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const website = searchParams.get('website')
 
+  const scope = await getUserScope(user.id)
   const service = createServiceClient()
   let query = service.from('phone_numbers').select('*').order('created_at', { ascending: false })
 
-  if (website) query = query.eq('website', website)
+  if (website) {
+    // If user is scoped, reject websites not in scope
+    if (scope.isScoped && !(scope.domains ?? []).includes(website)) {
+      return NextResponse.json([])
+    }
+    query = query.eq('website', website)
+  } else if (scope.isScoped) {
+    const allowed = scope.domains ?? []
+    if (allowed.length === 0) return NextResponse.json([])
+    query = query.in('website', allowed)
+  }
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

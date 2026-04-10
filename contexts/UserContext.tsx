@@ -2,10 +2,12 @@
 
 import { createContext, useContext } from 'react'
 
+export type UserRole = 'admin' | 'designer' | 'writer' | 'indoor_sales' | 'manager'
+
 interface UserContextType {
   email: string
   name: string
-  role: 'admin' | 'designer' | 'writer'
+  role: UserRole
 }
 
 const UserContext = createContext<UserContextType>({ email: '', name: '', role: 'admin' })
