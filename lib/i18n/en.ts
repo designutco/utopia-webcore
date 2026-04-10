@@ -48,6 +48,7 @@ export const en = {
   'nav.blogPosts': 'Blog Posts',
   'nav.users': 'Users',
   'nav.tickets': 'Tickets',
+  'nav.audit': 'Audit Trail',
   'nav.help': 'Help',
   'nav.manage': 'Manage',
   'nav.signOut': 'Sign out',

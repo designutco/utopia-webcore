@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
 import { updateLeadsMode } from '@/lib/updateLeadsMode'
 import { getUserScope } from '@/lib/getUserScope'
+import { resolveActor, writeAuditLog } from '@/lib/auditLog'
 
 // GET /api/phone-numbers?website=
 export async function GET(request: Request) {
@@ -67,6 +68,23 @@ export async function POST(request: Request) {
 
   // Auto-update leads_mode
   await updateLeadsMode(website)
+
+  // Audit log
+  const actor = await resolveActor(user.id)
+  await writeAuditLog({
+    actor,
+    entityType: 'phone_number',
+    entityId: data.id,
+    action: 'create',
+    website,
+    label: data.phone_number,
+    metadata: {
+      phone_number: data.phone_number,
+      location_slug: data.location_slug,
+      type: data.type,
+      percentage: data.percentage,
+    },
+  })
 
   return NextResponse.json(data, { status: 201 })
 }

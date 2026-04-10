@@ -80,6 +80,7 @@ export default function Breadcrumb() {
     // Others
     if (pathname === '/users') return [{ label: 'Users' }]
     if (pathname === '/tickets') return [{ label: 'Tickets' }]
+    if (pathname === '/audit') return [{ label: 'Audit Trail' }]
     if (pathname === '/help') return [{ label: 'Help & Feedback' }]
     return []
   }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
+import { resolveActor, writeAuditLog } from '@/lib/auditLog'
 
 // GET /api/blog?website=&status=
 export async function GET(request: Request) {
@@ -96,6 +97,23 @@ export async function POST(request: Request) {
     const { error: transError } = await service.from('blog_translations').insert(rows)
     if (transError) return NextResponse.json({ error: transError.message }, { status: 500 })
   }
+
+  // Audit log
+  const actor = await resolveActor(user.id)
+  const enTitle = Array.isArray(translations) ? (translations.find((t: { language: string; title: string }) => t.language === 'en')?.title ?? translations[0]?.title) : null
+  await writeAuditLog({
+    actor,
+    entityType: 'blog_post',
+    entityId: post.id,
+    action: 'create',
+    website,
+    label: enTitle ?? slug,
+    metadata: {
+      slug,
+      status: post.status,
+      languages: Array.isArray(translations) ? translations.map((t: { language: string }) => t.language) : [],
+    },
+  })
 
   return NextResponse.json(post, { status: 201 })
 }

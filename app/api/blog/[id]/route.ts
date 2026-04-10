@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
+import { resolveActor, writeAuditLog, diffObjects, BLOG_FIELDS, type ChangesMap } from '@/lib/auditLog'
 
 // GET /api/blog/[id] — get post with all translations
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +27,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { translations, ...postFields } = body
 
   const service = createServiceClient()
+
+  // Fetch full row + translations BEFORE any update so we can diff for audit log
+  const { data: beforeRow } = await service.from('blog_posts').select('*, blog_translations(*)').eq('id', id).single()
 
   // If changing slug, check for duplicates
   if (postFields.slug) {
@@ -74,6 +78,44 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // Return updated post with translations
   const { data } = await service.from('blog_posts').select('*, blog_translations(*)').eq('id', id).single()
+
+  // Audit log
+  const changes: ChangesMap = diffObjects(beforeRow, data, BLOG_FIELDS)
+  // Diff translation titles and content (per language)
+  if (Array.isArray(beforeRow?.blog_translations) && Array.isArray(data?.blog_translations)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const beforeByLang: Record<string, any> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(beforeRow.blog_translations as any[]).forEach(t => { beforeByLang[t.language] = t })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const afterByLang: Record<string, any> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(data.blog_translations as any[]).forEach(t => { afterByLang[t.language] = t })
+    const allLangs = new Set([...Object.keys(beforeByLang), ...Object.keys(afterByLang)])
+    for (const lang of allLangs) {
+      const fieldKeys = ['title', 'excerpt', 'content', 'meta_title', 'meta_description']
+      const inner = diffObjects(beforeByLang[lang] ?? null, afterByLang[lang] ?? null, fieldKeys)
+      for (const key of Object.keys(inner)) {
+        changes[`${lang}.${key}`] = inner[key]
+      }
+    }
+  }
+
+  if (Object.keys(changes).length > 0) {
+    const actor = await resolveActor(user.id)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const en = (data?.blog_translations as any[])?.find(t => t.language === 'en') ?? (data?.blog_translations as any[])?.[0]
+    await writeAuditLog({
+      actor,
+      entityType: 'blog_post',
+      entityId: id,
+      action: 'update',
+      website: data?.website ?? null,
+      label: en?.title ?? data?.slug ?? null,
+      changes,
+    })
+  }
+
   return NextResponse.json(data)
 }
 
@@ -85,7 +127,32 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { id } = await params
   const service = createServiceClient()
+
+  // Snapshot before delete for audit
+  const { data: before } = await service.from('blog_posts').select('*, blog_translations(*)').eq('id', id).single()
+
   const { error } = await service.from('blog_posts').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (before) {
+    const actor = await resolveActor(user.id)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const en = (before.blog_translations as any[])?.find(t => t.language === 'en') ?? (before.blog_translations as any[])?.[0]
+    await writeAuditLog({
+      actor,
+      entityType: 'blog_post',
+      entityId: id,
+      action: 'delete',
+      website: before.website,
+      label: en?.title ?? before.slug,
+      metadata: {
+        slug: before.slug,
+        status: before.status,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        languages: (before.blog_translations as any[])?.map(t => t.language) ?? [],
+      },
+    })
+  }
+
   return NextResponse.json({ success: true })
 }

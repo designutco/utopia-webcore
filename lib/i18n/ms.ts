@@ -50,6 +50,7 @@ export const ms: Record<TranslationKey, string> = {
   'nav.blogPosts': 'Catatan Blog',
   'nav.users': 'Pengguna',
   'nav.tickets': 'Tiket',
+  'nav.audit': 'Jejak Audit',
   'nav.help': 'Bantuan',
   'nav.manage': 'Urus',
   'nav.signOut': 'Log keluar',
