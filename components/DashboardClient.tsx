@@ -42,11 +42,11 @@ export default function DashboardClient({ role, isScoped, websiteCount, phoneCou
         <div className="relative rounded-xl border border-slate-200 bg-white p-5">
           <Link
             href="/all/websites"
-            className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
             aria-label="View all websites"
             title="View all websites"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </Link>
@@ -66,12 +66,12 @@ export default function DashboardClient({ role, isScoped, websiteCount, phoneCou
           <div className="relative rounded-xl border border-slate-200 bg-white p-5">
             <Link
               href="/all/phone-numbers"
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
+              className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
               aria-label="View all phone numbers"
               title="View all phone numbers"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </Link>
             <div className="flex items-center gap-3 mb-3">
@@ -91,12 +91,12 @@ export default function DashboardClient({ role, isScoped, websiteCount, phoneCou
           <div className="relative rounded-xl border border-slate-200 bg-white p-5">
             <Link
               href="/all/blog"
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
+              className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-[var(--primary)] transition-colors"
               aria-label="View all blog posts"
               title="View all blog posts"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </Link>
             <div className="flex items-center gap-3 mb-3">
