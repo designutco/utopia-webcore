@@ -34,6 +34,15 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
+  return (
+    <svg className={`w-3.5 h-3.5 ml-1 ${active ? 'text-[var(--primary)]' : 'text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4" style={{ opacity: !active || dir === 'asc' ? 1 : 0.3 }} />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 15l4 4 4-4" style={{ opacity: !active || dir === 'desc' ? 1 : 0.3 }} />
+    </svg>
+  )
+}
+
 export default function BlogListPage() {
   const router = useRouter()
   const { t } = useLanguage()
@@ -52,6 +61,14 @@ export default function BlogListPage() {
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid')
+  type SortKey = 'title' | 'status' | 'updated_at'
+  const [sortKey, setSortKey] = useState<SortKey>('updated_at')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
 
   // Fetch websites and companies
   useEffect(() => {
@@ -95,11 +112,18 @@ export default function BlogListPage() {
     fetchPosts()
   }
 
-  const filtered = posts.filter(p => {
-    if (!search) return true
-    const q = search.toLowerCase()
-    return p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q) || (p.excerpt ?? '').toLowerCase().includes(q)
-  })
+  const filtered = posts
+    .filter(p => {
+      if (!search) return true
+      const q = search.toLowerCase()
+      return p.title.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q) || (p.excerpt ?? '').toLowerCase().includes(q)
+    })
+    .sort((a, b) => {
+      const av = a[sortKey] ?? ''
+      const bv = b[sortKey] ?? ''
+      const cmp = String(av).localeCompare(String(bv))
+      return sortDir === 'asc' ? cmp : -cmp
+    })
 
   // Company folder view (no company or website selected)
   if (!openCompany && !openFolder) {
@@ -409,7 +433,8 @@ export default function BlogListPage() {
         </div>
       ) : (
         /* List view */
-        <div className="rounded-xl overflow-hidden border bg-white" style={{ borderColor: '#cbd5e1' }}>
+        <div className="rounded-xl overflow-hidden border bg-white" style={{ borderColor: '#e2e8f0' }}>
+          <div className="overflow-auto" style={{ maxHeight: '60vh' }}>
           <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
             <colgroup>
               <col />
@@ -418,11 +443,29 @@ export default function BlogListPage() {
               <col className="w-20 sm:w-24" />
             </colgroup>
             <thead>
-              <tr style={{ borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-                <th className="px-3 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Post</th>
-                <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
-                <th className="px-2 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Updated</th>
-                <th className="px-2 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Actions</th>
+              <tr className="sticky top-0 z-10" style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                <th
+                  className="px-3 sm:px-4 py-3 text-left text-[10px] sm:text-xs font-medium cursor-pointer select-none hover:text-[var(--primary)] transition-colors whitespace-nowrap"
+                  style={{ color: '#94a3b8' }}
+                  onClick={() => toggleSort('title')}
+                >
+                  <span className="inline-flex items-center">Post<SortIcon active={sortKey === 'title'} dir={sortKey === 'title' ? sortDir : 'asc'} /></span>
+                </th>
+                <th
+                  className="px-2 py-3 text-left text-[10px] sm:text-xs font-medium cursor-pointer select-none hover:text-[var(--primary)] transition-colors whitespace-nowrap"
+                  style={{ color: '#94a3b8' }}
+                  onClick={() => toggleSort('status')}
+                >
+                  <span className="inline-flex items-center">Status<SortIcon active={sortKey === 'status'} dir={sortKey === 'status' ? sortDir : 'asc'} /></span>
+                </th>
+                <th
+                  className="px-2 py-3 text-left text-[10px] sm:text-xs font-medium cursor-pointer select-none hover:text-[var(--primary)] transition-colors whitespace-nowrap"
+                  style={{ color: '#94a3b8' }}
+                  onClick={() => toggleSort('updated_at')}
+                >
+                  <span className="inline-flex items-center">Updated<SortIcon active={sortKey === 'updated_at'} dir={sortKey === 'updated_at' ? sortDir : 'asc'} /></span>
+                </th>
+                <th className="px-2 sm:px-4 py-3 text-right text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -466,6 +509,7 @@ export default function BlogListPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
