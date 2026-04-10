@@ -69,8 +69,8 @@ export default function AllWebsitesPage() {
       return sortDir === 'asc' ? cmp : -cmp
     })
 
-  function Th({ label, col }: { label: string; col?: SortKey }) {
-    const base = "px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap"
+  function Th({ label, col, align }: { label: string; col?: SortKey; align?: 'center' }) {
+    const base = `px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left${align === 'center' ? ' !text-center' : ''}`
     if (!col) return <th className={base} style={{ color: '#94a3b8' }}>{label}</th>
     return (
       <th className={`${base} cursor-pointer select-none hover:text-[var(--primary)] transition-colors`} style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
@@ -138,7 +138,7 @@ export default function AllWebsitesPage() {
                 {filtered.map((site, i) => {
                   const lm = site.leads_mode && LEADS_MODE[site.leads_mode] ? LEADS_MODE[site.leads_mode] : null
                   return (
-                    <tr key={site.domain} className="hover:bg-[#f8fafc] transition-colors" style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                    <tr key={site.domain} className="hover:bg-[#f8fafc] transition-colors relative hover:z-20" style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                       <td className="px-4 py-3.5 align-middle">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
@@ -150,11 +150,11 @@ export default function AllWebsitesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3.5 align-middle"><span className="text-xs" style={{ color: site.company_name ? '#475569' : '#cbd5e1' }}>{site.company_name ?? '—'}</span></td>
-                      {!isWriter && <td className="px-4 py-3.5 align-middle text-center">{lm ? <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: lm.bg, color: lm.color }}>{lm.label}</span> : <span style={{ color: '#cbd5e1' }}>—</span>}</td>}
+                      {!isWriter && <td className="px-4 py-3.5 align-middle">{lm ? <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: lm.bg, color: lm.color }}>{lm.label}</span> : <span style={{ color: '#cbd5e1' }}>—</span>}</td>}
                       {!isWriter && <td className="px-4 py-3.5 align-middle"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.phone_count}</span></td>}
-                      {!isWriter && <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.active_phone_count}</span></td>}
+                      {!isWriter && <td className="px-4 py-3.5 align-middle"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.active_phone_count}</span></td>}
                       <td className="px-4 py-3.5 align-middle"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.blog_count}</span></td>
-                      <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.published_blog_count > 0 ? { background: '#e0f2fe', color: '#0369a1' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.published_blog_count}</span></td>
+                      <td className="px-4 py-3.5 align-middle"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.published_blog_count > 0 ? { background: '#e0f2fe', color: '#0369a1' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.published_blog_count}</span></td>
                       <td className="px-4 py-3.5 align-middle">
                         <div className="flex items-center gap-1.5 justify-end">
                           <a href={`https://${site.domain}`} target="_blank" rel="noopener noreferrer"

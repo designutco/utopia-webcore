@@ -80,7 +80,7 @@ export default function AllBlogPage() {
 
   function ThSort({ label, col }: { label: string; col: SortKey }) {
     return (
-      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
+      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
         style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
         <span className="w-full inline-flex items-center justify-between gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
@@ -143,8 +143,8 @@ export default function AllBlogPage() {
                 <tr className="sticky top-0 z-10" style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
                   <ThSort label="Title" col="title" />
                   <ThSort label="Website" col="website" />
-                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Slug</th>
-                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Languages</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Slug</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Languages</th>
                   <ThSort label="Status" col="status" />
                   <ThSort label="Updated" col="updated_at" />
                   <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}></th>
@@ -152,14 +152,14 @@ export default function AllBlogPage() {
               </thead>
               <tbody>
                 {filtered.map((post, i) => (
-                  <tr key={post.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}
+                  <tr key={post.id} className="relative hover:z-20" style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f8fafc'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                     <td className="px-4 py-3 align-middle"><Link href={`/blog/${post.id}/edit`} className="text-sm font-medium hover:underline truncate block max-w-[250px]" style={{ color: 'var(--foreground)' }}>{post.title}</Link></td>
                     <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#475569' }}>{post.website}</span></td>
                     <td className="px-4 py-3 align-middle"><span className="text-xs truncate block max-w-[150px]" style={{ color: '#94a3b8' }}>/{post.slug}</span></td>
-                    <td className="px-4 py-3 align-middle text-center">
-                      <div className="flex gap-0.5 justify-center">
+                    <td className="px-4 py-3 align-middle">
+                      <div className="flex gap-0.5">
                         {['en', 'ms', 'zh'].map(l => (
                           <span key={l} className="text-[8px] px-1 py-0.5 rounded font-medium uppercase"
                             style={post.languages?.includes(l) ? { background: '#e0ecf5', color: '#1e3a5f' } : { background: '#f8fafc', color: '#e2e8f0' }}>{l}</span>

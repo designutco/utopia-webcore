@@ -75,7 +75,7 @@ export default function AllPhoneNumbersPage() {
 
   function ThSort({ label, col }: { label: string; col: SortKey }) {
     return (
-      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
+      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
         style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
         <span className="w-full inline-flex items-center justify-between gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
@@ -126,11 +126,11 @@ export default function AllPhoneNumbersPage() {
                 <tr className="sticky top-0 z-10" style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
                   <ThSort label="Phone Number" col="phone_number" />
                   <ThSort label="Website" col="website" />
-                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>WhatsApp Text</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>WhatsApp Text</th>
                   <ThSort label="Location" col="location_slug" />
-                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Type</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Type</th>
                   <ThSort label="%" col="percentage" />
-                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Status</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap text-left" style={{ color: '#94a3b8' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,12 +142,12 @@ export default function AllPhoneNumbersPage() {
                     <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#475569' }}>{n.website}</span></td>
                     <td className="px-4 py-3 align-middle"><span className="text-xs truncate block max-w-[200px]" style={{ color: '#94a3b8' }}>{n.whatsapp_text || '—'}</span></td>
                     <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#94a3b8' }}>{n.location_slug}</span></td>
-                    <td className="px-4 py-3 align-middle text-center">
+                    <td className="px-4 py-3 align-middle">
                       {n.type === 'default' ? <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
                         : <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label ?? 'Custom'}</span>}
                     </td>
                     <td className="px-4 py-3 align-middle"><span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span></td>
-                    <td className="px-4 py-3 align-middle text-center">
+                    <td className="px-4 py-3 align-middle">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
                         {n.is_active ? 'Active' : 'Off'}
