@@ -84,19 +84,29 @@ export default function AllPhoneNumbersPage() {
         <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{numbers.length} numbers across all websites</p>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-5 items-end">
-        <div className="flex-1 min-w-48 max-w-sm relative">
-          <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none" style={{ borderColor: '#e2e8f0' }} />
+      <div className="rounded-xl border p-4 mb-5 flex flex-wrap gap-3 items-end" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+        <div className="flex-1 min-w-48 max-w-sm">
+          <label className="block text-[10px] font-medium mb-1" style={{ color: '#94a3b8' }}>Search</label>
+          <div className="relative">
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search numbers, websites…"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none" style={{ borderColor: '#e2e8f0', background: 'white' }} />
+          </div>
         </div>
-        <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)}
-          className="px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer" style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2rem', background: 'white' }}>
-          <option value="">All companies</option>
-          {companyNames.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div>
+          <label className="block text-[10px] font-medium mb-1" style={{ color: '#94a3b8' }}>Company</label>
+          <div className="relative">
+            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)}
+              className="px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer pr-9" style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white', minWidth: '160px' }}>
+              <option value="">All companies</option>
+              {companyNames.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <svg className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+          </div>
+        </div>
         {(search || filterCompany) && (
-          <button onClick={() => { setSearch(''); setFilterCompany('') }} className="px-3 py-2 text-xs rounded-lg border hover:bg-slate-50 transition-colors" style={{ borderColor: '#e2e8f0', color: '#475569' }}>Clear</button>
+          <button onClick={() => { setSearch(''); setFilterCompany('') }}
+            className="px-3 py-2 text-xs font-medium rounded-lg border hover:bg-white transition-colors" style={{ borderColor: '#e2e8f0', color: '#64748b', background: 'white' }}>Clear filters</button>
         )}
       </div>
 

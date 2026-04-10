@@ -24,11 +24,11 @@ const LEADS_MODE: Record<string, { label: string; color: string; bg: string }> =
 type SortKey = 'domain' | 'company_name' | 'phone_count' | 'blog_count'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  return (
-    <svg className={`w-3 h-3 inline-block ml-0.5 ${active ? '' : 'opacity-30'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d={dir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} />
-    </svg>
-  )
+  return <svg className={`w-3 h-3 inline-block ml-0.5 transition-opacity ${active ? 'opacity-100' : 'opacity-20'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d={dir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'} /></svg>
+}
+
+function SelectArrow() {
+  return <svg className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
 }
 
 export default function AllWebsitesPage() {
@@ -42,10 +42,7 @@ export default function AllWebsitesPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
-    fetch('/api/websites').then(r => r.json()).then(data => {
-      if (Array.isArray(data)) setSites(data)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    fetch('/api/websites').then(r => r.json()).then(data => { if (Array.isArray(data)) setSites(data); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   const companies = [...new Set(sites.map(s => s.company_name).filter(Boolean))] as string[]
@@ -58,26 +55,18 @@ export default function AllWebsitesPage() {
   const filtered = sites
     .filter(s => {
       if (filterCompany && s.company_name !== filterCompany) return false
-      if (search) {
-        const q = search.toLowerCase()
-        return s.domain.toLowerCase().includes(q) || (s.company_name ?? '').toLowerCase().includes(q)
-      }
+      if (search) { const q = search.toLowerCase(); return s.domain.toLowerCase().includes(q) || (s.company_name ?? '').toLowerCase().includes(q) }
       return true
     })
     .sort((a, b) => {
-      const av = a[sortKey] ?? ''
-      const bv = b[sortKey] ?? ''
+      const av = a[sortKey] ?? ''; const bv = b[sortKey] ?? ''
       const cmp = typeof av === 'number' ? (av as number) - (bv as number) : String(av).localeCompare(String(bv))
       return sortDir === 'asc' ? cmp : -cmp
     })
 
-  function ThSort({ label, col }: { label: string; col: SortKey }) {
-    return (
-      <th className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
-        style={{ color: '#475569' }} onClick={() => toggleSort(col)}>
-        {label} <SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} />
-      </th>
-    )
+  function Th({ label, col }: { label: string; col?: SortKey }) {
+    if (!col) return <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#64748b' }}>{label}</th>
+    return <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold cursor-pointer select-none hover:text-[var(--primary)] transition-colors" style={{ color: '#64748b' }} onClick={() => toggleSort(col)}>{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></th>
   }
 
   return (
@@ -88,68 +77,89 @@ export default function AllWebsitesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-5 items-end">
-        <div className="flex-1 min-w-48 max-w-sm relative">
-          <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none" style={{ borderColor: '#e2e8f0' }} />
+      <div className="rounded-xl border p-4 mb-5 flex flex-wrap gap-3 items-end" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+        <div className="flex-1 min-w-48 max-w-sm">
+          <label className="block text-[10px] font-medium mb-1" style={{ color: '#94a3b8' }}>Search</label>
+          <div className="relative">
+            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search websites or companies…"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none" style={{ borderColor: '#e2e8f0', background: 'white' }} />
+          </div>
         </div>
-        <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)}
-          className="px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer" style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2rem', background: 'white' }}>
-          <option value="">All companies</option>
-          {companies.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div>
+          <label className="block text-[10px] font-medium mb-1" style={{ color: '#94a3b8' }}>Company</label>
+          <div className="relative">
+            <select value={filterCompany} onChange={e => setFilterCompany(e.target.value)}
+              className="px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer pr-9" style={{ borderColor: '#e2e8f0', appearance: 'none', WebkitAppearance: 'none', background: 'white', minWidth: '160px' }}>
+              <option value="">All companies</option>
+              {companies.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <SelectArrow />
+          </div>
+        </div>
         {(search || filterCompany) && (
-          <button onClick={() => { setSearch(''); setFilterCompany('') }} className="px-3 py-2 text-xs rounded-lg border hover:bg-slate-50 transition-colors" style={{ borderColor: '#e2e8f0', color: '#475569' }}>Clear</button>
+          <button onClick={() => { setSearch(''); setFilterCompany('') }}
+            className="px-3 py-2 text-xs font-medium rounded-lg border hover:bg-white transition-colors" style={{ borderColor: '#e2e8f0', color: '#64748b', background: 'white' }}>
+            Clear filters
+          </button>
         )}
       </div>
 
       {loading ? (
         <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>Loading…</div>
+      ) : filtered.length === 0 ? (
+        <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>No websites found</div>
       ) : (
         <div className="rounded-xl border overflow-hidden bg-white" style={{ borderColor: '#e2e8f0' }}>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
+            <table className="w-full text-sm min-w-[800px]">
               <thead>
                 <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                  <ThSort label="Website" col="domain" />
-                  <ThSort label="Company" col="company_name" />
-                  {!isWriter && <th className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Leads Mode</th>}
-                  {!isWriter && <ThSort label="Phones" col="phone_count" />}
-                  {!isWriter && <th className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Active</th>}
-                  <ThSort label="Blog Posts" col="blog_count" />
-                  <th className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Published</th>
-                  <th className="px-5 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}></th>
+                  <Th label="Website" col="domain" />
+                  <Th label="Company" col="company_name" />
+                  {!isWriter && <Th label="Leads Mode" />}
+                  {!isWriter && <Th label="Phones" col="phone_count" />}
+                  {!isWriter && <Th label="Active" />}
+                  <Th label="Blog" col="blog_count" />
+                  <Th label="Published" />
+                  <Th label="" />
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((site, i) => {
                   const lm = site.leads_mode && LEADS_MODE[site.leads_mode] ? LEADS_MODE[site.leads_mode] : null
                   return (
-                    <tr key={site.domain} style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f8fafc'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                      <td className="px-5 py-4 align-middle">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}><circle cx="12" cy="12" r="9" strokeWidth="1.5"/><path strokeWidth="1.5" d="M12 3c0 0-3 4-3 9s3 9 3 9"/><path strokeWidth="1.5" d="M12 3c0 0 3 4 3 9s-3 9-3 9"/><path strokeWidth="1.5" d="M3 12h18"/></svg>
+                    <tr key={site.domain} className="hover:bg-[#f8fafc] transition-colors" style={{ borderBottom: i < filtered.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                      <td className="px-4 py-3.5 align-middle">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#f1f5f9' }}>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }} strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3c0 0-3 4-3 9s3 9 3 9"/><path d="M12 3c0 0 3 4 3 9s-3 9-3 9"/><path d="M3 12h18"/></svg>
                           </div>
-                          <div>
-                            <p className="font-semibold" style={{ color: 'var(--foreground)' }}>{site.domain}</p>
-                            <a href={`https://${site.domain}`} target="_blank" rel="noopener noreferrer" className="text-xs hover:underline" style={{ color: '#94a3b8' }}>https://{site.domain} ↗</a>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{site.domain}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 align-middle text-center"><span className="text-xs" style={{ color: site.company_name ? '#475569' : '#cbd5e1' }}>{site.company_name ?? '—'}</span></td>
-                      {!isWriter && <td className="px-5 py-4 align-middle text-center">{lm ? <span className="text-[10px] px-2.5 py-0.5 rounded-full font-medium" style={{ background: lm.bg, color: lm.color }}>{lm.label}</span> : <span className="text-[10px]" style={{ color: '#cbd5e1' }}>—</span>}</td>}
-                      {!isWriter && <td className="px-5 py-4 align-middle text-center"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.phone_count}</span></td>}
-                      {!isWriter && <td className="px-5 py-4 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#64748b' }}>{site.active_phone_count} active</span></td>}
-                      <td className="px-5 py-4 align-middle text-center"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.blog_count}</span></td>
-                      <td className="px-5 py-4 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.published_blog_count > 0 ? { background: '#e0f2fe', color: '#0369a1' } : { background: '#f1f5f9', color: '#64748b' }}>{site.published_blog_count} published</span></td>
-                      <td className="px-5 py-4 align-middle text-center">
-                        <div className="flex items-center gap-2 justify-center">
-                          {!isWriter && <Link href={`/phone-numbers?website=${encodeURIComponent(site.domain)}`} className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 rounded-lg border transition-colors whitespace-nowrap hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#475569' }}>Phones ↗</Link>}
-                          <Link href={`/blog?website=${encodeURIComponent(site.domain)}`} className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 rounded-lg border transition-colors whitespace-nowrap hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#475569' }}>Blog ↗</Link>
+                      <td className="px-4 py-3.5 align-middle text-center"><span className="text-xs" style={{ color: site.company_name ? '#475569' : '#cbd5e1' }}>{site.company_name ?? '—'}</span></td>
+                      {!isWriter && <td className="px-4 py-3.5 align-middle text-center">{lm ? <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: lm.bg, color: lm.color }}>{lm.label}</span> : <span style={{ color: '#cbd5e1' }}>—</span>}</td>}
+                      {!isWriter && <td className="px-4 py-3.5 align-middle text-center"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.phone_count}</span></td>}
+                      {!isWriter && <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.active_phone_count}</span></td>}
+                      <td className="px-4 py-3.5 align-middle text-center"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.blog_count}</span></td>
+                      <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.published_blog_count > 0 ? { background: '#e0f2fe', color: '#0369a1' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.published_blog_count}</span></td>
+                      <td className="px-4 py-3.5 align-middle text-center">
+                        <div className="flex items-center gap-1.5 justify-center">
+                          {!isWriter && (
+                            <Link href={`/phone-numbers?website=${encodeURIComponent(site.domain)}`}
+                              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#64748b' }}>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                              Phones
+                            </Link>
+                          )}
+                          <Link href={`/blog?website=${encodeURIComponent(site.domain)}`}
+                            className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#64748b' }}>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Blog
+                          </Link>
                         </div>
                       </td>
                     </tr>
