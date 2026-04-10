@@ -82,7 +82,7 @@ export default function AllBlogPage() {
     return (
       <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
         style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
-        <span className="inline-flex items-center justify-center gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
+        <span className="w-full inline-flex items-center justify-between gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
     )
   }
@@ -156,8 +156,8 @@ export default function AllBlogPage() {
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f8fafc'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                     <td className="px-4 py-3 align-middle"><Link href={`/blog/${post.id}/edit`} className="text-sm font-medium hover:underline truncate block max-w-[250px]" style={{ color: 'var(--foreground)' }}>{post.title}</Link></td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs" style={{ color: '#475569' }}>{post.website}</span></td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs truncate block max-w-[150px] mx-auto" style={{ color: '#94a3b8' }}>/{post.slug}</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#475569' }}>{post.website}</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs truncate block max-w-[150px]" style={{ color: '#94a3b8' }}>/{post.slug}</span></td>
                     <td className="px-4 py-3 align-middle text-center">
                       <div className="flex gap-0.5 justify-center">
                         {['en', 'ms', 'zh'].map(l => (
@@ -176,12 +176,14 @@ export default function AllBlogPage() {
                     <td className="px-4 py-3 align-middle text-center">
                       <div className="flex items-center gap-1.5 justify-end">
                         <Link href={`/blog/${post.id}/edit`}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }} title="Edit post">
+                          className="group/tip relative w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity" style={{ background: '#1e293b', color: 'white' }}>Edit post</span>
                         </Link>
                         <Link href={`/blog/${post.id}/view`}
-                          className="w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }} title="Preview post">
+                          className="group/tip relative w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                          <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity" style={{ background: '#1e293b', color: 'white' }}>Preview</span>
                         </Link>
                       </div>
                     </td>

@@ -77,7 +77,7 @@ export default function AllPhoneNumbersPage() {
     return (
       <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
         style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
-        <span className="inline-flex items-center justify-center gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
+        <span className="w-full inline-flex items-center justify-between gap-1">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
     )
   }
@@ -139,9 +139,9 @@ export default function AllPhoneNumbersPage() {
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#f8fafc'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                     <td className="px-4 py-3 align-middle"><span className="text-sm font-medium font-mono" style={{ color: 'var(--foreground)' }}>{n.phone_number}</span></td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs" style={{ color: '#475569' }}>{n.website}</span></td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs truncate block max-w-[200px] mx-auto" style={{ color: '#94a3b8' }}>{n.whatsapp_text || '—'}</span></td>
-                    <td className="px-4 py-3 align-middle text-center"><span className="text-xs" style={{ color: '#94a3b8' }}>{n.location_slug}</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#475569' }}>{n.website}</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs truncate block max-w-[200px]" style={{ color: '#94a3b8' }}>{n.whatsapp_text || '—'}</span></td>
+                    <td className="px-4 py-3 align-middle"><span className="text-xs" style={{ color: '#94a3b8' }}>{n.location_slug}</span></td>
                     <td className="px-4 py-3 align-middle text-center">
                       {n.type === 'default' ? <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--primary)', color: 'white' }}>Default</span>
                         : <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label ?? 'Custom'}</span>}
