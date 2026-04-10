@@ -75,9 +75,9 @@ export default function AllPhoneNumbersPage() {
 
   function ThSort({ label, col }: { label: string; col: SortKey }) {
     return (
-      <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
-        style={{ color: '#475569' }} onClick={() => toggleSort(col)}>
-        {label} <SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} />
+      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
+        style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
+        <span className="inline-flex items-center justify-center gap-0.5">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
     )
   }
@@ -125,11 +125,11 @@ export default function AllPhoneNumbersPage() {
                 <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
                   <ThSort label="Phone Number" col="phone_number" />
                   <ThSort label="Website" col="website" />
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>WhatsApp Text</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>WhatsApp Text</th>
                   <ThSort label="Location" col="location_slug" />
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Type</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Type</th>
                   <ThSort label="%" col="percentage" />
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Status</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Status</th>
                 </tr>
               </thead>
               <tbody>

@@ -70,8 +70,13 @@ export default function AllWebsitesPage() {
     })
 
   function Th({ label, col }: { label: string; col?: SortKey }) {
-    if (!col) return <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#64748b' }}>{label}</th>
-    return <th className="px-4 py-3 text-center text-[10px] sm:text-xs font-semibold cursor-pointer select-none hover:text-[var(--primary)] transition-colors" style={{ color: '#64748b' }} onClick={() => toggleSort(col)}>{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></th>
+    const base = "px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap"
+    if (!col) return <th className={base} style={{ color: '#94a3b8' }}>{label}</th>
+    return (
+      <th className={`${base} cursor-pointer select-none hover:text-[var(--primary)] transition-colors`} style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
+        <span className="inline-flex items-center justify-center gap-0.5">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
+      </th>
+    )
   }
 
   return (
@@ -151,19 +156,21 @@ export default function AllWebsitesPage() {
                       {!isWriter && <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.active_phone_count > 0 ? { background: '#dcfce7', color: '#16a34a' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.active_phone_count}</span></td>}
                       <td className="px-4 py-3.5 align-middle text-center"><span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{site.blog_count}</span></td>
                       <td className="px-4 py-3.5 align-middle text-center"><span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={site.published_blog_count > 0 ? { background: '#e0f2fe', color: '#0369a1' } : { background: '#f1f5f9', color: '#94a3b8' }}>{site.published_blog_count}</span></td>
-                      <td className="px-4 py-3.5 align-middle text-center">
-                        <div className="flex items-center gap-1.5 justify-center">
+                      <td className="px-4 py-3.5 align-middle">
+                        <div className="flex items-center gap-1.5 justify-end">
+                          <a href={`https://${site.domain}`} target="_blank" rel="noopener noreferrer"
+                            className="w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }} title="Open website">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          </a>
                           {!isWriter && (
                             <Link href={`/phone-numbers?website=${encodeURIComponent(site.domain)}`}
-                              className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#64748b' }}>
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                              Phones
+                              className="w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }} title="Phone numbers">
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                             </Link>
                           )}
                           <Link href={`/blog?website=${encodeURIComponent(site.domain)}`}
-                            className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#64748b' }}>
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Blog
+                            className="w-7 h-7 flex items-center justify-center rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }} title="Blog posts">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                           </Link>
                         </div>
                       </td>

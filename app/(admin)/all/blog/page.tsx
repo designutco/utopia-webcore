@@ -80,9 +80,9 @@ export default function AllBlogPage() {
 
   function ThSort({ label, col }: { label: string; col: SortKey }) {
     return (
-      <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
-        style={{ color: '#475569' }} onClick={() => toggleSort(col)}>
-        {label} <SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} />
+      <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap cursor-pointer select-none hover:text-[var(--primary)] transition-colors"
+        style={{ color: '#94a3b8' }} onClick={() => toggleSort(col)}>
+        <span className="inline-flex items-center justify-center gap-0.5">{label}<SortIcon active={sortKey === col} dir={sortKey === col ? sortDir : 'asc'} /></span>
       </th>
     )
   }
@@ -142,11 +142,11 @@ export default function AllBlogPage() {
                 <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
                   <ThSort label="Title" col="title" />
                   <ThSort label="Website" col="website" />
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Slug</th>
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}>Languages</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Slug</th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Languages</th>
                   <ThSort label="Status" col="status" />
                   <ThSort label="Updated" col="updated_at" />
-                  <th className="px-4 py-3.5 text-center text-[10px] sm:text-xs font-semibold" style={{ color: '#475569' }}></th>
+                  <th className="px-4 py-3 text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}></th>
                 </tr>
               </thead>
               <tbody>
