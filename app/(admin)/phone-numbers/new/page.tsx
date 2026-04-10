@@ -260,23 +260,30 @@ export default function NewPhoneNumberPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex flex-col justify-center">
-      <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>Add Phone Numbers</h1>
-        <p className="text-xs sm:text-sm mb-6" style={{ color: '#475569' }}>Add one or more numbers to a website&apos;s rotation pool.</p>
+    <div className="py-6">
+      <div className="max-w-5xl mx-auto w-full">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>Add Phone Numbers</h1>
+          <p className="text-sm" style={{ color: '#64748b' }}>Add one or more numbers to a website&apos;s rotation pool. You can also edit existing numbers below.</p>
+        </div>
 
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: '#cbd5e1' }}>
+        <div className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: '#e2e8f0', background: 'white' }}>
 
           {/* Card header */}
-          <div className="px-5 py-4 flex items-center gap-2" style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Phone Number Details</span>
+          <div className="px-6 py-5 flex items-center gap-3" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#e0f2fe' }}>
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--primary)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>Phone Number Details</h2>
+              <p className="text-xs" style={{ color: '#94a3b8' }}>Select a website to see its current numbers and add new ones</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="p-5 space-y-4" style={{ background: 'white' }}>
+            <div className="p-6 space-y-6" style={{ background: 'white' }}>
 
               {serverError && (
                 <div className="p-3 rounded-lg border text-sm" style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#dc2626' }}>
@@ -327,20 +334,20 @@ export default function NewPhoneNumberPage() {
 
               {/* Leads Mode Indicator — all 4 modes displayed */}
               {website && (
-                <div className="rounded-lg border p-4" style={{ borderColor: modeChanged ? '#fbbf24' : '#e2e8f0', background: modeChanged ? '#fffbeb' : '#f8fafc' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: modeChanged ? '#d97706' : '#64748b' }} strokeWidth="1.8">
+                <div className="rounded-xl border p-5" style={{ borderColor: modeChanged ? '#fbbf24' : '#e2e8f0', background: modeChanged ? '#fffbeb' : '#f8fafc' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: modeChanged ? '#d97706' : '#64748b' }} strokeWidth="1.8">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-xs font-medium" style={{ color: '#475569' }}>Leads Mode</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Leads Mode</span>
                     {modeChanged && (
-                      <span className="text-[10px] font-medium ml-auto" style={{ color: '#d97706' }}>
+                      <span className="text-xs font-semibold ml-auto px-2 py-1 rounded-full" style={{ background: '#fef3c7', color: '#d97706' }}>
                         Mode will change after save
                       </span>
                     )}
                   </div>
                   {/* All 4 mode pills */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {(['single', 'rotation', 'location', 'hybrid'] as const).map(mode => {
                       const isCurrent = currentMode === mode
                       const isPredicted = predictedMode === mode
@@ -348,29 +355,29 @@ export default function NewPhoneNumberPage() {
                       return (
                         <div
                           key={mode}
-                          className="rounded-lg p-2 border transition-all relative"
+                          className="rounded-xl p-3 border-2 transition-all relative"
                           style={{
                             background: isPredicted ? m.bg : 'white',
                             borderColor: isPredicted ? m.color : '#e2e8f0',
-                            opacity: isPredicted || isCurrent ? 1 : 0.55,
+                            opacity: isPredicted || isCurrent ? 1 : 0.5,
                           }}
                         >
-                          <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-[10px] font-semibold" style={{ color: isPredicted ? m.color : '#64748b' }}>{m.label}</span>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-bold" style={{ color: isPredicted ? m.color : '#64748b' }}>{m.label}</span>
                             {isCurrent && !isPredicted && (
-                              <span className="text-[8px] px-1 py-0.5 rounded font-medium" style={{ background: '#f1f5f9', color: '#64748b' }}>NOW</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: '#f1f5f9', color: '#64748b' }}>NOW</span>
                             )}
                             {isPredicted && (
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" style={{ color: m.color }}><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" style={{ color: m.color }}><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
                             )}
                           </div>
-                          <p className="text-[9px] leading-tight" style={{ color: isPredicted ? m.color : '#94a3b8' }}>{m.desc}</p>
+                          <p className="text-xs leading-snug" style={{ color: isPredicted ? m.color : '#94a3b8' }}>{m.desc}</p>
                         </div>
                       )
                     })}
                   </div>
                   {/* Status line */}
-                  <p className="text-[10px] mt-3" style={{ color: '#64748b' }}>
+                  <p className="text-sm mt-4" style={{ color: '#475569' }}>
                     {!currentMode && existingNumbers.length === 0 && 'No numbers yet — adding new ones will set the initial mode.'}
                     {currentMode && !modeChanged && `Currently on ${LEADS_MODE[currentMode].label} mode (${existingNumbers.filter(n => n.is_active).length} active / ${existingNumbers.length} total).`}
                     {modeChanged && currentMode && predictedMode && `Adding ${rows.length} number${rows.length > 1 ? 's' : ''} will change mode from ${LEADS_MODE[currentMode].label} → ${LEADS_MODE[predictedMode].label}.`}
@@ -381,34 +388,37 @@ export default function NewPhoneNumberPage() {
               {/* Existing numbers list */}
               {website && existingNumbers.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>Current Numbers</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>Current Numbers</h3>
+                      <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Default number is pinned to top. Click Edit to modify any number.</p>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: '#f1f5f9', color: '#475569' }}>
                       {existingNumbers.filter(n => n.is_active).length} active / {existingNumbers.length} total
                     </span>
                   </div>
 
                   {/* Percentage distribution bar */}
                   {existingNumbers.filter(n => n.is_active).length > 0 && (
-                    <div className="mb-3 rounded-lg border p-3" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-medium" style={{ color: '#475569' }}>Lead Distribution</span>
-                        <span className="text-[10px]" style={{ color: '#94a3b8' }}>
+                    <div className="mb-4 rounded-xl border p-4" style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-semibold" style={{ color: '#475569' }}>Lead Distribution</span>
+                        <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>
                           Total: {sortedExisting.filter(n => n.is_active).reduce((s, n) => s + (n.percentage ?? 0), 0)}%
                         </span>
                       </div>
-                      <div className="flex h-3 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
+                      <div className="flex h-4 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
                         {sortedExisting.filter(n => n.is_active && n.percentage > 0).map((n, idx) => (
                           <div key={n.id} style={{ width: `${n.percentage}%`, background: BAR_COLORS[idx % BAR_COLORS.length] }} title={`${n.phone_number}: ${n.percentage}%`} />
                         ))}
                       </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
                         {sortedExisting.filter(n => n.is_active).map((n, idx) => (
-                          <div key={n.id} className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: BAR_COLORS[idx % BAR_COLORS.length] }} />
-                            <span className="text-[10px]" style={{ color: '#475569' }}>
+                          <div key={n.id} className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: BAR_COLORS[idx % BAR_COLORS.length] }} />
+                            <span className="text-xs" style={{ color: '#475569' }}>
                               {n.type === 'default' && <span className="font-bold" style={{ color: 'var(--primary)' }}>★ </span>}
-                              {n.phone_number.slice(-4)}: {n.percentage}%
+                              <span className="font-mono">{n.phone_number.slice(-4)}</span>: <span className="font-semibold">{n.percentage}%</span>
                             </span>
                           </div>
                         ))}
@@ -417,7 +427,7 @@ export default function NewPhoneNumberPage() {
                   )}
 
                   {/* Numbers table */}
-                  <div className="rounded-lg border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+                  <div className="rounded-xl border overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
                     {sortedExisting.map((n, i) => {
                       const isDefault = n.type === 'default'
                       const isEditing = editingId === n.id
@@ -427,32 +437,32 @@ export default function NewPhoneNumberPage() {
                           background: isDefault ? '#fff9e6' : 'white',
                         }}>
                           {!isEditing ? (
-                            <div className="px-3 py-2.5 flex items-center gap-3 flex-wrap">
+                            <div className="px-4 py-3.5 flex items-center gap-3 flex-wrap">
                               {/* Default/label badge */}
-                              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 {isDefault && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0" style={{ background: 'var(--primary)', color: 'white' }}>★ DEFAULT</span>
+                                  <span className="text-xs px-2 py-1 rounded-full font-bold flex-shrink-0" style={{ background: 'var(--primary)', color: 'white' }}>★ DEFAULT</span>
                                 )}
                                 {!isDefault && n.label && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label}</span>
+                                  <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: '#f1f5f9', color: '#475569' }}>{n.label}</span>
                                 )}
-                                <span className="text-xs font-mono font-medium truncate" style={{ color: 'var(--foreground)' }}>{n.phone_number}</span>
-                                <span className="text-[10px]" style={{ color: '#94a3b8' }}>
+                                <span className="text-sm font-mono font-semibold truncate" style={{ color: 'var(--foreground)' }}>{n.phone_number}</span>
+                                <span className="text-xs px-2 py-0.5 rounded" style={{ background: '#f8fafc', color: '#64748b' }}>
                                   {n.location_slug === 'all' ? 'All locations' : n.location_slug}
                                 </span>
                               </div>
                               {/* Percentage + status */}
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span>
-                                <span className={`inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                                  <span className="w-1 h-1 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
+                              <div className="flex items-center gap-2.5 flex-shrink-0">
+                                <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{n.percentage}%</span>
+                                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${n.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: n.is_active ? '#16a34a' : '#94a3b8' }} />
                                   {n.is_active ? 'Active' : 'Off'}
                                 </span>
                                 {/* Edit button */}
                                 <button
                                   type="button"
                                   onClick={() => startEdit(n)}
-                                  className="text-[10px] px-2 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                                  className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
                                   style={{ borderColor: '#e2e8f0', color: '#64748b' }}
                                 >
                                   Edit
@@ -462,7 +472,7 @@ export default function NewPhoneNumberPage() {
                                   <button
                                     type="button"
                                     onClick={() => deleteExisting(n.id)}
-                                    className="text-[10px] px-2 py-1 rounded-md border transition-colors hover:border-red-400 hover:text-red-500"
+                                    className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:border-red-400 hover:text-red-500"
                                     style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
                                   >
                                     Delete
@@ -475,7 +485,7 @@ export default function NewPhoneNumberPage() {
                             <div className="p-3" style={{ background: '#fafbfc' }}>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Phone Number</label>
+                                  <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Phone Number</label>
                                   <input
                                     type="text"
                                     value={editDraft.phone_number ?? ''}
@@ -485,7 +495,7 @@ export default function NewPhoneNumberPage() {
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>WhatsApp Text</label>
+                                  <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>WhatsApp Text</label>
                                   <input
                                     type="text"
                                     value={editDraft.whatsapp_text ?? ''}
@@ -495,7 +505,7 @@ export default function NewPhoneNumberPage() {
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Location</label>
+                                  <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Location</label>
                                   <div className="relative">
                                     <select
                                       value={editDraft.location_slug ?? 'all'}
@@ -511,7 +521,7 @@ export default function NewPhoneNumberPage() {
                                 </div>
                                 <div className="flex gap-3">
                                   <div className="w-20">
-                                    <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>%</label>
+                                    <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>%</label>
                                     <input
                                       type="number"
                                       min="0"
@@ -523,7 +533,7 @@ export default function NewPhoneNumberPage() {
                                     />
                                   </div>
                                   <div className="flex-1">
-                                    <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Label</label>
+                                    <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Label</label>
                                     <input
                                       type="text"
                                       value={editDraft.label ?? ''}
@@ -546,13 +556,13 @@ export default function NewPhoneNumberPage() {
                                   >
                                     <span className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform" style={{ transform: editDraft.is_active ? 'translateX(16px)' : 'translateX(0)' }} />
                                   </button>
-                                  <span className="text-[10px]" style={{ color: '#475569' }}>{editDraft.is_active ? 'Active' : 'Inactive'}</span>
+                                  <span className="text-xs" style={{ color: '#475569' }}>{editDraft.is_active ? 'Active' : 'Inactive'}</span>
                                 </label>
                                 <div className="flex items-center gap-2">
                                   <button
                                     type="button"
                                     onClick={cancelEdit}
-                                    className="text-[10px] px-3 py-1.5 rounded-md border transition-colors"
+                                    className="text-xs px-3 py-1.5 rounded-md border transition-colors"
                                     style={{ borderColor: '#e2e8f0', color: '#64748b' }}
                                   >
                                     Cancel
@@ -561,7 +571,7 @@ export default function NewPhoneNumberPage() {
                                     type="button"
                                     onClick={saveEdit}
                                     disabled={savingEdit}
-                                    className="text-[10px] font-medium px-3 py-1.5 rounded-md text-white transition-opacity disabled:opacity-50"
+                                    className="text-xs font-medium px-3 py-1.5 rounded-md text-white transition-opacity disabled:opacity-50"
                                     style={{ background: 'var(--primary)' }}
                                   >
                                     {savingEdit ? 'Saving…' : 'Save'}
@@ -586,21 +596,24 @@ export default function NewPhoneNumberPage() {
               {/* Number rows */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                    New Numbers<span className="text-red-500 ml-0.5">*</span>
-                  </label>
+                  <div>
+                    <h3 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>
+                      New Numbers<span className="text-red-500 ml-1">*</span>
+                    </h3>
+                    <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>Add one or more new numbers to this website</p>
+                  </div>
                   <div className="relative group/add">
                     <button
                       type="button"
                       onClick={addRow}
                       disabled={!website}
-                      className="text-xs font-medium px-2.5 py-1 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                      className="text-sm font-medium px-3 py-2 rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:border-[var(--primary)] hover:text-[var(--primary)]"
                       style={{ borderColor: '#cbd5e1', color: '#475569' }}
                     >
-                      + Add another number
+                      + Add another
                     </button>
                     {!website && (
-                      <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover/add:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
+                      <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white whitespace-nowrap opacity-0 group-hover/add:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
                         Select a website first
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-b-4" style={{ borderBottomColor: '#1e293b' }} />
                       </div>
@@ -608,19 +621,24 @@ export default function NewPhoneNumberPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {rows.map((row, i) => (
-                    <div key={row.id} className="rounded-lg border p-4" style={{ borderColor: '#e2e8f0', background: '#fafbfc' }}>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-semibold" style={{ color: '#475569' }}>
-                          Number {i + 1}
-                        </span>
+                    <div key={row.id} className="rounded-xl border p-5" style={{ borderColor: '#e2e8f0', background: '#fafbfc' }}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--primary)', color: 'white' }}>
+                            {i + 1}
+                          </div>
+                          <span className="text-sm font-semibold" style={{ color: '#475569' }}>
+                            New Number {i + 1}
+                          </span>
+                        </div>
                         {rows.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeRow(row.id)}
-                            className="text-xs px-2 py-0.5 rounded transition-colors hover:bg-red-50 hover:text-red-500"
-                            style={{ color: '#94a3b8' }}
+                            className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:border-red-400 hover:text-red-500 hover:bg-red-50"
+                            style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}
                           >
                             Remove
                           </button>
@@ -630,7 +648,7 @@ export default function NewPhoneNumberPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {/* Phone number */}
                         <div>
-                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Phone Number</label>
+                          <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Phone Number</label>
                           <input
                             type="text"
                             value={row.phone_number}
@@ -641,12 +659,12 @@ export default function NewPhoneNumberPage() {
                             onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                             onBlur={e => e.currentTarget.style.borderColor = errors[`phone_${i}`] ? '#fca5a5' : '#cbd5e1'}
                           />
-                          {errors[`phone_${i}`] && <p className="mt-0.5 text-[10px] text-red-500">{errors[`phone_${i}`]}</p>}
+                          {errors[`phone_${i}`] && <p className="mt-0.5 text-xs text-red-500">{errors[`phone_${i}`]}</p>}
                         </div>
 
                         {/* WhatsApp text */}
                         <div>
-                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>WhatsApp Text</label>
+                          <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>WhatsApp Text</label>
                           <input
                             type="text"
                             value={row.whatsapp_text}
@@ -657,12 +675,12 @@ export default function NewPhoneNumberPage() {
                             onFocus={e => e.currentTarget.style.borderColor = 'var(--primary)'}
                             onBlur={e => e.currentTarget.style.borderColor = errors[`wa_${i}`] ? '#fca5a5' : '#cbd5e1'}
                           />
-                          {errors[`wa_${i}`] && <p className="mt-0.5 text-[10px] text-red-500">{errors[`wa_${i}`]}</p>}
+                          {errors[`wa_${i}`] && <p className="mt-0.5 text-xs text-red-500">{errors[`wa_${i}`]}</p>}
                         </div>
 
                         {/* Location */}
                         <div>
-                          <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Location</label>
+                          <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Location</label>
                           <div className="relative">
                             <select
                               value={row.location_slug}
@@ -680,7 +698,7 @@ export default function NewPhoneNumberPage() {
                         {/* Percentage + Label */}
                         <div className="flex gap-3">
                           <div className="w-20">
-                            <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>%</label>
+                            <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>%</label>
                             <input
                               type="number"
                               min="1"
@@ -692,7 +710,7 @@ export default function NewPhoneNumberPage() {
                             />
                           </div>
                           <div className="flex-1">
-                            <label className="block text-[10px] font-medium mb-1" style={{ color: '#64748b' }}>Label <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span></label>
+                            <label className="block text-xs font-medium mb-1.5" style={{ color: '#64748b' }}>Label <span className="font-normal" style={{ color: '#94a3b8' }}>(optional)</span></label>
                             <input
                               type="text"
                               value={row.label}
@@ -708,14 +726,14 @@ export default function NewPhoneNumberPage() {
                       {/* WA text suggestions (only show for first row if no text filled) */}
                       {i === 0 && existingTexts.length > 0 && !row.whatsapp_text && (
                         <div className="mt-3 pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
-                          <p className="text-[10px] font-medium mb-1.5" style={{ color: '#94a3b8' }}>Existing texts — click to use:</p>
+                          <p className="text-xs font-medium mb-1.5.5" style={{ color: '#94a3b8' }}>Existing texts — click to use:</p>
                           <div className="flex flex-wrap gap-1.5">
                             {existingTexts.map((text, ti) => (
                               <button
                                 key={ti}
                                 type="button"
                                 onClick={() => updateRow(row.id, 'whatsapp_text', text)}
-                                className="text-[10px] px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                                className="text-xs px-2.5 py-1 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
                                 style={{ borderColor: '#e2e8f0', color: '#475569', background: 'white' }}
                               >
                                 {text.length > 50 ? text.slice(0, 50) + '…' : text}
@@ -781,7 +799,7 @@ export default function NewPhoneNumberPage() {
                   {saving ? 'Saving…' : `Add ${rows.length} Number${rows.length > 1 ? 's' : ''}`}
                 </button>
                 {!website && (
-                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-[10px] font-medium text-white whitespace-nowrap opacity-0 group-hover/submit:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white whitespace-nowrap opacity-0 group-hover/submit:opacity-100 transition-opacity z-20" style={{ background: '#1e293b' }}>
                     Select a company and website first
                     <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4" style={{ borderTopColor: '#1e293b' }} />
                   </div>
