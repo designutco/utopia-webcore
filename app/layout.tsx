@@ -8,15 +8,26 @@ const nunito = Nunito({ subsets: ['latin'], variable: '--font-display' })
 
 export const metadata: Metadata = {
   title: 'Utopia Webcore',
-  description: 'Web & Content Operations, Reporting Engine',
+  description: 'Web & Content Operations Platform — For Internal Use Only',
   icons: {
     icon: '/icon.svg',
-    apple: '/icon-192.png',
+    apple: '/icon.svg',
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'WEBCORE',
+  },
+  openGraph: {
+    title: 'Utopia Webcore',
+    description: 'Web & Content Operations Platform — For Internal Use Only',
+    type: 'website',
+    siteName: 'Utopia Webcore',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Utopia Webcore',
+    description: 'Web & Content Operations Platform — For Internal Use Only',
   },
   other: {
     'mobile-web-app-capable': 'yes',
