@@ -28,6 +28,7 @@ export const ms: Record<TranslationKey, string> = {
   'post.saveDraft': 'Simpan sebagai Draf',
   'post.publish': 'Terbitkan',
   'post.unpublish': 'Nyahterbit',
+  'post.republish': 'Terbit Semula',
   'post.saved': 'Disimpan',
   'post.statusPublished': 'Status: Diterbitkan',
   'post.statusDraft': 'Status: Draf',

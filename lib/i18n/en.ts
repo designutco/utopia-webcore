@@ -26,6 +26,7 @@ export const en = {
   'post.saveDraft': 'Save as Draft',
   'post.publish': 'Publish',
   'post.unpublish': 'Unpublish',
+  'post.republish': 'Republish',
   'post.saved': 'Saved',
   'post.statusPublished': 'Status: Published',
   'post.statusDraft': 'Status: Draft',
