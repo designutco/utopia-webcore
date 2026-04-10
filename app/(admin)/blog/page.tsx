@@ -449,21 +449,21 @@ export default function BlogListPage() {
                   style={{ color: '#94a3b8' }}
                   onClick={() => toggleSort('title')}
                 >
-                  <span className="inline-flex items-center">Post<SortIcon active={sortKey === 'title'} dir={sortKey === 'title' ? sortDir : 'asc'} /></span>
+                  <span className="flex w-full items-center justify-between gap-1">Post<SortIcon active={sortKey === 'title'} dir={sortKey === 'title' ? sortDir : 'asc'} /></span>
                 </th>
                 <th
                   className="px-2 py-3 text-left text-[10px] sm:text-xs font-medium cursor-pointer select-none hover:text-[var(--primary)] transition-colors whitespace-nowrap"
                   style={{ color: '#94a3b8' }}
                   onClick={() => toggleSort('status')}
                 >
-                  <span className="inline-flex items-center">Status<SortIcon active={sortKey === 'status'} dir={sortKey === 'status' ? sortDir : 'asc'} /></span>
+                  <span className="flex w-full items-center justify-between gap-1">Status<SortIcon active={sortKey === 'status'} dir={sortKey === 'status' ? sortDir : 'asc'} /></span>
                 </th>
                 <th
                   className="px-2 py-3 text-left text-[10px] sm:text-xs font-medium cursor-pointer select-none hover:text-[var(--primary)] transition-colors whitespace-nowrap"
                   style={{ color: '#94a3b8' }}
                   onClick={() => toggleSort('updated_at')}
                 >
-                  <span className="inline-flex items-center">Updated<SortIcon active={sortKey === 'updated_at'} dir={sortKey === 'updated_at' ? sortDir : 'asc'} /></span>
+                  <span className="flex w-full items-center justify-between gap-1">Updated<SortIcon active={sortKey === 'updated_at'} dir={sortKey === 'updated_at' ? sortDir : 'asc'} /></span>
                 </th>
                 <th className="px-2 sm:px-4 py-3 text-center text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: '#94a3b8' }}>Actions</th>
               </tr>
