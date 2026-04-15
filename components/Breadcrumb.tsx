@@ -53,29 +53,29 @@ export default function Breadcrumb() {
 
     // Blog
     if (pathname === '/blog/new') {
-      return [{ label: 'Blog Posts', href: '/blog' }, { label: 'New Post' }]
+      return [{ label: 'Blog Analytics', href: '/blog' }, { label: 'New Post' }]
     }
     if (/^\/blog\/.+\/view$/.test(pathname)) {
-      return [{ label: 'Blog Posts', href: '/blog' }, { label: postTitle || 'Preview' }]
+      return [{ label: 'Blog Analytics', href: '/blog' }, { label: postTitle || 'Preview' }]
     }
     if (/^\/blog\/.+\/edit$/.test(pathname)) {
-      return [{ label: 'Blog Posts', href: '/blog' }, { label: postTitle || 'Edit Post' }]
+      return [{ label: 'Blog Analytics', href: '/blog' }, { label: postTitle || 'Edit Post' }]
     }
     if (pathname === '/blog' && website) {
-      const crumbs: CrumbItem[] = [{ label: 'Blog Posts', href: '/blog' }]
+      const crumbs: CrumbItem[] = [{ label: 'Blog Analytics', href: '/blog' }]
       if (company) crumbs.push({ label: company, href: `/blog?company=${encodeURIComponent(company)}` })
       crumbs.push({ label: website })
       return crumbs
     }
     if (pathname === '/blog' && company) {
-      return [{ label: 'Blog Posts', href: '/blog' }, { label: company }]
+      return [{ label: 'Blog Analytics', href: '/blog' }, { label: company }]
     }
-    if (pathname === '/blog') return [{ label: 'Blog Posts' }]
+    if (pathname === '/blog') return [{ label: 'Blog Analytics' }]
 
     // All listing pages
     if (pathname === '/all/websites') return [{ label: 'All Websites' }]
     if (pathname === '/all/phone-numbers') return [{ label: 'All Phone Numbers' }]
-    if (pathname === '/all/blog') return [{ label: 'All Blog Posts' }]
+    if (pathname === '/all/blog') return [{ label: 'All Blog Analytics' }]
 
     // Others
     if (pathname === '/users') return [{ label: 'Users' }]
