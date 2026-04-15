@@ -1,8 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { NextResponse } from 'next/server'
+import { validateApiKey } from '@/lib/validateApiKey'
 
 /**
- * PUBLIC endpoint — no auth required.
+ * PUBLIC endpoint — no auth required for reads.
  * Your front-end websites call this to fetch their products.
  *
  * Usage:
@@ -152,4 +153,123 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json(result)
+}
+
+/**
+ * POST /api/public/products — create a product via API key
+ * Header: X-API-Key: uwc_...
+ * Body: { website, name, slug, description?, sale_price?, rental_price?, parent_id?, photos?: [{url, alt_text?}] }
+ */
+export async function POST(request: Request) {
+  const apiKey = request.headers.get('x-api-key')
+  const body = await request.json()
+  const { website, name, slug, description, sale_price, rental_price, parent_id, photos } = body
+
+  if (!website || !name || !slug) {
+    return NextResponse.json({ error: 'website, name, and slug are required' }, { status: 400 })
+  }
+
+  const keyInfo = await validateApiKey(apiKey, 'write', website)
+  if (!keyInfo) {
+    return NextResponse.json({ error: 'Invalid or unauthorized API key' }, { status: 401 })
+  }
+
+  const service = createServiceClient()
+
+  // Enforce single-level hierarchy
+  if (parent_id) {
+    const { data: parent } = await service.from('products').select('parent_id').eq('id', parent_id).single()
+    if (parent?.parent_id) return NextResponse.json({ error: 'Sub-products cannot have their own sub-products' }, { status: 400 })
+  }
+
+  // Duplicate slug check
+  const { data: existing } = await service.from('products').select('id').eq('website', website).eq('slug', slug).maybeSingle()
+  if (existing) return NextResponse.json({ error: `Slug "${slug}" already exists for this website` }, { status: 409 })
+
+  const { data: product, error } = await service
+    .from('products')
+    .insert({
+      website,
+      parent_id: parent_id || null,
+      name,
+      slug,
+      description: description ?? null,
+      sale_price: sale_price ?? null,
+      rental_price: rental_price ?? null,
+      is_active: true,
+    })
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Insert photos
+  if (Array.isArray(photos) && photos.length > 0) {
+    const rows = photos.map((p: { url: string; alt_text?: string }, i: number) => ({
+      product_id: product.id,
+      url: p.url,
+      alt_text: p.alt_text ?? null,
+      sort_order: i,
+    }))
+    await service.from('product_photos').insert(rows)
+  }
+
+  return NextResponse.json(product, { status: 201 })
+}
+
+/**
+ * PATCH /api/public/products — update a product via API key
+ * Header: X-API-Key: uwc_...
+ * Body: { id, ...fields }
+ */
+export async function PATCH(request: Request) {
+  const apiKey = request.headers.get('x-api-key')
+  const body = await request.json()
+  const { id, ...fields } = body
+
+  if (!id) return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
+
+  const service = createServiceClient()
+  const { data: product } = await service.from('products').select('website').eq('id', id).single()
+  if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
+  const keyInfo = await validateApiKey(apiKey, 'write', product.website)
+  if (!keyInfo) return NextResponse.json({ error: 'Invalid or unauthorized API key' }, { status: 401 })
+
+  // Slug dup check
+  if (fields.slug) {
+    const { data: dup } = await service.from('products').select('id').eq('website', product.website).eq('slug', fields.slug).neq('id', id).maybeSingle()
+    if (dup) return NextResponse.json({ error: `Slug "${fields.slug}" already exists` }, { status: 409 })
+  }
+
+  fields.updated_at = new Date().toISOString()
+  const { data, error } = await service.from('products').update(fields).eq('id', id).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json(data)
+}
+
+/**
+ * DELETE /api/public/products — delete a product via API key
+ * Header: X-API-Key: uwc_...
+ * Body: { id }
+ */
+export async function DELETE(request: Request) {
+  const apiKey = request.headers.get('x-api-key')
+  const body = await request.json()
+  const { id } = body
+
+  if (!id) return NextResponse.json({ error: 'Product id is required' }, { status: 400 })
+
+  const service = createServiceClient()
+  const { data: product } = await service.from('products').select('website').eq('id', id).single()
+  if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
+  const keyInfo = await validateApiKey(apiKey, 'write', product.website)
+  if (!keyInfo) return NextResponse.json({ error: 'Invalid or unauthorized API key' }, { status: 401 })
+
+  const { error } = await service.from('products').delete().eq('id', id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ success: true })
 }

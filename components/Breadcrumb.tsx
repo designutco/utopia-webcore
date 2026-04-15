@@ -83,6 +83,7 @@ export default function Breadcrumb() {
     if (pathname === '/products') return [{ label: 'Products' }]
     if (pathname === '/products/new') return [{ label: 'Products', href: '/products' }, { label: 'New Product' }]
     if (/^\/products\/.+\/edit$/.test(pathname)) return [{ label: 'Products', href: '/products' }, { label: 'Edit Product' }]
+    if (pathname === '/api-keys') return [{ label: 'API Keys' }]
     if (pathname === '/audit') return [{ label: 'Audit Trail' }]
     if (pathname === '/help') return [{ label: 'Help & Feedback' }]
     return []

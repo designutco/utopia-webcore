@@ -56,6 +56,7 @@ export const en = {
   'nav.users': 'Users',
   'nav.products': 'Products',
   'nav.tickets': 'Tickets',
+  'nav.apiKeys': 'API Keys',
   'nav.audit': 'Audit Trail',
   'nav.help': 'Help',
   'nav.manage': 'Manage',
