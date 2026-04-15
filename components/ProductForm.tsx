@@ -15,7 +15,8 @@ interface ProductFormProps {
 }
 
 interface Photo { id: string; url: string; alt_text: string | null; sort_order: number }
-interface SubProduct { id: string; name: string; slug: string; sale_price: number | null; rental_price: number | null; is_active: boolean; photos: Photo[] }
+interface SubProduct { id: string; name: string; sale_price: number | null; rental_price: number | null; is_active: boolean; photos: Photo[] }
+interface MainProduct { id: string; name: string }
 
 function toSlug(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -30,11 +31,10 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
   const [companies, setCompanies] = useState<{ id: string; name: string; company_websites: { domain: string }[] }[]>([])
   const [selectedCompany, setSelectedCompany] = useState('')
   const [website, setWebsite] = useState(initialData.website ?? '')
-  const [parentId] = useState(initialData.parent_id ?? '')
+  const [parentId, setParentId] = useState(initialData.parent_id ?? '')
+  const [mainProducts, setMainProducts] = useState<MainProduct[]>([])
 
   const [name, setName] = useState('')
-  const [slug, setSlug] = useState('')
-  const [slugLocked, setSlugLocked] = useState(false)
   const [description, setDescription] = useState('')
   const [salePrice, setSalePrice] = useState('')
   const [rentalPrice, setRentalPrice] = useState('')
@@ -64,22 +64,34 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
     }).catch(() => {})
   }, [initialData.company, initialData.website])
 
+  // Fetch main products for parent dropdown when website changes
+  useEffect(() => {
+    if (!website) { setMainProducts([]); return }
+    fetch(`/api/products?website=${encodeURIComponent(website)}&parent_id=null`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          // Exclude current product from parent list (can't be parent of itself)
+          setMainProducts(data.filter((p: MainProduct) => p.id !== productId).map((p: MainProduct) => ({ id: p.id, name: p.name })))
+        }
+      })
+      .catch(() => {})
+  }, [website, productId])
+
   // Load existing product in edit mode
   useEffect(() => {
     if (mode !== 'edit' || !productId) return
     fetch(`/api/products/${productId}`).then(r => r.json()).then(data => {
       if (data.id) {
         setName(data.name ?? '')
-        setSlug(data.slug ?? '')
-        setSlugLocked(true)
         setDescription(data.description ?? '')
         setSalePrice(data.sale_price != null ? String(data.sale_price) : '')
         setRentalPrice(data.rental_price != null ? String(data.rental_price) : '')
         setIsActive(data.is_active ?? true)
         setWebsite(data.website ?? '')
+        setParentId(data.parent_id ?? '')
         setPhotos(data.photos ?? [])
         setSubProducts(data.sub_products ?? [])
-        // Auto-select company
         const match = companies.find(c => c.company_websites.some(w => w.domain === data.website))
         if (match) setSelectedCompany(match.id)
       }
@@ -87,17 +99,12 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
   }, [mode, productId, companies])
 
   const companyWebsites = companies.find(c => c.id === selectedCompany)?.company_websites ?? []
-
-  // Auto-slug from name
-  useEffect(() => {
-    if (!slugLocked && name) setSlug(toSlug(name))
-  }, [name, slugLocked])
+  const isSubProduct = !!parentId
 
   function validate() {
     const e: Record<string, string> = {}
     if (!website) e.website = 'Website is required'
     if (!name.trim()) e.name = 'Name is required'
-    if (!slug.trim()) e.slug = 'Slug is required'
     return e
   }
 
@@ -109,11 +116,12 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
     setSaving(true)
     setSaved(false)
 
+    const slug = toSlug(name)
     const payload = {
       website,
       parent_id: parentId || null,
       name: name.trim(),
-      slug: toSlug(slug),
+      slug,
       description: description.trim() || null,
       sale_price: salePrice ? parseFloat(salePrice) : null,
       rental_price: rentalPrice ? parseFloat(rentalPrice) : null,
@@ -192,8 +200,8 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
   return (
     <div className="max-w-5xl mx-auto">
       <PageHeader
-        title={mode === 'new' ? t('page.products.new') : t('page.products.edit')}
-        description={mode === 'new' ? 'Add a new product or service to a website' : `Editing ${name || 'product'}`}
+        title={mode === 'new' ? (isSubProduct ? 'New Sub-Product' : t('page.products.new')) : t('page.products.edit')}
+        description={mode === 'new' ? (isSubProduct ? 'Add a sub-product under the main product' : 'Add a new product or service to a website') : `Editing ${name || 'product'}`}
         actions={
           <>
             {saved && <span className="text-xs text-green-600 font-medium mr-2">Saved</span>}
@@ -209,7 +217,7 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left — main content */}
         <div className="lg:col-span-2 space-y-5">
-          {/* Name + slug */}
+          {/* Name + description */}
           <div className="rounded-xl border bg-white p-5 space-y-4" style={{ borderColor: '#e2e8f0' }}>
             <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Product Name<span className="text-red-500 ml-0.5">*</span></label>
@@ -217,22 +225,6 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
                 className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors"
                 style={{ borderColor: errors.name ? '#fca5a5' : '#cbd5e1' }} />
               {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium" style={{ color: '#475569' }}>Slug<span className="text-red-500 ml-0.5">*</span></label>
-                {mode === 'edit' && (
-                  <button type="button" onClick={() => setSlugLocked(!slugLocked)}
-                    className="text-[10px] font-medium" style={{ color: 'var(--primary)' }}>
-                    {slugLocked ? 'Edit' : 'Lock'}
-                  </button>
-                )}
-              </div>
-              <input type="text" value={slug} onChange={e => { setSlug(e.target.value); if (mode === 'new') setSlugLocked(false) }}
-                disabled={slugLocked}
-                className="w-full px-3 py-2.5 text-sm rounded-lg border focus:outline-none transition-colors disabled:opacity-60 font-mono"
-                style={{ borderColor: errors.slug ? '#fca5a5' : '#cbd5e1' }} />
-              {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
             </div>
             <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: '#475569' }}>Description</label>
@@ -254,8 +246,7 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={photo.url} alt={photo.alt_text ?? ''} className="w-full h-28 object-cover" />
                       <button type="button" onClick={() => removePhoto(photo.id)}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
+                        className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
@@ -277,16 +268,15 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
             </div>
           )}
 
-          {/* Sub-products (edit mode only) */}
-          {mode === 'edit' && !parentId && (
+          {/* Sub-products (edit mode, main products only) */}
+          {mode === 'edit' && !isSubProduct && (
             <div className="rounded-xl border bg-white p-5" style={{ borderColor: '#e2e8f0' }}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Sub-Products</h3>
                 <Link
                   href={`/products/new?website=${encodeURIComponent(website)}&parent_id=${productId}`}
                   className="text-xs font-medium px-3 py-1.5 rounded-md border transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
-                  style={{ borderColor: '#cbd5e1', color: '#475569' }}
-                >
+                  style={{ borderColor: '#cbd5e1', color: '#475569' }}>
                   + Add Sub-Product
                 </Link>
               </div>
@@ -331,14 +321,14 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
 
         {/* Right sidebar */}
         <div className="space-y-5">
-          {/* Website selector */}
+          {/* Website + parent selector */}
           <div className="rounded-xl border bg-white p-5" style={{ borderColor: '#e2e8f0' }}>
             <div className="space-y-4">
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#94a3b8' }}>Company</label>
                 <div className="relative">
                   <select value={selectedCompany}
-                    onChange={e => { setSelectedCompany(e.target.value); setWebsite('') }}
+                    onChange={e => { setSelectedCompany(e.target.value); setWebsite(''); setParentId('') }}
                     disabled={mode === 'edit'}
                     className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer disabled:opacity-60"
                     style={{ borderColor: '#cbd5e1', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
@@ -352,7 +342,7 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
                 <label className="block text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#94a3b8' }}>Website</label>
                 <div className="relative">
                   <select value={website}
-                    onChange={e => setWebsite(e.target.value)}
+                    onChange={e => { setWebsite(e.target.value); setParentId('') }}
                     disabled={!selectedCompany || mode === 'edit'}
                     className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer disabled:opacity-60"
                     style={{ borderColor: errors.website ? '#fca5a5' : '#cbd5e1', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
@@ -362,6 +352,25 @@ export default function ProductForm({ mode, productId, initialData = {} }: Produ
                   <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
                 {errors.website && <p className="mt-1 text-xs text-red-500">{errors.website}</p>}
+              </div>
+
+              {/* Parent product dropdown */}
+              <div>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#94a3b8' }}>Product Type</label>
+                <div className="relative">
+                  <select value={parentId}
+                    onChange={e => setParentId(e.target.value)}
+                    disabled={!website}
+                    className="w-full px-3 py-2 text-sm rounded-lg border focus:outline-none cursor-pointer disabled:opacity-60"
+                    style={{ borderColor: '#cbd5e1', appearance: 'none', WebkitAppearance: 'none', paddingRight: '2.5rem' }}>
+                    <option value="">Main Product (top-level)</option>
+                    {mainProducts.map(p => <option key={p.id} value={p.id}>↳ Sub-product of &quot;{p.name}&quot;</option>)}
+                  </select>
+                  <svg className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </div>
+                <p className="mt-1 text-[10px]" style={{ color: '#94a3b8' }}>
+                  {parentId ? 'This will be a sub-product under the selected main product' : 'This will be a standalone main product'}
+                </p>
               </div>
             </div>
           </div>
