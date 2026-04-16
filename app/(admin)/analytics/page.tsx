@@ -139,9 +139,9 @@ function SimpleChart({ data }: { data: DailyStat[] }) {
   if (data.length === 0) return null
   const maxVal = Math.max(...data.map(d => d.pageviews), 1)
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 h-full flex flex-col">
       <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Daily Pageviews</h3>
-      <div className="flex items-end gap-1 h-32">
+      <div className="flex items-end gap-1 flex-1 min-h-[128px]">
         {data.map(d => {
           const h = Math.max((d.pageviews / maxVal) * 100, 2)
           return (
@@ -253,7 +253,7 @@ export default function AnalyticsPage() {
         {/* Chart + Insights side by side on large screens */}
         {data && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6 items-stretch">
-            <div className="lg:col-span-2"><SimpleChart data={data.dailyStats} /></div>
+            <div className="lg:col-span-2 flex"><SimpleChart data={data.dailyStats} /></div>
             <InsightsPanel insights={data.insights} />
           </div>
         )}
@@ -365,7 +365,7 @@ export default function AnalyticsPage() {
 
         {data && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6 items-stretch">
-            <div className="lg:col-span-2"><SimpleChart data={data.dailyStats} /></div>
+            <div className="lg:col-span-2 flex"><SimpleChart data={data.dailyStats} /></div>
             <InsightsPanel insights={data.insights} />
           </div>
         )}
@@ -469,7 +469,7 @@ export default function AnalyticsPage() {
 
           {/* Chart + Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6 items-stretch">
-            <div className="lg:col-span-2"><SimpleChart data={data.dailyStats} /></div>
+            <div className="lg:col-span-2 flex"><SimpleChart data={data.dailyStats} /></div>
             <InsightsPanel insights={data.insights} />
           </div>
 
