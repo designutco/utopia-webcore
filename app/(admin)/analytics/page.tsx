@@ -22,7 +22,21 @@ interface AnalyticsData {
 
 interface Company { id: string; name: string; company_websites: { domain: string }[] }
 
-function StatCard({ label, value, icon, color }: { label: string; value: number; icon: React.ReactNode; color: string }) {
+const MEDAL = ['🥇', '🥈', '🥉']
+
+function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <div className="group/tip relative inline-flex">
+      {children}
+      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity z-20 max-w-[240px] text-center" style={{ background: '#1e293b' }}>
+        {text}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4" style={{ borderTopColor: '#1e293b' }} />
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value, icon, color, hint }: { label: string; value: number; icon: React.ReactNode; color: string; hint?: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center gap-3 mb-3">
@@ -30,6 +44,13 @@ function StatCard({ label, value, icon, color }: { label: string; value: number;
           <div style={{ color }}>{icon}</div>
         </div>
         <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</span>
+        {hint && (
+          <Tooltip text={hint}>
+            <svg className="w-3.5 h-3.5 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </Tooltip>
+        )}
       </div>
       <p className="text-3xl font-bold text-slate-900">{value.toLocaleString()}</p>
     </div>
@@ -144,13 +165,13 @@ export default function AnalyticsPage() {
         {/* Summary cards */}
         {data && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <StatCard label="Pageviews" value={data.summary.pageviews} color="#2979d6"
+            <StatCard label="Pageviews" value={data.summary.pageviews} color="#2979d6" hint="Total number of pages viewed across all websites"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
-            <StatCard label="Sessions" value={data.summary.sessions} color="#16a34a"
+            <StatCard label="Sessions" value={data.summary.sessions} color="#16a34a" hint="Unique visitor sessions (one session per browser tab)"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>} />
-            <StatCard label="Clicks" value={data.summary.clicks} color="#f59e0b"
+            <StatCard label="Clicks" value={data.summary.clicks} color="#f59e0b" hint="Button clicks tracked by your websites (e.g. WhatsApp, Call)"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>} />
-            <StatCard label="Impressions" value={data.summary.impressions} color="#7c3aed"
+            <StatCard label="Impressions" value={data.summary.impressions} color="#7c3aed" hint="Product or content views tracked by your websites"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>} />
           </div>
         )}
@@ -159,36 +180,77 @@ export default function AnalyticsPage() {
         {data && <div className="mb-6"><SimpleChart data={data.dailyStats} /></div>}
 
         {/* Company performance ranking */}
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Company Performance</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-sm font-semibold text-slate-700">Company Performance</h2>
+          <Tooltip text="Companies ranked by total pageviews. Click to see individual website performance.">
+            <svg className="w-3.5 h-3.5 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </Tooltip>
+        </div>
         {loading ? (
           <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>Loading…</div>
         ) : (
           <div className="rounded-xl border bg-white overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
-            {companyPerf.map((c, i) => (
-              <Link key={c.id} href={`/analytics?company=${encodeURIComponent(c.name)}`}
-                className="group flex items-center gap-4 px-5 py-4 hover:bg-[#f8fafc] transition-colors"
-                style={{ borderBottom: i < companyPerf.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                <div className="w-8 text-center">
-                  <span className="text-lg font-bold" style={{ color: i < 3 ? 'var(--primary)' : '#94a3b8' }}>#{i + 1}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{c.name}</p>
-                  <div className="flex gap-4 mt-1">
-                    <span className="text-xs" style={{ color: '#64748b' }}>{c.websiteCount} site{c.websiteCount !== 1 ? 's' : ''}</span>
-                    <span className="text-xs" style={{ color: '#64748b' }}>{c.sessions.toLocaleString()} sessions</span>
-                    <span className="text-xs" style={{ color: '#64748b' }}>{c.clicks.toLocaleString()} clicks</span>
+            {companyPerf.map((c, i) => {
+              const isTop3 = i < 3 && c.pageviews > 0
+              return (
+                <Link key={c.id} href={`/analytics?company=${encodeURIComponent(c.name)}`}
+                  className="group flex items-center gap-4 px-5 py-4 hover:bg-[#f8fafc] transition-colors"
+                  style={{
+                    borderBottom: i < companyPerf.length - 1 ? '1px solid #f1f5f9' : 'none',
+                    background: isTop3 ? (i === 0 ? '#fffbeb' : i === 1 ? '#f8fafc' : '#fdf4ef') : undefined,
+                  }}>
+                  <div className="w-10 text-center flex-shrink-0">
+                    {isTop3 ? (
+                      <span className="text-xl">{MEDAL[i]}</span>
+                    ) : (
+                      <span className="text-sm font-bold" style={{ color: '#94a3b8' }}>#{i + 1}</span>
+                    )}
                   </div>
-                </div>
-                <div className="w-48 flex-shrink-0">
-                  <MiniBar value={c.pageviews} max={maxPv} color="var(--primary)" />
-                </div>
-                <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{c.name}</p>
+                      {isTop3 && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{
+                          background: i === 0 ? '#fef3c7' : i === 1 ? '#f1f5f9' : '#fed7aa',
+                          color: i === 0 ? '#92400e' : i === 1 ? '#475569' : '#9a3412',
+                        }}>
+                          {i === 0 ? 'Top Performer' : i === 1 ? '2nd Place' : '3rd Place'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-4 mt-1">
+                      <Tooltip text="Total websites with traffic in this period">
+                        <span className="text-xs cursor-help" style={{ color: '#64748b' }}>{c.websiteCount} site{c.websiteCount !== 1 ? 's' : ''}</span>
+                      </Tooltip>
+                      <Tooltip text="Unique visitor sessions">
+                        <span className="text-xs cursor-help" style={{ color: '#64748b' }}>{c.sessions.toLocaleString()} sessions</span>
+                      </Tooltip>
+                      <Tooltip text="WhatsApp, call, and other button clicks">
+                        <span className="text-xs cursor-help" style={{ color: '#64748b' }}>{c.clicks.toLocaleString()} clicks</span>
+                      </Tooltip>
+                    </div>
+                  </div>
+                  <div className="w-48 flex-shrink-0">
+                    <Tooltip text={`${c.pageviews.toLocaleString()} pageviews`}>
+                      <div className="w-full"><MiniBar value={c.pageviews} max={maxPv} color={isTop3 ? (i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#ea580c') : 'var(--primary)'} /></div>
+                    </Tooltip>
+                  </div>
+                  <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              )
+            })}
             {companyPerf.length === 0 && (
-              <p className="p-8 text-center text-sm" style={{ color: '#94a3b8' }}>No analytics data yet. Add the tracking script to your websites.</p>
+              <div className="p-8 text-center">
+                <svg className="w-10 h-10 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#e2e8f0' }} strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p className="text-sm font-medium" style={{ color: '#94a3b8' }}>No analytics data yet</p>
+                <p className="text-xs mt-1" style={{ color: '#cbd5e1' }}>Add the tracking script to your websites to start collecting data</p>
+              </div>
             )}
           </div>
         )}
@@ -224,34 +286,49 @@ export default function AnalyticsPage() {
 
         {data && <div className="mb-6"><SimpleChart data={data.dailyStats} /></div>}
 
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Website Ranking</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-sm font-semibold text-slate-700">Website Ranking</h2>
+          <Tooltip text="Websites ranked by pageviews. Click to see detailed analytics for each website.">
+            <svg className="w-3.5 h-3.5 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#cbd5e1' }} strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </Tooltip>
+        </div>
         {loading ? (
           <div className="p-12 text-center text-sm rounded-xl border" style={{ borderColor: '#e2e8f0', color: '#94a3b8' }}>Loading…</div>
         ) : (
           <div className="rounded-xl border bg-white overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
-            {websitePerf.map((w, i) => (
+            {websitePerf.map((w, i) => {
+              const isTop3 = i < 3 && w.pageviews > 0
+              return (
               <Link key={w.website} href={`/analytics?website=${encodeURIComponent(w.website)}`}
                 className="group flex items-center gap-4 px-5 py-4 hover:bg-[#f8fafc] transition-colors"
-                style={{ borderBottom: i < websitePerf.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                <div className="w-8 text-center">
-                  <span className="text-lg font-bold" style={{ color: i < 3 ? 'var(--primary)' : '#94a3b8' }}>#{i + 1}</span>
+                style={{
+                  borderBottom: i < websitePerf.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  background: isTop3 ? (i === 0 ? '#fffbeb' : i === 1 ? '#f8fafc' : '#fdf4ef') : undefined,
+                }}>
+                <div className="w-10 text-center flex-shrink-0">
+                  {isTop3 ? <span className="text-xl">{MEDAL[i]}</span> : <span className="text-sm font-bold" style={{ color: '#94a3b8' }}>#{i + 1}</span>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate group-hover:text-[var(--primary)] transition-colors" style={{ color: 'var(--foreground)' }}>{w.website}</p>
                   <div className="flex gap-4 mt-1">
-                    <span className="text-xs" style={{ color: '#64748b' }}>{w.sessions.toLocaleString()} sessions</span>
-                    <span className="text-xs" style={{ color: '#f59e0b' }}>{w.clicks.toLocaleString()} clicks</span>
-                    <span className="text-xs" style={{ color: '#7c3aed' }}>{w.impressions.toLocaleString()} impressions</span>
+                    <Tooltip text="Unique visitor sessions"><span className="text-xs cursor-help" style={{ color: '#64748b' }}>{w.sessions.toLocaleString()} sessions</span></Tooltip>
+                    <Tooltip text="Button clicks (WhatsApp, Call, etc.)"><span className="text-xs cursor-help" style={{ color: '#f59e0b' }}>{w.clicks.toLocaleString()} clicks</span></Tooltip>
+                    <Tooltip text="Product or content views"><span className="text-xs cursor-help" style={{ color: '#7c3aed' }}>{w.impressions.toLocaleString()} impressions</span></Tooltip>
                   </div>
                 </div>
                 <div className="w-48 flex-shrink-0">
-                  <MiniBar value={w.pageviews} max={maxPv} color="var(--primary)" />
+                  <Tooltip text={`${w.pageviews.toLocaleString()} pageviews`}>
+                    <div className="w-full"><MiniBar value={w.pageviews} max={maxPv} color={isTop3 ? (i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#ea580c') : 'var(--primary)'} /></div>
+                  </Tooltip>
                 </div>
                 <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#94a3b8' }} strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
-            ))}
+              )
+            })}
             {websitePerf.length === 0 && (
               <p className="p-8 text-center text-sm" style={{ color: '#94a3b8' }}>No data for this company yet.</p>
             )}
@@ -288,13 +365,13 @@ export default function AnalyticsPage() {
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <StatCard label="Pageviews" value={data.summary.pageviews} color="#2979d6"
+            <StatCard label="Pageviews" value={data.summary.pageviews} color="#2979d6" hint="Total pages viewed on this website"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
-            <StatCard label="Sessions" value={data.summary.sessions} color="#16a34a"
+            <StatCard label="Sessions" value={data.summary.sessions} color="#16a34a" hint="Unique visitor sessions on this website"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>} />
-            <StatCard label="Clicks" value={data.summary.clicks} color="#f59e0b"
+            <StatCard label="Clicks" value={data.summary.clicks} color="#f59e0b" hint="WhatsApp, call, and other tracked button clicks"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>} />
-            <StatCard label="Impressions" value={data.summary.impressions} color="#7c3aed"
+            <StatCard label="Impressions" value={data.summary.impressions} color="#7c3aed" hint="Product or content impression events"
               icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>} />
           </div>
 

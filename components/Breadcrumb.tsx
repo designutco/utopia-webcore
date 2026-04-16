@@ -80,7 +80,18 @@ export default function Breadcrumb() {
     // Others
     if (pathname === '/users') return [{ label: 'Users' }]
     if (pathname === '/tickets') return [{ label: 'Tickets' }]
-    if (pathname === '/analytics') return [{ label: 'Analytics' }]
+    if (pathname === '/analytics') {
+      const analyticsCompany = searchParams.get('company') ?? ''
+      const analyticsWebsite = searchParams.get('website') ?? ''
+      if (analyticsWebsite) {
+        const crumbs: CrumbItem[] = [{ label: 'Analytics', href: '/analytics' }]
+        if (analyticsCompany) crumbs.push({ label: analyticsCompany, href: `/analytics?company=${encodeURIComponent(analyticsCompany)}` })
+        crumbs.push({ label: analyticsWebsite })
+        return crumbs
+      }
+      if (analyticsCompany) return [{ label: 'Analytics', href: '/analytics' }, { label: analyticsCompany }]
+      return [{ label: 'Analytics' }]
+    }
     if (pathname === '/products') return [{ label: 'Products' }]
     if (pathname === '/products/new') return [{ label: 'Products', href: '/products' }, { label: 'New Product' }]
     if (/^\/products\/.+\/edit$/.test(pathname)) return [{ label: 'Products', href: '/products' }, { label: 'Edit Product' }]
